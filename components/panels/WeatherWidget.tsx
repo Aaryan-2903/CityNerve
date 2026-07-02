@@ -11,10 +11,8 @@ interface WeatherCondition {
 }
 
 const CONDITIONS: WeatherCondition[] = [
-  { label: 'Wind', value: '34 mph SSW', icon: Wind, color: '#F97316' },
-  { label: 'Temp', value: '62°F / 17°C', icon: Thermometer },
-  { label: 'Humidity', value: '89%', icon: Droplets },
-  { label: 'Visibility', value: '2.1 mi', icon: Eye, color: '#EAB308' },
+  { label: 'Rainfall', value: '4.2 in/hr', icon: Droplets, color: '#3B82F6' },
+  { label: 'Forecast', value: 'Heavy Rain 3hr', icon: Cloud, color: '#A855F7' },
 ];
 
 const ALERTS = [

@@ -3,6 +3,7 @@ import { RiskMap } from '@/components/map/RiskMap';
 import { CommandFeed } from '@/components/timeline/CommandFeed';
 import { IncidentCards } from '@/components/cards/IncidentCards';
 import { AICommand } from '@/components/ai/AICommand';
+import { WeatherWidget } from '@/components/panels/WeatherWidget';
 
 export const metadata = {
   title: 'CityNerve — EOC Operations Dashboard',
@@ -15,6 +16,13 @@ export default function DashboardPage() {
       {/* ── Upper: Hero Risk Map ──────────────────────────────── */}
       <div className="relative overflow-hidden border-b border-white/[0.05]" style={{ height: 'calc(100% - 270px)' }}>
         <RiskMap />
+
+        {/* Floating Weather Panel */}
+        <div className="absolute top-[72px] left-5 w-[320px] pointer-events-none z-10">
+          <div className="pointer-events-auto">
+            <WeatherWidget />
+          </div>
+        </div>
       </div>
 
       {/* ── Lower: Three-column command section ──────────────── */}

@@ -3,6 +3,8 @@
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
+import { Users, PlusSquare, GraduationCap, MapPinOff, Home } from 'lucide-react';
+
 interface Metric {
   id: string;
   label: string;
@@ -10,40 +12,54 @@ interface Metric {
   subtext: string;
   dotColor: string;
   glowColor: string;
+  icon: React.ElementType;
 }
 
 const METRICS: Metric[] = [
   {
-    id: 'incidents',
-    label: 'Active Incidents',
-    value: '18',
-    subtext: '+5 in last hour',
+    id: 'population',
+    label: 'Population Affected',
+    value: '12.4k',
+    subtext: '+2.1k in last hour',
     dotColor: '#EF4444',
     glowColor: 'rgba(239,68,68,0.3)',
+    icon: Users,
   },
   {
-    id: 'teams',
-    label: 'Rescue Teams',
-    value: '42',
-    subtext: '12 en route',
-    dotColor: '#22C55E',
-    glowColor: 'rgba(34,197,94,0.3)',
+    id: 'hospitals',
+    label: 'Hospitals Nearby',
+    value: '4',
+    subtext: '2 at capacity',
+    dotColor: '#EAB308',
+    glowColor: 'rgba(234,179,8,0.3)',
+    icon: PlusSquare,
+  },
+  {
+    id: 'schools',
+    label: 'Schools Nearby',
+    value: '7',
+    subtext: '3 used as shelters',
+    dotColor: '#3B82F6',
+    glowColor: 'rgba(59,130,246,0.3)',
+    icon: GraduationCap,
+  },
+  {
+    id: 'roads',
+    label: 'Roads Closed',
+    value: '14',
+    subtext: 'Major arterial blocked',
+    dotColor: '#F97316',
+    glowColor: 'rgba(249,115,22,0.3)',
+    icon: MapPinOff,
   },
   {
     id: 'shelters',
-    label: 'Shelters',
-    value: '27',
-    subtext: '3 near capacity',
-    dotColor: '#EAB308',
-    glowColor: 'rgba(234,179,8,0.3)',
-  },
-  {
-    id: 'response',
-    label: 'Average Response',
-    value: '7m 42s',
-    subtext: 'Improving',
+    label: 'Shelters Available',
+    value: '8',
+    subtext: 'Total capacity: 4.5k',
     dotColor: '#22C55E',
     glowColor: 'rgba(34,197,94,0.3)',
+    icon: Home,
   },
 ];
 
@@ -70,17 +86,7 @@ function MetricCardItem({ metric, index }: MetricCardItemProps) {
     >
       {/* Label row */}
       <div className="flex items-center gap-2">
-        {/* Pulsing dot */}
-        <span className="relative flex h-2 w-2 shrink-0">
-          <span
-            className="absolute inline-flex h-full w-full rounded-full animate-ping opacity-60"
-            style={{ backgroundColor: metric.dotColor }}
-          />
-          <span
-            className="relative inline-flex h-2 w-2 rounded-full"
-            style={{ backgroundColor: metric.dotColor }}
-          />
-        </span>
+        <metric.icon className="w-3.5 h-3.5" style={{ color: metric.dotColor }} />
         <span className="text-[11px] font-medium text-white/45 tracking-wide">
           {metric.label}
         </span>

@@ -63,7 +63,7 @@ function IncidentCard({ incident, isSelected, onClick }: IncidentCardProps) {
               {incident.status === 'escalating' ? '▲ ESCALATING' : statusConfig.label}
             </span>
           </div>
-          <span className="text-[10px] font-mono text-white/25 shrink-0">
+          <span suppressHydrationWarning className="text-[10px] font-mono text-white/25 shrink-0">
             {formatRelativeTime(incident.timestamp)}
           </span>
         </div>
