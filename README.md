@@ -17,8 +17,9 @@ An intelligent command dashboard that transforms how disaster management agencie
 
 <br />
 
-![Current Operations Dashboard](./public/dashboard.png)
-*Current Operations Dashboard*
+<p align="center">
+  <img src="./docs/screenshots/dashboard-v2.png" alt="Current Operations Dashboard" width="1000"/>
+</p>
 
 </div>
 
