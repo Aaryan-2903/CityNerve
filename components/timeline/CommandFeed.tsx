@@ -1,9 +1,10 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Zap } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { useSimulationContext } from '@/context/SimulationContext';
 
 interface FeedEntry {
   id: string;
@@ -13,7 +14,7 @@ interface FeedEntry {
   category: 'dispatch' | 'shelter' | 'advisory' | 'report';
 }
 
-const FEED_ENTRIES: FeedEntry[] = [
+const STATIC_FEED_ENTRIES: FeedEntry[] = [
   {
     id: 'f1',
     time: '22:31',
@@ -74,26 +75,30 @@ const FEED_ENTRIES: FeedEntry[] = [
 
 const CATEGORY_LABELS: Record<FeedEntry['category'], string> = {
   dispatch: 'DISPATCH',
-  shelter: 'SHELTER',
+  shelter:  'SHELTER',
   advisory: 'ADVISORY',
-  report: 'REPORT',
+  report:   'REPORT',
 };
 
 interface FeedEntryRowProps {
   entry: FeedEntry;
   index: number;
+  isNew?: boolean;
 }
 
-function FeedEntryRow({ entry, index }: FeedEntryRowProps) {
+function FeedEntryRow({ entry, index, isNew }: FeedEntryRowProps) {
   return (
     <motion.div
+      layout
       initial={{ opacity: 0, x: -8 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3, delay: 0.05 * index }}
+      exit={{ opacity: 0, x: -8 }}
+      transition={{ duration: 0.3, delay: isNew ? 0 : 0.05 * index }}
       className={cn(
         'flex items-start gap-3 py-2.5 px-4',
         'border-b border-white/[0.04] last:border-b-0',
         'hover:bg-white/[0.02] transition-colors group',
+        isNew && 'bg-white/[0.025]',
       )}
     >
       {/* Timestamp */}
@@ -124,6 +129,15 @@ function FeedEntryRow({ entry, index }: FeedEntryRowProps) {
 }
 
 export function CommandFeed() {
+  const sim = useSimulationContext();
+  const feedEntries = sim?.feedEntries ?? [];
+
+  // Sim entries are prepended (most recent first), then static entries follow
+  const allEntries: FeedEntry[] = [
+    ...(feedEntries as FeedEntry[]),
+    ...STATIC_FEED_ENTRIES,
+  ];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -153,16 +167,23 @@ export function CommandFeed() {
       {/* Feed list */}
       <ScrollArea className="flex-1">
         <div className="flex flex-col">
-          {FEED_ENTRIES.map((entry, i) => (
-            <FeedEntryRow key={entry.id} entry={entry} index={i} />
-          ))}
+          <AnimatePresence mode="popLayout">
+            {allEntries.map((entry, i) => (
+              <FeedEntryRow
+                key={entry.id}
+                entry={entry}
+                index={i}
+                isNew={feedEntries.some((f: { id: string }) => f.id === entry.id)}
+              />
+            ))}
+          </AnimatePresence>
         </div>
       </ScrollArea>
 
       {/* Footer: entry count */}
       <div className="border-t border-white/[0.04] px-4 py-2 shrink-0">
         <p className="text-[10px] text-white/20 font-mono">
-          {FEED_ENTRIES.length} events · auto-updating
+          {allEntries.length} events · auto-updating
         </p>
       </div>
     </motion.div>

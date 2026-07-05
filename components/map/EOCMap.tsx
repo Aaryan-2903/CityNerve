@@ -1,15 +1,15 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import Map, { Marker, Popup, NavigationControl, ScaleControl } from 'react-map-gl/mapbox';
-import type { MapRef } from 'react-map-gl/mapbox';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import Map, { Marker, Popup, NavigationControl, ScaleControl } from 'react-map-gl/maplibre';
+import type { MapRef } from 'react-map-gl/maplibre';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import { cn } from '@/lib/utils';
 import type { Incident } from '@/types/incident';
 import type { Resource } from '@/types/resource';
 import type { MapViewport } from '@/types/map';
 import { SEVERITY_CONFIG, INCIDENT_TYPE_CONFIG } from '@/constants/incidents';
-import { MAPBOX_STYLE } from '@/constants/map';
+import { MAPLIBRE_STYLE } from '@/constants/map';
 import { formatRelativeTime, formatPopulation } from '@/utils/format';
 import { SeverityBadge } from '@/components/shared/SeverityBadge';
 import { X, Maximize2, Users, Clock, TrendingUp } from 'lucide-react';
@@ -25,7 +25,7 @@ interface EOCMapProps {
   showResources: boolean;
 }
 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? '';
+/* ─── Marker pin components ──────────────────────────────────────────────── */
 
 function IncidentMarkerPin({
   incident,
@@ -54,11 +54,7 @@ function IncidentMarkerPin({
       {isSelected && (
         <span
           className="absolute rounded-full"
-          style={{
-            inset: -4,
-            border: `2px solid ${config.color}`,
-            borderRadius: '50%',
-          }}
+          style={{ inset: -4, border: `2px solid ${config.color}`, borderRadius: '50%' }}
         />
       )}
       {/* Main marker */}
@@ -94,25 +90,7 @@ function ResourceMarkerPin({ resource }: { resource: Resource }) {
   );
 }
 
-function NoTokenFallback() {
-  return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#070B14] text-white/30">
-      <div className="grid grid-cols-12 grid-rows-8 gap-0.5 opacity-10 absolute inset-0">
-        {Array.from({ length: 96 }).map((_, i) => (
-          <div key={i} className="bg-blue-500/20 rounded-[1px]" />
-        ))}
-      </div>
-      <div className="relative z-10 text-center space-y-2 p-8">
-        <p className="text-sm font-mono text-white/50">MAPBOX TOKEN REQUIRED</p>
-        <p className="text-xs text-white/25">
-          Add <code className="text-blue-400">NEXT_PUBLIC_MAPBOX_TOKEN</code> to{' '}
-          <code className="text-blue-400">.env.local</code>
-        </p>
-        <p className="text-[10px] text-white/15 mt-4">Map will render here with incidents and resources overlaid</p>
-      </div>
-    </div>
-  );
-}
+/* ─── Main component ─────────────────────────────────────────────────────── */
 
 export function EOCMap({
   incidents,
@@ -140,38 +118,14 @@ export function EOCMap({
     onSelectIncident(null);
   }, [onSelectIncident]);
 
-  if (!MAPBOX_TOKEN) {
-    return (
-      <div className="relative w-full h-full rounded-2xl overflow-hidden">
-        <NoTokenFallback />
-        {/* Overlay mock incident dots for visual effect */}
-        <div className="absolute inset-0 pointer-events-none">
-          {incidents.map((inc) => (
-            <div
-              key={inc.id}
-              className="absolute w-3 h-3 rounded-full"
-              style={{
-                backgroundColor: SEVERITY_CONFIG[inc.severity].color,
-                left: `${((inc.location.lng + 74.3) / 0.7) * 100}%`,
-                top: `${((40.92 - inc.location.lat) / 0.5) * 100}%`,
-                boxShadow: `0 0 12px ${SEVERITY_CONFIG[inc.severity].glowColor}`,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative w-full h-full rounded-2xl overflow-hidden">
       <Map
         ref={mapRef}
-        mapboxAccessToken={MAPBOX_TOKEN}
         {...viewport}
         onMove={(evt) => onViewportChange(evt.viewState)}
         onClick={handleMapClick}
-        mapStyle={MAPBOX_STYLE}
+        mapStyle={MAPLIBRE_STYLE}
         style={{ width: '100%', height: '100%' }}
         attributionControl={false}
       >
@@ -301,7 +255,7 @@ export function EOCMap({
         </div>
         <div className="flex items-center gap-1 rounded-lg border border-white/[0.08] bg-black/60 px-2 py-1.5 backdrop-blur-sm">
           <Maximize2 className="w-3 h-3 text-white/40" />
-          <span className="font-mono text-[10px] text-white/30">NYC Metro</span>
+          <span className="font-mono text-[10px] text-white/30">Mumbai Metro</span>
         </div>
       </div>
     </div>

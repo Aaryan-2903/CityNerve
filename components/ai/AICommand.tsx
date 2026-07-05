@@ -1,40 +1,56 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Brain, CheckCircle2, HelpCircle, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Brain, CheckCircle2, ChevronRight, Zap, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useSimulationContext } from '@/context/SimulationContext';
+import type { ThreatLevel } from '@/data/simulationScenario';
+
+// ─── Config ──────────────────────────────────────────────────────────────────
 
 const REASONING = [
-  'Heavy rainfall (+34%)',
-  'River level rising',
+  'Heavy rainfall',
+  'River overflow',
   'Historical floodplain',
-  '5 verified citizen reports'
+  'Citizen reports',
 ];
 
-interface ActionSuggestion {
-  id: string;
-  text: string;
-}
-
-const ACTION_SUGGESTIONS: ActionSuggestion[] = [
+const ACTION_SUGGESTIONS = [
   { id: 'a1', text: 'Close Bridge 4' },
   { id: 'a2', text: 'Open Shelter Alpha' },
   { id: 'a3', text: 'Deploy Rescue Team Bravo' },
 ];
 
-export function AICommand() {
-  const [approved, setApproved] = useState(false);
-  const [loading, setLoading] = useState(false);
+const THREAT_CONFIG: Record<
+  ThreatLevel,
+  { color: string; bg: string; border: string; label: string }
+> = {
+  LOW:      { color: '#22C55E', bg: 'rgba(34,197,94,0.15)',   border: 'rgba(34,197,94,0.3)',   label: 'LOW'      },
+  MODERATE: { color: '#EAB308', bg: 'rgba(234,179,8,0.15)',   border: 'rgba(234,179,8,0.3)',   label: 'MODERATE' },
+  HIGH:     { color: '#EF4444', bg: 'rgba(239,68,68,0.15)',   border: 'rgba(239,68,68,0.3)',   label: 'HIGH'     },
+  CRITICAL: { color: '#EF4444', bg: 'rgba(239,68,68,0.2)',    border: 'rgba(239,68,68,0.4)',   label: 'CRITICAL' },
+};
 
-  const handleApprove = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setApproved(true);
-    }, 1200);
-  };
+// ─── Prediction text by threat ────────────────────────────────────────────────
+
+const PREDICTION_TEXT: Partial<Record<ThreatLevel, string>> = {
+  HIGH:     'Flood expected to reach Kurla within 30 minutes.',
+  MODERATE: 'Flood waters receding. Kurla risk reducing.',
+  CRITICAL: 'Imminent breach — multiple Kurla sectors at risk within 15 minutes.',
+};
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export function AICommand() {
+  const sim = useSimulationContext();
+  const threatLevel: ThreatLevel = sim?.threatLevel ?? 'LOW';
+  const confidence = sim?.confidence ?? 72;
+  const showActionPlan = sim?.showActionPlan ?? false;
+  const showPrediction = sim?.showPrediction ?? false;
+
+  const threatCfg = THREAT_CONFIG[threatLevel];
+  const predictionText = PREDICTION_TEXT[threatLevel];
 
   return (
     <motion.div
@@ -59,96 +75,145 @@ export function AICommand() {
             <h2 className="text-sm font-bold text-white/90">AI Command</h2>
           </div>
           <p className="text-[10px] font-semibold tracking-[0.12em] text-purple-400/70 uppercase ml-7">
-            Action Plan Ready
+            {showActionPlan ? 'Action Plan Ready' : showPrediction ? 'Analyzing...' : 'Monitoring'}
           </p>
         </div>
 
-        {/* HIGH threat badge */}
-        <div className="flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/15 px-2.5 py-1">
-          <span className="h-1 w-1 rounded-full bg-red-400 animate-pulse" />
-          <span className="text-[10px] font-bold text-red-400 tracking-widest">HIGH</span>
-        </div>
+        {/* Threat badge — animates on change */}
+        <motion.div
+          key={threatLevel}
+          initial={{ scale: 0.85, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3, type: 'spring' }}
+          className="flex items-center gap-1.5 rounded-full border px-2.5 py-1"
+          style={{ backgroundColor: threatCfg.bg, borderColor: threatCfg.border }}
+        >
+          <span
+            className="h-1 w-1 rounded-full animate-pulse"
+            style={{ backgroundColor: threatCfg.color }}
+          />
+          <span
+            className="text-[10px] font-bold tracking-widest"
+            style={{ color: threatCfg.color }}
+          >
+            {threatCfg.label}
+          </span>
+        </motion.div>
       </div>
 
       {/* Content */}
       <div className="relative flex flex-col flex-1 overflow-y-auto p-4 gap-4 scrollbar-thin">
-        {/* Prediction Block */}
-        <div>
-          <h3 className="text-[10px] font-semibold text-white/40 uppercase tracking-widest mb-1.5">Prediction</h3>
-          <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 text-sm text-white/90">
-            Flood likely to spread into <span className="text-orange-400 font-semibold">Ward 7</span> within <span className="font-semibold">30 minutes</span>.
-          </div>
-        </div>
+
+        {/* Prediction Block — visible from phase 3 */}
+        <AnimatePresence>
+          {showPrediction && predictionText && (
+            <motion.div
+              key="prediction"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.35 }}
+            >
+              <h3 className="text-[10px] font-semibold text-white/40 uppercase tracking-widest mb-1.5">
+                Prediction
+              </h3>
+              <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 text-sm text-white/90">
+                {predictionText.split('Kurla').map((part, i, arr) =>
+                  i < arr.length - 1 ? (
+                    <span key={i}>
+                      {part}
+                      <span className="text-orange-400 font-semibold">Kurla</span>
+                    </span>
+                  ) : (
+                    <span key={i}>{part}</span>
+                  ),
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Reasoning Block */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <h3 className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">Reasoning</h3>
-            <span className="text-[10px] font-bold text-green-400 tracking-wider">94% CONFIDENCE</span>
+            <h3 className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">
+              Reasoning
+            </h3>
+            <motion.span
+              key={confidence}
+              initial={{ opacity: 0, x: 4 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-[10px] font-bold text-green-400 tracking-wider"
+            >
+              {confidence}% CONFIDENCE
+            </motion.span>
           </div>
           <ul className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 space-y-2">
             {REASONING.map((point, i) => (
               <li key={i} className="flex items-start gap-2 text-[11.5px] text-white/70">
-                <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-white/20" />
+                <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-white/20 mt-1.5" />
                 {point}
               </li>
             ))}
           </ul>
         </div>
 
-        {/* Action checklist */}
+        {/* Action checklist — visible from phase 5 */}
         <div>
-          <h3 className="text-[10px] font-semibold text-white/40 uppercase tracking-widest mb-1.5">Recommended Actions</h3>
+          <h3 className="text-[10px] font-semibold text-white/40 uppercase tracking-widest mb-1.5">
+            Recommended Actions
+          </h3>
           <div className="flex flex-col gap-1.5">
-            {ACTION_SUGGESTIONS.map((action, i) => (
-              <motion.div
-                key={action.id}
-                initial={{ opacity: 0, x: 6 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + i * 0.08 }}
-                className={cn(
-                  'flex items-center gap-2.5 rounded-lg border px-3 py-2 text-[11px] font-medium transition-all',
-                  approved
-                    ? 'border-green-500/20 bg-green-500/10 text-green-400'
-                    : 'border-white/[0.06] bg-white/[0.02] text-white/60',
-                )}
-              >
-                {approved ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-green-400 shrink-0" />
-                ) : (
-                  <ChevronRight className="w-3.5 h-3.5 text-white/25 shrink-0" />
-                )}
-                {action.text}
-              </motion.div>
-            ))}
+            <AnimatePresence>
+              {ACTION_SUGGESTIONS.map((action, i) => (
+                <motion.div
+                  key={action.id}
+                  initial={{ opacity: 0, x: 6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -6 }}
+                  transition={{ delay: showActionPlan ? 0.05 + i * 0.08 : 0 }}
+                  className={cn(
+                    'flex items-center gap-2.5 rounded-lg border px-3 py-2 text-[11px] font-medium transition-all duration-500',
+                    showActionPlan
+                      ? 'border-green-500/20 bg-green-500/10 text-green-400'
+                      : 'border-white/[0.06] bg-white/[0.02] text-white/30',
+                  )}
+                >
+                  {showActionPlan ? (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                  ) : (
+                    <ChevronRight className="w-3.5 h-3.5 text-white/15 shrink-0" />
+                  )}
+                  {action.text}
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         </div>
+
       </div>
 
-      {/* Footer: Action Buttons */}
+      {/* Footer */}
       <div className="relative border-t border-white/[0.06] p-3 shrink-0 flex flex-col gap-2">
         <Button
-          onClick={handleApprove}
-          disabled={approved || loading}
+          disabled={!showActionPlan}
           className={cn(
             'w-full h-10 rounded-lg text-sm font-bold transition-all duration-300 shadow-lg',
-            approved
-              ? 'bg-green-500/20 text-green-400 border border-green-500/30 cursor-default shadow-none'
-              : 'bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white shadow-purple-500/20 border-0',
+            showActionPlan
+              ? 'bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white shadow-purple-500/20 border-0'
+              : 'bg-white/[0.04] text-white/20 border border-white/[0.06] cursor-not-allowed shadow-none',
           )}
         >
-          {loading ? (
+          {showActionPlan ? (
             <span className="flex items-center gap-2">
-              <span className="h-3.5 w-3.5 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-              Authorizing...
-            </span>
-          ) : approved ? (
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4" />
-              Plan Approved
+              <Zap className="w-4 h-4" />
+              Approve Action Plan
             </span>
           ) : (
-            'Approve Action Plan'
+            <span className="flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              Awaiting Analysis...
+            </span>
           )}
         </Button>
 

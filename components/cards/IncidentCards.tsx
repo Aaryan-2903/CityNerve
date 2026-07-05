@@ -1,10 +1,11 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Clock, Users, AlertTriangle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { useSimulationContext } from '@/context/SimulationContext';
+import type { SimIncident } from '@/data/simulationScenario';
 
 type Severity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
 
@@ -17,6 +18,7 @@ interface Incident {
   status: string;
   impact: string;
   location: string;
+  isNew?: boolean;
 }
 
 const INCIDENTS: Incident[] = [
@@ -97,10 +99,11 @@ const SEVERITY_CONFIG: Record<
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  Responding: '#22C55E',
-  Evacuating: '#F97316',
+  Responding:        '#22C55E',
+  Evacuating:        '#F97316',
   'Closure pending': '#EAB308',
-  'Under repair': '#3B82F6',
+  'Under repair':    '#3B82F6',
+  Unverified:        '#6B7280',
 };
 
 interface IncidentCardItemProps {
@@ -114,18 +117,30 @@ function IncidentCardItem({ incident, index }: IncidentCardItemProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.1 + index * 0.06 }}
+      layout
+      initial={{ opacity: 0, y: -8, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -4, scale: 0.98 }}
+      transition={{ duration: 0.3, delay: incident.isNew ? 0 : 0.06 * index }}
       className={cn(
         'rounded-xl border p-3.5 cursor-pointer transition-all duration-200',
         'hover:brightness-110 hover:scale-[1.005]',
+        incident.isNew && 'ring-1 ring-orange-500/40',
       )}
       style={{
         backgroundColor: sConfig.bg,
         borderColor: sConfig.border,
       }}
     >
+      {/* New badge */}
+      {incident.isNew && (
+        <div className="flex items-center gap-1 mb-2">
+          <span className="rounded-full bg-orange-500/20 border border-orange-500/30 px-2 py-0.5 text-[9px] font-bold text-orange-400 tracking-widest uppercase animate-pulse">
+            ● NEW · Citizen Report
+          </span>
+        </div>
+      )}
+
       {/* Top row: title + severity */}
       <div className="flex items-start justify-between gap-2 mb-2.5">
         <p className="text-[13px] font-semibold text-white/90 leading-tight">{incident.title}</p>
@@ -151,10 +166,7 @@ function IncidentCardItem({ incident, index }: IncidentCardItemProps) {
           <Users className="w-3 h-3 text-white/20" />
           <span className="text-[11px] text-white/50">{incident.team}</span>
         </div>
-        <span
-          className="text-[11px] font-semibold"
-          style={{ color: statusColor }}
-        >
+        <span className="text-[11px] font-semibold" style={{ color: statusColor }}>
           {incident.status}
         </span>
       </div>
@@ -176,8 +188,17 @@ function IncidentCardItem({ incident, index }: IncidentCardItemProps) {
 }
 
 export function IncidentCards() {
-  const criticalCount = INCIDENTS.filter((i) => i.severity === 'CRITICAL').length;
-  const highCount = INCIDENTS.filter((i) => i.severity === 'HIGH').length;
+  const sim = useSimulationContext();
+  const simIncidents = sim?.simIncidents ?? [];
+
+  // Merge sim incidents (prepended) with static incidents
+  const allIncidents: Incident[] = [
+    ...(simIncidents as Incident[]),
+    ...INCIDENTS,
+  ];
+
+  const criticalCount = allIncidents.filter((i) => i.severity === 'CRITICAL').length;
+  const highCount     = allIncidents.filter((i) => i.severity === 'HIGH').length;
 
   return (
     <motion.div
@@ -213,16 +234,18 @@ export function IncidentCards() {
       {/* Incident list */}
       <ScrollArea className="flex-1">
         <div className="flex flex-col gap-2 p-3">
-          {INCIDENTS.map((incident, i) => (
-            <IncidentCardItem key={incident.id} incident={incident} index={i} />
-          ))}
+          <AnimatePresence mode="popLayout">
+            {allIncidents.map((incident, i) => (
+              <IncidentCardItem key={incident.id} incident={incident} index={i} />
+            ))}
+          </AnimatePresence>
         </div>
       </ScrollArea>
 
       {/* Footer */}
       <div className="border-t border-white/[0.04] px-4 py-2 shrink-0">
         <p className="text-[10px] text-white/20 font-mono">
-          {INCIDENTS.length} active · sorted by severity
+          {allIncidents.length} active · sorted by severity
         </p>
       </div>
     </motion.div>

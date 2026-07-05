@@ -18,8 +18,7 @@ import { IncidentFeed } from '@/components/panels/IncidentFeed';
 import { ResourceTracker } from '@/components/panels/ResourceTracker';
 import { AIBriefingPanel } from '@/components/panels/AIBriefing';
 import { WeatherWidget } from '@/components/panels/WeatherWidget';
-import { IncidentTimeline } from '@/components/charts/IncidentTimeline';
-import { SeverityDistribution } from '@/components/charts/SeverityDistribution';
+import { ImpactSummary } from '@/components/cards/ImpactSummary';
 import { StatCard } from '@/components/shared/StatCard';
 import { useIncidents } from '@/hooks/useIncidents';
 import { useMapLayers } from '@/hooks/useMapLayers';
@@ -228,10 +227,16 @@ export default function EOCDashboard() {
               </div>
             </div>
 
-            {/* Bottom charts row */}
-            <div className="grid grid-cols-2 gap-2 shrink-0">
-              <IncidentTimeline />
-              <SeverityDistribution incidents={incidents} />
+            {/* Impact Summary */}
+            <div className="shrink-0">
+              <ImpactSummary
+                population={formatPopulation(
+                  incidents.reduce((sum, i) => sum + i.affectedPopulation, 0)
+                )}
+                roadsClosed={14}
+                sheltersOpen={8}
+                hospitalsNearby={4}
+              />
             </div>
           </motion.div>
 
