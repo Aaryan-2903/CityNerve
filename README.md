@@ -1,286 +1,191 @@
 <div align="center">
+  
+# CityNerve
 
-# 🌐 CityNerve
+**AI-Powered Disaster Intelligence & Emergency Operations Platform**
 
-**The AI Nervous System for Disaster-Ready Cities**
+An intelligent command dashboard that transforms how disaster management agencies monitor incidents, analyze risks, and coordinate emergency response.
 
-*CityNerve is a unified intelligence platform that transforms fragmented urban data into predictive, actionable emergency response strategies.*
-
-<br />
-
-[![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-<br />
-[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=FastAPI&logoColor=white)](https://fastapi.tiangolo.com/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![MapLibre](https://img.shields.io/badge/MapLibre-GL-4A5568?style=for-the-badge)
+![OpenStreetMap](https://img.shields.io/badge/OpenStreetMap-7EBC6F?style=for-the-badge&logo=openstreetmap&logoColor=white)
+![MIT License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+![Status: In Development](https://img.shields.io/badge/Status-In%20Development-orange?style=for-the-badge)
 
 <br />
 
-<!-- Placeholder for Hero Image -->
-<img src="https://via.placeholder.com/1200x600/080D18/FFFFFF?text=CityNerve+Hero+Image" alt="CityNerve Platform Interface" width="100%" />
+![Current Operations Dashboard](./public/dashboard.png)
+*Current Operations Dashboard*
 
 </div>
 
 ---
 
-## 📖 Overview
+## ⚡ About CityNerve
 
-CityNerve is an AI-powered Disaster Intelligence & Decision Support Platform engineered for modern Emergency Operations Centers (EOC). Rather than simply presenting raw data on a map, CityNerve acts as a cognitive engine for urban resilience. It ingests complex geospatial intelligence, live weather telemetry, and citizen reports, synthesizing them through explainable AI to provide commanders with clear, actionable intervention strategies before crises escalate.
-
-Designed with a Palantir-inspired, enterprise-grade architecture, CityNerve moves emergency management from reactive observation to proactive orchestration.
+**CityNerve** is an AI-powered Emergency Operations Center (EOC) that helps disaster management agencies monitor incidents, analyze risks, coordinate emergency response, and support faster decision-making through an intelligent command dashboard. Built with a focus on mission-critical clarity and real-time situational awareness, CityNerve aims to bridge the gap between complex data and actionable insights during urban emergencies.
 
 ---
 
-## 🚨 The Problem
+## ✨ Key Features
 
-Modern disaster management is fundamentally hindered by information friction. When seconds matter, decision-makers face critical bottlenecks:
-
-*   **Fragmented Intelligence:** Data lives in silos. Weather alerts, social media sentiment, and infrastructure status require manual reconciliation across disparate systems.
-*   **Reactive Posture:** Traditional systems notify operators *after* a threshold is breached, inherently delaying response times.
-*   **Cognitive Overload:** During a crisis, EOC operators are overwhelmed by raw alerts rather than guided by synthesized operational priorities.
-*   **Black-Box Algorithms:** Existing AI solutions often provide risk scores without the transparency required for high-stakes governmental decision-making.
-
----
-
-## 💡 Our Solution
-
-CityNerve transforms raw environmental noise into a unified, high-fidelity operational picture. Our platform operates on a four-pillar methodology:
-
-> [!IMPORTANT]
-> **Detect:** Aggregate real-time telemetry from IoT sensors, weather APIs, and verified citizen reports.
->
-> **Understand:** Contextualize anomalies against infrastructure vulnerabilities and historical data models.
->
-> **Predict:** Utilize forecasting algorithms to anticipate crisis vectors (e.g., flash flood spread within 30 minutes).
->
-> **Respond:** Generate concrete, explainable action plans (e.g., "Deploy Team Bravo, Close Route 4") requiring only one-click command approval.
+- 🚨 **Live Incident Monitoring:** Track active emergencies, severity levels, and response status in real-time.
+- 🗺 **Interactive Risk Map:** High-performance vector maps using MapLibre GL for plotting incidents, risks, and routes.
+- 🌦 **Weather Intelligence:** Real-time localized weather conditions, forecasts, and extreme weather alerts.
+- 🚒 **Resource Management:** Deploy, track, and manage emergency response assets across the city.
+- 🏥 **Shelter Tracking:** Monitor safe zones, evacuation routes, and shelter capacities.
+- 📊 **Impact Summary:** Instant aggregation of affected population, road closures, and critical infrastructure status.
+- 🤖 **AI Command Center** *(Coming Soon)*: Intelligent decision support, predictive threat modeling, and automated action plans.
+- 📡 **Disaster Simulation Engine** *(Coming Soon)*: Run realistic, multi-stage emergency scenarios for training and planning.
 
 ---
 
-## ✨ Features
+## 🛠 Technology Stack
 
-*   **🗺️ Interactive Risk Map:** High-performance, WebGL-accelerated geospatial visualization highlighting active incidents, critical infrastructure, and dynamic risk zones.
-*   **🧠 AI Command Intelligence:** Automated synthesis of multi-modal data into prioritized, actionable recommendations.
-*   **📱 Citizen Reporting Integration:** Streamlined ingestion of localized crisis data from civilian sources.
-*   **🔍 Explainable AI:** Transparent confidence scoring and logical breakdowns for every AI-generated recommendation.
-*   **🌊 Flood Prediction Engine:** Hyper-local hydrological modeling to forecast urban inundation.
-*   **⚡ Command Feed:** A real-time, timestamped operational ledger tracking all dispatches, advisories, and systemic alerts.
-*   **📊 Operational Dashboard:** A unified, dark-mode command center designed to reduce eye strain and maximize cognitive focus during extended operations.
-*   **🚑 Emergency Resource Monitoring:** Real-time tracking and utilization metrics for field units, shelters, and medical facilities.
+### Frontend
+- **Next.js** — App Router, SSR, and API routes
+- **React** — UI components and state management
+- **TypeScript** — Strict type safety across the platform
+- **Tailwind CSS** — Utility-first, responsive, premium dark-mode styling
+- **shadcn/ui** — Accessible and customizable component primitives
+- **Framer Motion** — Fluid micro-animations and transitions
 
----
+### Maps
+- **MapLibre GL** — Open-source, high-performance WebGL map rendering
+- **OpenStreetMap** — Free and open geographic data
 
-## 🏗️ Architecture
+### Backend *(Planned)*
+- **Node.js** & **Express** — Scalable API services
 
-```mermaid
-graph TD
-    %% Input Layer
-    subgraph Data Sources
-        W[Weather APIs]
-        C[Citizen Reports]
-        M[Geospatial Map Data]
-        S[IoT Sensors]
-    end
+### Artificial Intelligence *(Planned)*
+- **Gemini API** — Core engine for the AI decision support and predictive analytics
 
-    %% Processing Layer
-    subgraph CityNerve Core
-        RE[Risk Engine]
-        AI[AI Recommendation Engine]
-    end
-
-    %% Presentation Layer
-    subgraph Interface
-        D[Command Dashboard]
-    end
-
-    %% Action Layer
-    subgraph Execution
-        ER[Emergency Response Teams]
-    end
-
-    %% Data Flow
-    W --> RE
-    C --> RE
-    M --> RE
-    S --> RE
-    
-    RE -->|Aggregated Context| AI
-    AI -->|Actionable Intelligence| D
-    D -->|Approved Commands| ER
-
-    classDef source fill:#0B1020,stroke:#3B82F6,stroke-width:2px,color:#E2E8F0
-    classDef core fill:#1E1B4B,stroke:#A855F7,stroke-width:2px,color:#E2E8F0
-    classDef ui fill:#064E3B,stroke:#10B981,stroke-width:2px,color:#E2E8F0
-    classDef action fill:#7F1D1D,stroke:#EF4444,stroke-width:2px,color:#E2E8F0
-
-    class W,C,M,S source
-    class RE,AI core
-    class D ui
-    class ER action
-```
+### Deployment
+- **Vercel** — Edge network deployment and CI/CD
 
 ---
 
-## 🛠️ Tech Stack
-
-| Domain | Technologies |
-| :--- | :--- |
-| **Frontend** | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Framer Motion |
-| **Backend** | Python, FastAPI |
-| **AI / ML** | PyTorch, Hugging Face, OpenAI APIs |
-| **Database** | MongoDB, PostgreSQL (PostGIS) |
-| **Mapping** | Mapbox GL, react-map-gl |
-| **Deployment** | Vercel (Frontend), Docker, AWS (Backend) |
-
----
-
-## 📂 Project Structure
+## 📂 Project Architecture
 
 ```text
 citynerve/
-├── app/                  # Next.js 16 App Router pages and layouts
-│   ├── dashboard/        # Core EOC Dashboard route
-│   ├── layout.tsx        # Root layout, fonts, and global providers
-│   └── page.tsx          # Landing page (placeholder)
-├── components/           # Modular React components
-│   ├── ai/               # AI recommendation panels
-│   ├── cards/            # KPI metrics and incident detail cards
-│   ├── layout/           # Sidebar, TopNavbar, and structural shells
-│   ├── map/              # WebGL map and layer controls
-│   ├── timeline/         # Live command feed
-│   └── ui/               # Reusable shadcn/ui base components
-├── constants/            # Application configuration and design tokens
-├── data/                 # Mock datasets for UI development
-├── hooks/                # Custom React hooks (state, map layers, clock)
-├── lib/                  # Utility functions (Tailwind merge, etc.)
-├── types/                # Strict TypeScript interface definitions
-└── public/               # Static assets
+├── app/                  # Next.js App Router pages and layouts
+├── components/           # Reusable UI components
+│   ├── ai/               # AI reasoning and briefing panels
+│   ├── cards/            # Incident and metric display cards
+│   ├── layout/           # Dashboard shell, sidebar, and navigation
+│   ├── map/              # MapLibre wrappers and layer controls
+│   ├── panels/           # Control widgets (Weather, Resources, etc.)
+│   └── shared/           # Generic buttons, badges, and base elements
+├── constants/            # Configuration constants and theme setups
+├── context/              # React Context providers (e.g., Simulation Engine)
+├── data/                 # Mock datasets and simulation scenarios
+├── hooks/                # Custom React hooks
+├── lib/                  # Utility functions and generic helpers
+├── public/               # Static assets and images
+└── types/                # TypeScript interface definitions
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Current Progress
 
-### Prerequisites
-*   Node.js (v18 or higher)
-*   npm or yarn
-*   Mapbox Access Token
+### Completed
+- [x] Dashboard Core Layout
+- [x] High-performance Interactive Map
+- [x] Live Incident Feed
+- [x] Weather Intelligence Widget
+- [x] Resource Management Tracking
+- [x] Regional Impact Summary
 
-### Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Aaryan-2903/citynerve.git
-   cd citynerve
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment Variables:**
-   Create a `.env.local` file in the root directory and add your Mapbox token:
-   ```env
-   NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_access_token_here
-   ```
-
-4. **Run the development server:**
-   ```bash
-   npm run dev
-   ```
-
-5. **Access the application:**
-   Open [http://localhost:3000](http://localhost:3000) in your browser. The dashboard is available at `/dashboard`.
+### Upcoming
+- [ ] Disaster Simulation Engine
+- [ ] AI Command & Decision Support
+- [ ] Citizen Reporting Integration
+- [ ] Predictive Analytics Module
+- [ ] Presentation / Briefing Mode
 
 ---
 
-## 🛣️ Roadmap
+## 🗺 Future Roadmap
 
-- [x] **Planning:** Define architecture, component structure, and design system.
-- [x] **UI:** Design Palantir-inspired, dark-mode enterprise interface.
-- [x] **Frontend:** Implement responsive layout, Framer Motion animations, and Mapbox scaffolding.
-- [ ] **Backend:** Develop FastAPI microservices for data ingestion and routing.
-- [ ] **AI:** Integrate predictive models and LLM-based recommendation synthesis.
-- [ ] **Simulation:** Build disaster scenario simulation engine for testing and training.
-- [ ] **Presentation:** Finalize documentation, pitch deck, and demo environment.
+| Phase | Milestone | Status |
+| :---: | :--- | :---: |
+| **Phase 1** | Dashboard & Map Core | ✅ |
+| **Phase 2** | Simulation Engine | ⬜ |
+| **Phase 3** | AI Decision Support | ⬜ |
+| **Phase 4** | Backend Integration | ⬜ |
+| **Phase 5** | Real API Data Streams | ⬜ |
+
+---
+
+## 🏁 Getting Started
+
+Clone the repository and install the dependencies to run the dashboard locally.
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/Aaryan-2903/CityNerve.git
+
+# 2. Navigate to the project directory
+cd citynerve
+
+# 3. Install dependencies
+npm install
+
+# 4. Start the development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the platform in action.
 
 ---
 
 ## 📸 Screenshots
 
 <details>
-<summary><b>Landing Page</b></summary>
-<br>
-<img src="https://via.placeholder.com/800x450/080D18/FFFFFF?text=Landing+Page+Screenshot" alt="Landing Page" width="100%" />
+<summary><b>View Application Screenshots</b></summary>
+<br/>
+
+### Operations Dashboard
+> *Placeholder: Add your operations dashboard screenshot here*
+
+### AI Command Center
+> *Placeholder: Add your AI Command panel screenshot here*
+
+### Disaster Simulation
+> *Placeholder: Add your simulation engine screenshot here*
+
 </details>
-
-<details>
-<summary><b>Operational Dashboard</b></summary>
-<br>
-<img src="https://via.placeholder.com/800x450/080D18/FFFFFF?text=EOC+Dashboard+Screenshot" alt="Operational Dashboard" width="100%" />
-</details>
-
-<details>
-<summary><b>AI Command Center</b></summary>
-<br>
-<img src="https://via.placeholder.com/800x450/080D18/FFFFFF?text=AI+Command+Panel+Screenshot" alt="AI Command Center" width="100%" />
-</details>
-
-<details>
-<summary><b>Disaster Simulation Module</b></summary>
-<br>
-<img src="https://via.placeholder.com/800x450/080D18/FFFFFF?text=Simulation+Module+Screenshot" alt="Simulation Module" width="100%" />
-</details>
-
----
-
-## 🎬 Demo
-
-*   🔗 **Live Demo:** [Placeholder Link]
-*   📹 **Demo Video:** [Placeholder Link]
-*   📄 **Presentation:** [Placeholder Link]
-
----
-
-## 🔮 Future Scope
-
-CityNerve is built to scale. Future integrations include:
-
-*   🚁 **Drone Integration:** Automated dispatch of reconnaissance drones to critical incident coordinates.
-*   📡 **IoT Sensors:** Direct ingestion of water level, seismic, and structural stress sensor telemetry.
-*   🔥 **Forest Fire Prediction:** Expansion of predictive models to include wildfire spread vectors utilizing satellite thermal imaging.
-*   🎙️ **Voice AI:** Hands-free command execution for EOC operators via secure voice interfaces.
-*   📱 **Mobile App:** A stripped-down companion app for field responders to receive AI directives and report ground truth.
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions from the community. CityNerve is an ambitious project, and we value expertise in geospatial analysis, UI/UX design, machine learning, and systems architecture.
+We welcome contributions from the open-source community! Whether it's adding new features, fixing bugs, or improving documentation, your help is appreciated.
 
-Please read our [Contributing Guidelines](CONTRIBUTING.md) for details on our code of conduct, development workflow, and pull request process.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+Please ensure your code follows the existing style guidelines and includes appropriate type definitions.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-## ✍️ Author
-
-**Aryan Mandal**
-
-*   **GitHub:** [@Aaryan-2903](https://github.com/Aaryan-2903)
-*   **LinkedIn:** [Placeholder for LinkedIn URL]
-
-<br />
 <div align="center">
-  <i>Built to protect. Designed to empower.</i>
+  <p>Built with ❤️ by <b>Aryan Mandal</b></p>
+  <p>
+    <a href="https://github.com/Aaryan-2903">GitHub Profile</a>
+  </p>
 </div>
