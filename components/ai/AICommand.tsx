@@ -5,6 +5,7 @@ import { Brain, CheckCircle2, ChevronRight, Zap, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
+import { useCity } from '@/src/context/CityContext';
 import type { ThreatLevel } from '@/data/simulationScenario';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -33,21 +34,26 @@ const THREAT_CONFIG: Record<
 };
 
 // ─── Prediction text by threat ────────────────────────────────────────────────
-
-const PREDICTION_TEXT: Partial<Record<ThreatLevel, string>> = {
-  HIGH:     'Flood expected to reach Kurla within 30 minutes.',
-  MODERATE: 'Flood waters receding. Kurla risk reducing.',
-  CRITICAL: 'Imminent breach — multiple Kurla sectors at risk within 15 minutes.',
-};
+// Dynamically generated inside the component now.
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function AICommand() {
   const sim = useSimulationContext();
+  const { currentCity } = useCity();
+
   const threatLevel: ThreatLevel = sim?.threatLevel ?? 'LOW';
   const confidence = sim?.confidence ?? 72;
   const showActionPlan = sim?.showActionPlan ?? false;
   const showPrediction = sim?.showPrediction ?? false;
+
+  const targetArea = currentCity.id === 'mumbai' ? 'Kurla' : `${currentCity.name} Central`;
+
+  const PREDICTION_TEXT: Partial<Record<ThreatLevel, string>> = {
+    HIGH:     `Flood expected to reach ${targetArea} within 30 minutes.`,
+    MODERATE: `Flood waters receding. ${targetArea} risk reducing.`,
+    CRITICAL: `Imminent breach — multiple ${targetArea} sectors at risk within 15 minutes.`,
+  };
 
   const threatCfg = THREAT_CONFIG[threatLevel];
   const predictionText = PREDICTION_TEXT[threatLevel];
@@ -118,11 +124,11 @@ export function AICommand() {
                 Prediction
               </h3>
               <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 text-sm text-white/90">
-                {predictionText.split('Kurla').map((part, i, arr) =>
+                {predictionText.split(targetArea).map((part, i, arr) =>
                   i < arr.length - 1 ? (
                     <span key={i}>
                       {part}
-                      <span className="text-orange-400 font-semibold">Kurla</span>
+                      <span className="text-orange-400 font-semibold">{targetArea}</span>
                     </span>
                   ) : (
                     <span key={i}>{part}</span>

@@ -6,6 +6,7 @@ import { AICommand } from '@/components/ai/AICommand';
 import { WeatherWidget } from '@/components/panels/WeatherWidget';
 import { SimulationControl } from '@/components/panels/SimulationControl';
 import { SimulationProvider } from '@/context/SimulationContext';
+import { CityProvider } from '@/src/context/CityContext';
 
 export const metadata = {
   title: 'CityNerve — EOC Operations Dashboard',
@@ -14,8 +15,9 @@ export const metadata = {
 
 export default function DashboardPage() {
   return (
-    <SimulationProvider>
-      <DashboardLayout>
+    <CityProvider>
+      <SimulationProvider>
+        <DashboardLayout>
         {/* ── Upper: Hero Risk Map ──────────────────────────────── */}
         <div className="relative overflow-hidden border-b border-white/[0.05]" style={{ height: 'calc(100% - 230px)' }}>
           <RiskMap />
@@ -53,6 +55,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </DashboardLayout>
-    </SimulationProvider>
+      </SimulationProvider>
+    </CityProvider>
   );
 }

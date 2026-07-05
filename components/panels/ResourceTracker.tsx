@@ -18,6 +18,7 @@ import { GlassCard } from '@/components/shared/GlassCard';
 import { StatusIndicator } from '@/components/shared/StatusIndicator';
 import type { Resource, ResourceStatus, ResourceType } from '@/types/resource';
 import { formatRelativeTime, formatETA } from '@/utils/format';
+import { useState, useEffect } from 'react';
 
 const TYPE_ICONS: Record<ResourceType, React.ElementType> = {
   fire_engine: Flame,
@@ -53,6 +54,11 @@ const STATUS_COLOR: Record<ResourceStatus, string> = {
 function ResourceCard({ resource }: { resource: Resource }) {
   const Icon = TYPE_ICONS[resource.type] ?? Truck;
   const statusColor = STATUS_COLOR[resource.status];
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <motion.div
@@ -87,7 +93,7 @@ function ResourceCard({ resource }: { resource: Resource }) {
         <div className="flex items-center justify-between gap-1">
           <span className="text-[10px] text-white/30 truncate">{resource.unit}</span>
           <span className="text-[10px] text-white/20 font-mono shrink-0">
-            {resource.eta ? formatETA(resource.eta) : formatRelativeTime(resource.lastUpdated)}
+            {mounted ? (resource.eta ? formatETA(resource.eta) : formatRelativeTime(resource.lastUpdated)) : '--'}
           </span>
         </div>
         {resource.assignedIncidentId && (

@@ -9,17 +9,87 @@ interface TopBarProps {
   criticalCount: number;
 }
 
+import { useState, useRef, useEffect } from 'react';
+import { useCity } from '@/src/context/CityContext';
+import { SUPPORTED_CITIES } from '@/src/data/cities';
+import { MapPin, Navigation } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+function CitySwitcher() {
+  const { currentCity, setCity, isDetecting, detectLocation } = useCity();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="relative" ref={dropdownRef}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-1.5 text-xs font-semibold text-white/90 hover:text-white transition-colors"
+        >
+          <span>📍 {currentCity.name}</span>
+          <ChevronDown className={cn("w-3 h-3 text-white/50 transition-transform", isOpen && "rotate-180")} />
+        </button>
+
+        {isOpen && (
+          <div className="absolute top-full left-0 mt-2 w-48 rounded-lg border border-white/[0.1] bg-[#0F1524] shadow-2xl overflow-hidden z-50">
+            <div className="max-h-[300px] overflow-y-auto p-1">
+              {SUPPORTED_CITIES.map((city) => (
+                <button
+                  key={city.id}
+                  onClick={() => {
+                    setCity(city.id);
+                    setIsOpen(false);
+                  }}
+                  className={cn(
+                    "w-full flex items-center gap-2 px-3 py-2 text-xs rounded-md transition-colors text-left",
+                    currentCity.id === city.id 
+                      ? "bg-white/10 text-white font-semibold" 
+                      : "text-white/60 hover:bg-white/5 hover:text-white/90"
+                  )}
+                >
+                  <MapPin className="w-3 h-3 opacity-50" />
+                  {city.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <button
+        onClick={detectLocation}
+        disabled={isDetecting}
+        className="flex items-center gap-1.5 rounded bg-white/[0.05] border border-white/[0.1] px-2 py-1 text-[10px] font-medium text-blue-400 hover:bg-white/[0.1] hover:text-blue-300 transition-colors"
+      >
+        <Navigation className={cn("w-3 h-3", isDetecting && "animate-spin")} />
+        {isDetecting ? 'Detecting...' : '📡 Use My Location'}
+      </button>
+    </div>
+  );
+}
+
 export function TopBar({ activeIncidents, criticalCount }: TopBarProps) {
   const { utcTime, utcDate } = useRealTimeClock();
 
   return (
-    <header className="flex h-12 shrink-0 items-center gap-4 border-b border-white/[0.06] bg-[#070B14]/80 px-4 backdrop-blur-xl">
+    <header className="relative z-50 flex h-12 shrink-0 items-center gap-4 border-b border-white/[0.06] bg-[#070B14]/80 px-4 backdrop-blur-xl">
       {/* Left: Breadcrumb + Incident count */}
       <div className="flex items-center gap-3 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-white/30">EOC</span>
           <span className="text-white/20">/</span>
-          <span className="text-xs font-semibold text-white/80">Operations Center</span>
+          <CitySwitcher />
         </div>
         <div className="h-4 w-px bg-white/10" />
         <div className="flex items-center gap-1.5">

@@ -71,7 +71,7 @@ export const PHASE_WEATHER: Record<number, SimWeather> = {
   0: {
     label: 'Overcast',
     emoji: '🌥️',
-    rainfall: '1.4 in/hr',
+    rainfall: '36 mm/hr',
     forecast: 'Rain likely tonight',
     alertText: 'Dense Fog Advisory — Harbour areas',
     alertLevel: 'advisory',
@@ -79,7 +79,7 @@ export const PHASE_WEATHER: Record<number, SimWeather> = {
   1: {
     label: 'Torrential',
     emoji: '🌧️',
-    rainfall: '7.6 in/hr',
+    rainfall: '193 mm/hr',
     forecast: 'Flood Risk — Extreme',
     alertText: '⚡ Flash Flood Watch — Kurla & Eastern Suburbs',
     alertLevel: 'warning',
@@ -87,7 +87,7 @@ export const PHASE_WEATHER: Record<number, SimWeather> = {
   2: {
     label: 'Torrential',
     emoji: '🌧️',
-    rainfall: '8.3 in/hr',
+    rainfall: '211 mm/hr',
     forecast: 'Flood Risk — Critical',
     alertText: '🚨 Flash Flood Warning — Kurla Station Zone',
     alertLevel: 'warning',
@@ -95,7 +95,7 @@ export const PHASE_WEATHER: Record<number, SimWeather> = {
   3: {
     label: 'Torrential',
     emoji: '⛈️',
-    rainfall: '9.7 in/hr',
+    rainfall: '246 mm/hr',
     forecast: 'Flood Imminent — Kurla',
     alertText: '🚨 Flash Flood Emergency — Mithi River Overflow',
     alertLevel: 'warning',
@@ -103,7 +103,7 @@ export const PHASE_WEATHER: Record<number, SimWeather> = {
   4: {
     label: 'Torrential',
     emoji: '⛈️',
-    rainfall: '10.1 in/hr',
+    rainfall: '257 mm/hr',
     forecast: 'Flooding — Kurla, Ghatkopar',
     alertText: '🚨 Evacuation Order — Kurla East & West',
     alertLevel: 'warning',
@@ -111,7 +111,7 @@ export const PHASE_WEATHER: Record<number, SimWeather> = {
   5: {
     label: 'Heavy Rain',
     emoji: '🌧️',
-    rainfall: '6.8 in/hr',
+    rainfall: '173 mm/hr',
     forecast: 'Easing — 2 hours',
     alertText: '⚠️ Evacuation Order — Kurla East & West',
     alertLevel: 'warning',
@@ -119,7 +119,7 @@ export const PHASE_WEATHER: Record<number, SimWeather> = {
   6: {
     label: 'Moderate Rain',
     emoji: '🌦️',
-    rainfall: '2.9 in/hr',
+    rainfall: '74 mm/hr',
     forecast: 'Clearing by 02:00',
     alertText: 'Advisory: Flooded roads — proceed with caution',
     alertLevel: 'advisory',
@@ -187,7 +187,7 @@ export const PHASE_FEED_ENTRIES: Record<number, SimFeedEntry[]> = {
     {
       id: 'sim-f-1',
       time: '22:08',
-      text: 'NWS: Rainfall intensifying to 7.6 in/hr — Flash Flood Watch issued for Mumbai metro',
+      text: 'IMD: Rainfall intensifying to 193 mm/hr — Flash Flood Watch issued for Mumbai metro',
       dotColor: '#EAB308',
       category: 'advisory',
     },

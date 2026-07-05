@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, MapPin, Clock, Users, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -28,6 +28,11 @@ function IncidentCard({ incident, isSelected, onClick }: IncidentCardProps) {
   const severityConfig = SEVERITY_CONFIG[incident.severity];
   const typeConfig = INCIDENT_TYPE_CONFIG[incident.type];
   const statusConfig = INCIDENT_STATUS_CONFIG[incident.status];
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <motion.div
@@ -63,8 +68,8 @@ function IncidentCard({ incident, isSelected, onClick }: IncidentCardProps) {
               {incident.status === 'escalating' ? '▲ ESCALATING' : statusConfig.label}
             </span>
           </div>
-          <span suppressHydrationWarning className="text-[10px] font-mono text-white/25 shrink-0">
-            {formatRelativeTime(incident.timestamp)}
+          <span className="text-[10px] font-mono text-white/25 shrink-0">
+            {mounted ? formatRelativeTime(incident.timestamp) : '--'}
           </span>
         </div>
 

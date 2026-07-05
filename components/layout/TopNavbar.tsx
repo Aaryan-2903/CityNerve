@@ -30,15 +30,78 @@ function BrandMark() {
   );
 }
 
+import { useState, useRef, useEffect } from 'react';
+import { useCity } from '@/src/context/CityContext';
+import { SUPPORTED_CITIES } from '@/src/data/cities';
+import { MapPin, Navigation } from 'lucide-react';
+
 function CommandZoneSelector() {
+  const { currentCity, setCity, isDetecting, detectLocation } = useCity();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <button className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-2 hover:bg-white/[0.06] hover:border-white/[0.12] transition-all group">
-      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/20 border border-blue-500/30 shrink-0">
-        <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
-      </span>
-      <span className="text-sm font-semibold text-white/85">Mumbai Command Zone</span>
-      <ChevronDown className="w-3.5 h-3.5 text-white/30 group-hover:text-white/60 transition-colors" />
-    </button>
+    <div className="relative" ref={dropdownRef}>
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-2 hover:bg-white/[0.06] hover:border-white/[0.12] transition-all group"
+      >
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/20 border border-blue-500/30 shrink-0">
+          <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
+        </span>
+        <span className="text-sm font-semibold text-white/85">{currentCity.displayLabel}</span>
+        <ChevronDown className={cn("w-3.5 h-3.5 text-white/30 transition-transform", isOpen && "rotate-180")} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full mt-2 w-56 rounded-xl border border-white/[0.1] bg-[#0F1524] shadow-2xl overflow-hidden z-50">
+          <div className="p-1.5">
+            <button
+              onClick={() => {
+                detectLocation();
+                setIsOpen(false);
+              }}
+              disabled={isDetecting}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors text-left"
+            >
+              <Navigation className={cn("w-3.5 h-3.5", isDetecting && "animate-spin")} />
+              <span className="font-medium">{isDetecting ? 'Detecting...' : 'Use My Location'}</span>
+            </button>
+          </div>
+          <div className="h-px bg-white/[0.06] mx-2" />
+          <div className="p-1.5 max-h-[300px] overflow-y-auto">
+            {SUPPORTED_CITIES.map((city) => (
+              <button
+                key={city.id}
+                onClick={() => {
+                  setCity(city.id);
+                  setIsOpen(false);
+                }}
+                className={cn(
+                  "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left",
+                  currentCity.id === city.id 
+                    ? "bg-white/10 text-white font-semibold" 
+                    : "text-white/60 hover:bg-white/5 hover:text-white/90"
+                )}
+              >
+                <MapPin className="w-3 h-3 opacity-50" />
+                {city.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -1,10 +1,27 @@
 import { cn } from '@/lib/utils';
 import { GlassCard } from './GlassCard';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { motion, useSpring, useTransform } from 'framer-motion';
+import { useEffect } from 'react';
+
+function AnimatedNumber({ value, formatter }: { value: number; formatter?: (v: number) => string }) {
+  const spring = useSpring(value, { bounce: 0, duration: 800 });
+  const display = useTransform(spring, (current) => {
+    const rounded = Math.round(current);
+    return formatter ? formatter(rounded) : rounded.toString();
+  });
+
+  useEffect(() => {
+    spring.set(value);
+  }, [spring, value]);
+
+  return <motion.span>{display}</motion.span>;
+}
 
 interface StatCardProps {
   label: string;
   value: string | number;
+  formatValue?: (v: number) => string;
   delta?: string;
   trend?: 'up' | 'down' | 'stable';
   trendPositive?: boolean;
@@ -17,6 +34,7 @@ interface StatCardProps {
 export function StatCard({
   label,
   value,
+  formatValue,
   delta,
   trend,
   trendPositive = true,
@@ -71,7 +89,11 @@ export function StatCard({
           className="text-3xl font-bold tracking-tight tabular-nums"
           style={{ color: accentColor ?? '#ffffff' }}
         >
-          {value}
+          {typeof value === 'number' ? (
+            <AnimatedNumber value={value} formatter={formatValue} />
+          ) : (
+            value
+          )}
         </span>
 
         {delta && trend && (

@@ -4,12 +4,21 @@ import { Cloud, Droplets, AlertTriangle } from 'lucide-react';
 import { GlassCard } from '@/components/shared/GlassCard';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { PHASE_WEATHER } from '@/data/simulationScenario';
+import { useCity } from '@/src/context/CityContext';
+import { localizeData } from '@/src/data/cities';
+import { useMemo } from 'react';
 
 export function WeatherWidget() {
   const sim = useSimulationContext();
+  const { currentCity } = useCity();
+
+  const fallbackWeather = useMemo(
+    () => localizeData(PHASE_WEATHER[0], currentCity),
+    [currentCity]
+  );
 
   // Fallback to phase-0 weather when no simulation context exists
-  const currentWeather = sim && sim.status !== 'idle' ? sim.weather : PHASE_WEATHER[0];
+  const currentWeather = sim && sim.status !== 'idle' ? sim.weather : fallbackWeather;
 
   const ALERT_STYLE = {
     warning:  { color: '#EF4444', bg: 'rgba(239,68,68,0.1)',  border: 'rgba(239,68,68,0.2)'  },

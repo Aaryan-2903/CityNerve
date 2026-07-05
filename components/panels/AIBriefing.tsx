@@ -78,10 +78,15 @@ interface AIBriefingPanelProps {
 
 export function AIBriefingPanel({ briefing }: AIBriefingPanelProps) {
   const [expanded, setExpanded] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const threatConfig = THREAT_CONFIG[briefing.overallThreatLevel];
   const immediateRecs = briefing.recommendations.filter((r) => r.priority === 'immediate');
   const otherRecs = briefing.recommendations.filter((r) => r.priority !== 'immediate');
   const displayedRecs = expanded ? briefing.recommendations : immediateRecs;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <GlassCard
@@ -128,7 +133,7 @@ export function AIBriefingPanel({ briefing }: AIBriefingPanelProps) {
           </div>
         </div>
         <p className="relative text-[10px] text-purple-300/40 mt-0.5 font-mono">
-          Generated {formatRelativeTime(briefing.generatedAt)} · AI confidence: 91%
+          Generated {mounted ? formatRelativeTime(briefing.generatedAt) : '--'} · AI confidence: 91%
         </p>
       </div>
 

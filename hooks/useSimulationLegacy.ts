@@ -11,6 +11,8 @@
  */
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useCity } from '@/src/context/CityContext';
+import { localizeData } from '@/src/data/cities';
 import {
   SIMULATION_DURATION,
   PHASE_TIMESTAMPS,
@@ -53,6 +55,14 @@ export interface SimulationState {
   start: () => void;
   pause: () => void;
   reset: () => void;
+  
+  // Aliases for SimulationControls
+  startSimulation: () => void;
+  pauseSimulation: () => void;
+  resumeSimulation: () => void;
+  resetSimulation: () => void;
+  nextStage: () => void;
+  previousStage: () => void;
 }
 
 /** Returns the stage index (0-6) for a given elapsed time */
@@ -65,16 +75,16 @@ function getStageForElapsed(elapsed: number): number {
   return match ? match.stage : 0;
 }
 
-/** Accumulates all feed entries from stage 0 up to (and including) the given stage */
-function accumulateFeedEntries(stage: number): SimFeedEntry[] {
-  const entries: SimFeedEntry[] = [];
-  for (let s = stage; s >= 0; s--) {
-    entries.push(...(PHASE_FEED_ENTRIES[s] ?? []));
-  }
-  return entries;
-}
-
 export function useSimulation(): SimulationState {
+  const { currentCity } = useCity();
+
+  // Localize simulation data based on the selected city
+  const lWeather = useMemo(() => localizeData(PHASE_WEATHER, currentCity), [currentCity]);
+  const lFeedEntries = useMemo(() => localizeData(PHASE_FEED_ENTRIES, currentCity), [currentCity]);
+  const lReportInc = useMemo(() => localizeData(CITIZEN_REPORT_INCIDENT, currentCity), [currentCity]);
+  const lReportRes = useMemo(() => localizeData(CITIZEN_REPORT_RESPONDING, currentCity), [currentCity]);
+  const lReportRslvd = useMemo(() => localizeData(CITIZEN_REPORT_RESOLVED, currentCity), [currentCity]);
+
   const [status, setStatus] = useState<SimStatus>('idle');
   const [elapsed, setElapsed] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -126,7 +136,7 @@ export function useSimulation(): SimulationState {
   const progress    = elapsed / SIMULATION_DURATION;
   const threatLevel = PHASE_THREAT[phase]      ?? 'LOW';
   const confidence  = PHASE_CONFIDENCE[phase]  ?? 68;
-  const weather     = PHASE_WEATHER[phase]     ?? PHASE_WEATHER[0];
+  const weather     = lWeather[phase]          ?? lWeather[0];
   const resources   = PHASE_RESOURCES[phase]   ?? PHASE_RESOURCES[0];
 
   // Stage 4+ → flood polygon visible on map
@@ -136,18 +146,35 @@ export function useSimulation(): SimulationState {
   // Stage 3+ → prediction text visible in AICommand
   const showPrediction   = phase >= 3;
 
-  // Incident injection:
-  //   Stage 2 (index 2): citizen report appears (NEW badge)
-  //   Stage 5 (index 5): incident → RESPONDING
-  //   Stage 6 (index 6): incident → RESOLVED
+  // Incident injection
   const simIncidents = useMemo<SimIncident[]>(() => {
     if (phase < 2)  return [];
-    if (phase >= 6) return [CITIZEN_REPORT_RESOLVED];
-    if (phase >= 5) return [CITIZEN_REPORT_RESPONDING];
-    return [CITIZEN_REPORT_INCIDENT];
-  }, [phase]);
+    if (phase >= 6) return [lReportRslvd];
+    if (phase >= 5) return [lReportRes];
+    return [lReportInc];
+  }, [phase, lReportInc, lReportRes, lReportRslvd]);
 
-  const feedEntries = useMemo(() => accumulateFeedEntries(phase), [phase]);
+  const feedEntries = useMemo(() => {
+    const entries: SimFeedEntry[] = [];
+    for (let s = phase; s >= 0; s--) {
+      entries.push(...(lFeedEntries[s] ?? []));
+    }
+    return entries;
+  }, [phase, lFeedEntries]);
+
+  const nextStage = useCallback(() => {
+    setElapsed((prev) => {
+      const p = getStageForElapsed(prev);
+      return Math.min(60, (p + 1) * 10);
+    });
+  }, []);
+
+  const previousStage = useCallback(() => {
+    setElapsed((prev) => {
+      const p = getStageForElapsed(prev);
+      return Math.max(0, (p - 1) * 10);
+    });
+  }, []);
 
   return {
     status,
@@ -166,5 +193,13 @@ export function useSimulation(): SimulationState {
     start,
     pause,
     reset,
+    
+    // Aliases
+    startSimulation: start,
+    pauseSimulation: pause,
+    resumeSimulation: start,
+    resetSimulation: reset,
+    nextStage,
+    previousStage,
   };
 }

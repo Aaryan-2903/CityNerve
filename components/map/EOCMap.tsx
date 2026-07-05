@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import Map, { Marker, Popup, NavigationControl, ScaleControl } from 'react-map-gl/maplibre';
 import type { MapRef } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -92,6 +92,8 @@ function ResourceMarkerPin({ resource }: { resource: Resource }) {
 
 /* ─── Main component ─────────────────────────────────────────────────────── */
 
+import { useCity } from '@/src/context/CityContext';
+
 export function EOCMap({
   incidents,
   resources,
@@ -104,6 +106,12 @@ export function EOCMap({
 }: EOCMapProps) {
   const mapRef = useRef<MapRef>(null);
   const [popupIncident, setPopupIncident] = useState<Incident | null>(null);
+  const { currentCity } = useCity();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleMarkerClick = useCallback(
     (incident: Incident) => {
@@ -212,7 +220,7 @@ export function EOCMap({
                 <div className="bg-white/[0.04] rounded-lg p-1.5">
                   <Clock className="w-3 h-3 text-white/30 mx-auto mb-0.5" />
                   <p className="text-[10px] font-bold text-white/80">
-                    {formatRelativeTime(popupIncident.timestamp)}
+                    {mounted ? formatRelativeTime(popupIncident.timestamp) : '--'}
                   </p>
                   <p className="text-[9px] text-white/25">Reported</p>
                 </div>
@@ -255,7 +263,12 @@ export function EOCMap({
         </div>
         <div className="flex items-center gap-1 rounded-lg border border-white/[0.08] bg-black/60 px-2 py-1.5 backdrop-blur-sm">
           <Maximize2 className="w-3 h-3 text-white/40" />
-          <span className="font-mono text-[10px] text-white/30">Mumbai Metro</span>
+          <span className="font-mono text-[10px] text-white/30">
+            {currentCity.id === 'mumbai' ? 'Mumbai Metro' : 
+             currentCity.id === 'delhi' ? 'Delhi NCR' : 
+             ['pune', 'bengaluru', 'chennai', 'hyderabad'].includes(currentCity.id) ? `${currentCity.name} Metro` : 
+             currentCity.name}
+          </span>
         </div>
       </div>
     </div>

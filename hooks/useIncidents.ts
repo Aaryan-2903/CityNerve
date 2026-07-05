@@ -4,6 +4,8 @@ import { useState, useMemo, useCallback } from 'react';
 import type { Incident, Severity, IncidentType, IncidentStatus } from '@/types/incident';
 import { MOCK_INCIDENTS } from '@/data/mockIncidents';
 import { SEVERITY_ORDER } from '@/utils/severity';
+import { useCity } from '@/src/context/CityContext';
+import { localizeData } from '@/src/data/cities';
 
 export interface IncidentFilters {
   severity: Severity | 'all';
@@ -20,9 +22,11 @@ const DEFAULT_FILTERS: IncidentFilters = {
 };
 
 export function useIncidents() {
+  const { currentCity } = useCity();
+  const incidents = useMemo(() => localizeData(MOCK_INCIDENTS, currentCity), [currentCity]);
+  
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [filters, setFilters] = useState<IncidentFilters>(DEFAULT_FILTERS);
-  const [incidents] = useState<Incident[]>(MOCK_INCIDENTS);
 
   const filteredIncidents = useMemo(() => {
     return incidents

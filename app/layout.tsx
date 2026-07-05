@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import { CityProvider } from '@/src/context/CityContext';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -31,7 +32,11 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${jetbrainsMono.variable} dark h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#070B14] text-white">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#070B14] text-white">
+        <CityProvider>
+          {children}
+        </CityProvider>
+      </body>
     </html>
   );
 }

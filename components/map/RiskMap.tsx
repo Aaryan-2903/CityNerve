@@ -8,6 +8,8 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { MetricCards } from '@/components/cards/MetricCards';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
+import { useCity } from '@/src/context/CityContext';
+import { localizeData } from '@/src/data/cities';
 import { KURLA_FLOOD_GEOJSON } from '@/data/simulationScenario';
 
 /* ─── Dark tile style (CartoDB, free, no API key) ───────────────────────── */
@@ -108,6 +110,19 @@ export function RiskMap() {
   const sim = useSimulationContext();
   const showFloodOverlay = sim?.showFloodOverlay ?? false;
 
+  const { currentCity } = useCity();
+
+  // Localize all mock markers/zones to the selected city's exact coordinates
+  const localized = localizeData({
+    incidents: FLOOD_INCIDENTS,
+    rescue: RESCUE_TEAMS,
+    shelters: SHELTERS,
+    hospitals: HOSPITALS,
+    floodZone: FLOOD_ZONE_GEOJSON,
+    evacRoute: EVAC_ROUTE_GEOJSON,
+    simFlood: KURLA_FLOOD_GEOJSON
+  }, currentCity);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -116,9 +131,10 @@ export function RiskMap() {
       className="absolute inset-0 bg-[#080D18]"
     >
       <Map
+        key={currentCity.id}
         initialViewState={{
-          longitude: 72.8777,
-          latitude:  19.0760,
+          longitude: currentCity.longitude,
+          latitude:  currentCity.latitude,
           zoom:      11.5,
           pitch:     40,
           bearing:   -12,
@@ -131,7 +147,7 @@ export function RiskMap() {
       >
         {/* ── Risk Zones ── */}
         {showRiskZones && (
-          <Source id="flood-zone-source" type="geojson" data={FLOOD_ZONE_GEOJSON}>
+          <Source id="flood-zone-source" type="geojson" data={localized.floodZone}>
             <Layer {...floodFillLayer} />
             <Layer {...floodLineLayer} />
           </Source>
@@ -139,21 +155,21 @@ export function RiskMap() {
 
         {/* ── Evacuation Routes ── */}
         {showEvacRoutes && (
-          <Source id="evac-route-source" type="geojson" data={EVAC_ROUTE_GEOJSON}>
+          <Source id="evac-route-source" type="geojson" data={localized.evacRoute}>
             <Layer {...evacLineLayer} />
           </Source>
         )}
 
         {/* ── Simulation: Kurla Flood Overlay (stage 4+) ── */}
         {showFloodOverlay && (
-          <Source id="sim-flood-source" type="geojson" data={KURLA_FLOOD_GEOJSON}>
+          <Source id="sim-flood-source" type="geojson" data={localized.simFlood}>
             <Layer {...simFloodFill} />
             <Layer {...simFloodLine} />
           </Source>
         )}
 
         {/* ── Flood Incident Markers 🌊 ── */}
-        {showIncidents && FLOOD_INCIDENTS.map((inc) => (
+        {showIncidents && localized.incidents.map((inc) => (
           <Marker
             key={inc.id}
             longitude={inc.lng}
@@ -189,7 +205,7 @@ export function RiskMap() {
         ))}
 
         {/* ── Rescue Team Markers 🚑 ── */}
-        {showResources && RESCUE_TEAMS.map((res) => (
+        {showResources && localized.rescue.map((res) => (
           <Marker key={res.id} longitude={res.lng} latitude={res.lat} anchor="center">
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
@@ -208,7 +224,7 @@ export function RiskMap() {
         ))}
 
         {/* ── Shelter Markers 🏠 ── */}
-        {showResources && SHELTERS.map((shl) => (
+        {showResources && localized.shelters.map((shl) => (
           <Marker key={shl.id} longitude={shl.lng} latitude={shl.lat} anchor="center">
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
@@ -227,7 +243,7 @@ export function RiskMap() {
         ))}
 
         {/* ── Hospital Markers 🏥 ── */}
-        {showResources && HOSPITALS.map((hosp) => (
+        {showResources && localized.hospitals.map((hosp) => (
           <Marker key={hosp.id} longitude={hosp.lng} latitude={hosp.lat} anchor="center">
             <motion.div
               initial={{ scale: 0, opacity: 0 }}

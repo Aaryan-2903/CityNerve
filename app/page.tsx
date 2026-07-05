@@ -20,13 +20,30 @@ import { AIBriefingPanel } from '@/components/panels/AIBriefing';
 import { WeatherWidget } from '@/components/panels/WeatherWidget';
 import { ImpactSummary } from '@/components/cards/ImpactSummary';
 import { StatCard } from '@/components/shared/StatCard';
+import { SimulationControls } from '@/components/simulation/SimulationControls';
 import { useIncidents } from '@/hooks/useIncidents';
 import { useMapLayers } from '@/hooks/useMapLayers';
 import { MOCK_RESOURCES } from '@/data/mockResources';
 import { MOCK_AI_BRIEFING } from '@/data/mockAIBriefing';
 import { formatPopulation } from '@/utils/format';
+import { useCity } from '@/src/context/CityContext';
+import { localizeData } from '@/src/data/cities';
+import { useMemo } from 'react';
+import { useSimulationContext } from '@/context/SimulationContext';
 
 export default function EOCDashboard() {
+  const { currentCity } = useCity();
+
+  const localizedResources = useMemo(
+    () => localizeData(MOCK_RESOURCES, currentCity),
+    [currentCity]
+  );
+  
+  const localizedAIBriefing = useMemo(
+    () => localizeData(MOCK_AI_BRIEFING, currentCity),
+    [currentCity]
+  );
+
   const {
     incidents,
     filteredIncidents,
@@ -56,12 +73,21 @@ export default function EOCDashboard() {
     }
   };
 
-  const deployedResources = MOCK_RESOURCES.filter(
+  const deployedResources = localizedResources.filter(
     (r) => r.status === 'deployed' || r.status === 'en_route',
   );
 
-  const totalCasualties = incidents.reduce((sum, i) => sum + i.casualties, 0);
-  const avgResponseTime = '4m 32s';
+  const sim = useSimulationContext();
+  const activeIncidentsCount = stats.active;
+  const deployedUnitsCount = deployedResources.length;
+  
+  const baseCasualties = incidents.reduce((sum, i) => sum + i.casualties, 0);
+  const totalCasualties = baseCasualties;
+  
+  const baseAffected = incidents.reduce((sum, i) => sum + i.affectedPopulation, 0);
+  const affectedPopulationCount = baseAffected;
+  
+  const avgResponseTimeSeconds = 272;
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#070B14]">
@@ -85,7 +111,7 @@ export default function EOCDashboard() {
           >
             <StatCard
               label="Active Incidents"
-              value={stats.active}
+              value={activeIncidentsCount}
               delta="+3 since 18:00"
               trend="up"
               trendPositive={false}
@@ -101,13 +127,13 @@ export default function EOCDashboard() {
           >
             <StatCard
               label="Deployed Units"
-              value={deployedResources.length}
+              value={deployedUnitsCount}
               delta="87% capacity"
               trend="up"
               trendPositive={false}
               accentColor="#F97316"
               icon={<Truck className="w-4 h-4" />}
-              sublabel={`${MOCK_RESOURCES.length} total assets tracked`}
+              sublabel={`${localizedResources.length} total assets tracked`}
             />
           </motion.div>
           <motion.div
@@ -117,9 +143,8 @@ export default function EOCDashboard() {
           >
             <StatCard
               label="Affected Population"
-              value={formatPopulation(
-                incidents.reduce((sum, i) => sum + i.affectedPopulation, 0),
-              )}
+              value={affectedPopulationCount}
+              formatValue={(v) => formatPopulation(v)}
               delta={`${totalCasualties} casualties`}
               trend={totalCasualties > 0 ? 'up' : 'stable'}
               trendPositive={false}
@@ -135,7 +160,8 @@ export default function EOCDashboard() {
           >
             <StatCard
               label="Avg Response Time"
-              value={avgResponseTime}
+              value={avgResponseTimeSeconds}
+              formatValue={(v) => `${Math.floor(v/60)}m ${v%60}s`}
               delta="-0m 48s vs baseline"
               trend="down"
               trendPositive={true}
@@ -192,7 +218,7 @@ export default function EOCDashboard() {
                   totalCount={stats.active}
                 />
               ) : (
-                <AIBriefingPanel briefing={MOCK_AI_BRIEFING} />
+                <AIBriefingPanel briefing={localizedAIBriefing} />
               )}
             </div>
           </motion.div>
@@ -208,7 +234,7 @@ export default function EOCDashboard() {
             <div className="relative flex-1 min-h-0">
               <EOCMap
                 incidents={incidents}
-                resources={MOCK_RESOURCES}
+                resources={localizedResources}
                 selectedIncidentId={selectedIncidentId}
                 onSelectIncident={handleSelectIncident}
                 viewport={viewport}
@@ -224,6 +250,11 @@ export default function EOCDashboard() {
                   onToggleLayer={toggleLayer}
                   onResetView={resetViewport}
                 />
+              </div>
+
+              {/* Simulation Controls Overlay */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+                <SimulationControls />
               </div>
             </div>
 
@@ -250,7 +281,7 @@ export default function EOCDashboard() {
           >
             {/* Resources */}
             <div className="flex-1 min-h-0 overflow-hidden">
-              <ResourceTracker resources={MOCK_RESOURCES} />
+              <ResourceTracker resources={localizedResources} />
             </div>
             {/* Weather */}
             <div className="shrink-0">

@@ -1,12 +1,5 @@
 'use client';
 
-/**
- * SimulationContext.tsx
- *
- * React context that makes simulation state available to all
- * dashboard panel components without prop-drilling through the layout.
- */
-
 import { createContext, useContext, type ReactNode } from 'react';
 import { useSimulation, type SimulationState } from '@/hooks/useSimulationLegacy';
 
@@ -21,9 +14,6 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** Hook for consuming simulation state inside any panel component.
- * Returns null when used outside <SimulationProvider> — components should handle this gracefully.
- */
 export function useSimulationContext(): SimulationState | null {
   return useContext(SimulationContext);
 }
