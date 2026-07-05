@@ -8,7 +8,7 @@
  */
 
 import { createContext, useContext, type ReactNode } from 'react';
-import { useSimulation, type SimulationState } from '@/hooks/useSimulation';
+import { useSimulation, type SimulationState } from '@/hooks/useSimulationLegacy';
 
 const SimulationContext = createContext<SimulationState | null>(null);
 

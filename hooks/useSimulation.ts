@@ -1,170 +1,116 @@
 'use client';
 
-/**
- * useSimulation.ts
- *
- * Core simulation engine. Drives 7-stage transitions using a 1-second
- * interval and derives all panel state from the current stage index.
- *
- * Controls: start(), pause(), reset()
- * No backend, no API calls, no Gemini.
- */
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { SimulationStage } from '@/simulation/simulationStages';
+import { SimulationEngine, type SimulationStatus } from '@/simulation/simulationEngine';
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import {
-  SIMULATION_DURATION,
-  PHASE_TIMESTAMPS,
-  PHASE_THREAT,
-  PHASE_CONFIDENCE,
-  PHASE_WEATHER,
-  PHASE_FEED_ENTRIES,
-  PHASE_RESOURCES,
-  CITIZEN_REPORT_INCIDENT,
-  CITIZEN_REPORT_RESPONDING,
-  CITIZEN_REPORT_RESOLVED,
-  type SimIncident,
-  type SimFeedEntry,
-  type SimResources,
-  type SimWeather,
-  type ThreatLevel,
-} from '@/data/simulationScenario';
-
-export type SimStatus = 'idle' | 'running' | 'paused' | 'complete';
-
-export interface SimulationState {
-  // Controls
-  status: SimStatus;
-  phase: number;        // 0-6 (internal stage index)
-  elapsed: number;      // 0–60 seconds
-  progress: number;     // 0–1
-
-  // Derived panel state
-  threatLevel: ThreatLevel;
-  confidence: number;
-  weather: SimWeather;
-  simIncidents: SimIncident[];
-  feedEntries: SimFeedEntry[];
-  resources: SimResources;
-  showFloodOverlay: boolean;
-  showActionPlan: boolean;
-  showPrediction: boolean;
-
-  // Actions
-  start: () => void;
-  pause: () => void;
-  reset: () => void;
+export interface UseSimulationReturn {
+  currentStage: SimulationStage;
+  status: SimulationStatus;
+  progress: number;
+  startSimulation: () => void;
+  pauseSimulation: () => void;
+  resumeSimulation: () => void;
+  resetSimulation: () => void;
+  nextStage: () => void;
+  previousStage: () => void;
 }
 
-/** Returns the stage index (0-6) for a given elapsed time */
-function getStageForElapsed(elapsed: number): number {
-  const stages = Object.entries(PHASE_TIMESTAMPS)
-    .map(([stage, time]) => ({ stage: Number(stage), time }))
-    .sort((a, b) => b.time - a.time); // descending
+export function useSimulation(): UseSimulationReturn {
+  const [currentStage, setCurrentStage] = useState<SimulationStage>(SimulationStage.NORMAL);
+  const [status, setStatus] = useState<SimulationStatus>('idle');
+  const [elapsedMs, setElapsedMs] = useState(0);
 
-  const match = stages.find((s) => elapsed >= s.time);
-  return match ? match.stage : 0;
-}
+  const requestRef = useRef<number>();
+  const lastTimeRef = useRef<number>();
 
-/** Accumulates all feed entries from stage 0 up to (and including) the given stage */
-function accumulateFeedEntries(stage: number): SimFeedEntry[] {
-  const entries: SimFeedEntry[] = [];
-  for (let s = stage; s >= 0; s--) {
-    entries.push(...(PHASE_FEED_ENTRIES[s] ?? []));
-  }
-  return entries;
-}
+  const nextStage = useCallback(() => {
+    setCurrentStage((prev) => SimulationEngine.getNextStage(prev));
+    setElapsedMs(0);
+  }, []);
 
-export function useSimulation(): SimulationState {
-  const [status, setStatus] = useState<SimStatus>('idle');
-  const [elapsed, setElapsed] = useState(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const previousStage = useCallback(() => {
+    setCurrentStage((prev) => SimulationEngine.getPreviousStage(prev));
+    setElapsedMs(0);
+  }, []);
 
-  // Clear interval helper
-  const clearTimer = useCallback(() => {
-    if (intervalRef.current !== null) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+  const startSimulation = useCallback(() => {
+    if (status === 'idle') {
+      setCurrentStage(SimulationStage.NORMAL);
+      setElapsedMs(0);
     }
-  }, []);
-
-  const start = useCallback(() => {
     setStatus('running');
-  }, []);
+  }, [status]);
 
-  const pause = useCallback(() => {
-    setStatus((prev) => (prev === 'running' ? 'paused' : prev));
-  }, []);
+  const pauseSimulation = useCallback(() => {
+    if (status === 'running') setStatus('paused');
+  }, [status]);
 
-  const reset = useCallback(() => {
-    clearTimer();
-    setElapsed(0);
+  const resumeSimulation = useCallback(() => {
+    if (status === 'paused') setStatus('running');
+  }, [status]);
+
+  const resetSimulation = useCallback(() => {
     setStatus('idle');
-  }, [clearTimer]);
+    setCurrentStage(SimulationStage.NORMAL);
+    setElapsedMs(0);
+    if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    lastTimeRef.current = undefined;
+  }, []);
 
-  // Tick every second when running
+  const tick = useCallback((time: number) => {
+    if (lastTimeRef.current !== undefined) {
+      const deltaTime = time - lastTimeRef.current;
+      
+      setElapsedMs((prev) => {
+        const newElapsed = prev + deltaTime;
+        const duration = SimulationEngine.getStageDuration(currentStage);
+        
+        // Advance stage if duration met
+        if (duration > 0 && newElapsed >= duration) {
+          const next = SimulationEngine.getNextStage(currentStage);
+          if (next === currentStage) {
+            setStatus('completed');
+            return duration;
+          } else {
+            setCurrentStage(next);
+            return 0; // reset elapsed for new stage
+          }
+        }
+        return newElapsed;
+      });
+    }
+    lastTimeRef.current = time;
+    if (status === 'running') {
+      requestRef.current = requestAnimationFrame(tick);
+    }
+  }, [currentStage, status]);
+
+  // Request Animation Frame loop
   useEffect(() => {
     if (status === 'running') {
-      intervalRef.current = setInterval(() => {
-        setElapsed((prev) => {
-          const next = prev + 1;
-          if (next >= SIMULATION_DURATION) {
-            clearTimer();
-            setStatus('complete');
-            return SIMULATION_DURATION;
-          }
-          return next;
-        });
-      }, 1000);
+      requestRef.current = requestAnimationFrame(tick);
     } else {
-      clearTimer();
+      lastTimeRef.current = undefined;
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
     }
-    return clearTimer;
-  }, [status, clearTimer]);
+    return () => {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    };
+  }, [status, tick]);
 
-  // Derive all state from elapsed time
-  const phase = useMemo(() => getStageForElapsed(elapsed), [elapsed]);
-  const progress    = elapsed / SIMULATION_DURATION;
-  const threatLevel = PHASE_THREAT[phase]      ?? 'LOW';
-  const confidence  = PHASE_CONFIDENCE[phase]  ?? 68;
-  const weather     = PHASE_WEATHER[phase]     ?? PHASE_WEATHER[0];
-  const resources   = PHASE_RESOURCES[phase]   ?? PHASE_RESOURCES[0];
-
-  // Stage 4+ → flood polygon visible on map
-  const showFloodOverlay = phase >= 4;
-  // Stage 5+ → action plan lit up in AICommand
-  const showActionPlan   = phase >= 5;
-  // Stage 3+ → prediction text visible in AICommand
-  const showPrediction   = phase >= 3;
-
-  // Incident injection:
-  //   Stage 2 (index 2): citizen report appears (NEW badge)
-  //   Stage 5 (index 5): incident → RESPONDING
-  //   Stage 6 (index 6): incident → RESOLVED
-  const simIncidents = useMemo<SimIncident[]>(() => {
-    if (phase < 2)  return [];
-    if (phase >= 6) return [CITIZEN_REPORT_RESOLVED];
-    if (phase >= 5) return [CITIZEN_REPORT_RESPONDING];
-    return [CITIZEN_REPORT_INCIDENT];
-  }, [phase]);
-
-  const feedEntries = useMemo(() => accumulateFeedEntries(phase), [phase]);
+  const duration = SimulationEngine.getStageDuration(currentStage);
+  const progress = duration > 0 ? Math.min(elapsedMs / duration, 1) : 1;
 
   return {
+    currentStage,
     status,
-    phase,
-    elapsed,
     progress,
-    threatLevel,
-    confidence,
-    weather,
-    simIncidents,
-    feedEntries,
-    resources,
-    showFloodOverlay,
-    showActionPlan,
-    showPrediction,
-    start,
-    pause,
-    reset,
+    startSimulation,
+    pauseSimulation,
+    resumeSimulation,
+    resetSimulation,
+    nextStage,
+    previousStage
   };
 }

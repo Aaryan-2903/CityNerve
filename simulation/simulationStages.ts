@@ -1,0 +1,23 @@
+export enum SimulationStage {
+  NORMAL = 'NORMAL',
+  RAIN_BEGINS = 'RAIN_BEGINS',
+  CITIZEN_REPORTS = 'CITIZEN_REPORTS',
+  FLOOD_WARNING = 'FLOOD_WARNING',
+  ROAD_CLOSURE = 'ROAD_CLOSURE',
+  SHELTER_ACTIVATED = 'SHELTER_ACTIVATED',
+  RESCUE_DEPLOYMENT = 'RESCUE_DEPLOYMENT',
+  RECOVERY = 'RECOVERY',
+  COMPLETED = 'COMPLETED'
+}
+
+export const STAGE_SEQUENCE = [
+  SimulationStage.NORMAL,
+  SimulationStage.RAIN_BEGINS,
+  SimulationStage.CITIZEN_REPORTS,
+  SimulationStage.FLOOD_WARNING,
+  SimulationStage.ROAD_CLOSURE,
+  SimulationStage.SHELTER_ACTIVATED,
+  SimulationStage.RESCUE_DEPLOYMENT,
+  SimulationStage.RECOVERY,
+  SimulationStage.COMPLETED
+];
