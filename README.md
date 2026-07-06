@@ -14,7 +14,9 @@ An intelligent command dashboard that transforms how disaster management agencie
 ![Status: In Development](https://img.shields.io/badge/Status-In%20Development-orange?style=for-the-badge)
 
 <p align="center">
-  <img src="./docs/screenshots/dashboard-v2.png" alt="Current Operations Dashboard" width="1000"/>
+  <img src="public/screenshots/dashboard-v3.png"
+       alt="CityNerve Dashboard"
+       width="1000"/>
 </p>
 
 ---
