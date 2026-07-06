@@ -5,6 +5,7 @@ import { Zap } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
+import { useDashboardData } from '@/hooks/useDashboardData';
 
 interface FeedEntry {
   id: string;
@@ -14,64 +15,6 @@ interface FeedEntry {
   category: 'dispatch' | 'shelter' | 'advisory' | 'report';
 }
 
-const STATIC_FEED_ENTRIES: FeedEntry[] = [
-  {
-    id: 'f1',
-    time: '22:31',
-    text: 'Emergency Team Bravo dispatched to Bridge 4',
-    dotColor: '#22C55E',
-    category: 'dispatch',
-  },
-  {
-    id: 'f2',
-    time: '22:26',
-    text: 'Shelter Alpha activated for Ward 7 overflow',
-    dotColor: '#22C55E',
-    category: 'shelter',
-  },
-  {
-    id: 'f3',
-    time: '22:23',
-    text: 'Road closure recommended along East River Road',
-    dotColor: '#EAB308',
-    category: 'advisory',
-  },
-  {
-    id: 'f4',
-    time: '22:20',
-    text: 'Citizen report verified near Riverside Underpass',
-    dotColor: '#3B82F6',
-    category: 'report',
-  },
-  {
-    id: 'f5',
-    time: '22:17',
-    text: 'Flood barrier deployed at Sector 9 entry point',
-    dotColor: '#22C55E',
-    category: 'dispatch',
-  },
-  {
-    id: 'f6',
-    time: '22:14',
-    text: 'Hospital surge alert issued — BYL Nair capacity at 89%',
-    dotColor: '#EF4444',
-    category: 'advisory',
-  },
-  {
-    id: 'f7',
-    time: '22:11',
-    text: 'Helicopter Unit 3 repositioned to Landing Zone Delta',
-    dotColor: '#A855F7',
-    category: 'dispatch',
-  },
-  {
-    id: 'f8',
-    time: '22:08',
-    text: 'AI model updated forecast: 92% rain probability next 2h',
-    dotColor: '#3B82F6',
-    category: 'report',
-  },
-];
 
 const CATEGORY_LABELS: Record<FeedEntry['category'], string> = {
   dispatch: 'DISPATCH',
@@ -130,12 +73,13 @@ function FeedEntryRow({ entry, index, isNew }: FeedEntryRowProps) {
 
 export function CommandFeed() {
   const sim = useSimulationContext();
+  const { baseFeed } = useDashboardData();
   const feedEntries = sim?.feedEntries ?? [];
 
-  // Sim entries are prepended (most recent first), then static entries follow
+  // Sim entries are prepended (most recent first), then dynamic base entries follow
   const allEntries: FeedEntry[] = [
     ...(feedEntries as FeedEntry[]),
-    ...STATIC_FEED_ENTRIES,
+    ...baseFeed,
   ];
 
   return (

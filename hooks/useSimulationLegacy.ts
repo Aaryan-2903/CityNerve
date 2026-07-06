@@ -12,18 +12,13 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useCity } from '@/src/context/CityContext';
-import { localizeData } from '@/src/data/cities';
+import { CITY_SCENARIOS } from '@/data/cityScenarios';
 import {
   SIMULATION_DURATION,
   PHASE_TIMESTAMPS,
   PHASE_THREAT,
   PHASE_CONFIDENCE,
-  PHASE_WEATHER,
-  PHASE_FEED_ENTRIES,
   PHASE_RESOURCES,
-  CITIZEN_REPORT_INCIDENT,
-  CITIZEN_REPORT_RESPONDING,
-  CITIZEN_REPORT_RESOLVED,
   type SimIncident,
   type SimFeedEntry,
   type SimResources,
@@ -78,12 +73,10 @@ function getStageForElapsed(elapsed: number): number {
 export function useSimulation(): SimulationState {
   const { currentCity } = useCity();
 
-  // Localize simulation data based on the selected city
-  const lWeather = useMemo(() => localizeData(PHASE_WEATHER, currentCity), [currentCity]);
-  const lFeedEntries = useMemo(() => localizeData(PHASE_FEED_ENTRIES, currentCity), [currentCity]);
-  const lReportInc = useMemo(() => localizeData(CITIZEN_REPORT_INCIDENT, currentCity), [currentCity]);
-  const lReportRes = useMemo(() => localizeData(CITIZEN_REPORT_RESPONDING, currentCity), [currentCity]);
-  const lReportRslvd = useMemo(() => localizeData(CITIZEN_REPORT_RESOLVED, currentCity), [currentCity]);
+  // Load the active city scenario (fallback to Mumbai if not explicitly mapped)
+  const scenario = useMemo(() => {
+    return CITY_SCENARIOS[currentCity.id] || CITY_SCENARIOS['mumbai'];
+  }, [currentCity.id]);
 
   const [status, setStatus] = useState<SimStatus>('idle');
   const [elapsed, setElapsed] = useState(0);
@@ -136,7 +129,7 @@ export function useSimulation(): SimulationState {
   const progress    = elapsed / SIMULATION_DURATION;
   const threatLevel = PHASE_THREAT[phase]      ?? 'LOW';
   const confidence  = PHASE_CONFIDENCE[phase]  ?? 68;
-  const weather     = lWeather[phase]          ?? lWeather[0];
+  const weather     = scenario.weather[phase]  ?? scenario.weather[0];
   const resources   = PHASE_RESOURCES[phase]   ?? PHASE_RESOURCES[0];
 
   // Stage 4+ → flood polygon visible on map
@@ -149,18 +142,18 @@ export function useSimulation(): SimulationState {
   // Incident injection
   const simIncidents = useMemo<SimIncident[]>(() => {
     if (phase < 2)  return [];
-    if (phase >= 6) return [lReportRslvd];
-    if (phase >= 5) return [lReportRes];
-    return [lReportInc];
-  }, [phase, lReportInc, lReportRes, lReportRslvd]);
+    if (phase >= 6) return [scenario.incidents[2]]; // Resolved
+    if (phase >= 5) return [scenario.incidents[1]]; // Responding
+    return [scenario.incidents[0]];                 // Report
+  }, [phase, scenario.incidents]);
 
   const feedEntries = useMemo(() => {
     const entries: SimFeedEntry[] = [];
     for (let s = phase; s >= 0; s--) {
-      entries.push(...(lFeedEntries[s] ?? []));
+      entries.push(...(scenario.feedEntries[s] ?? []));
     }
     return entries;
-  }, [phase, lFeedEntries]);
+  }, [phase, scenario.feedEntries]);
 
   const nextStage = useCallback(() => {
     setElapsed((prev) => {

@@ -1,7 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowRight, ExternalLink } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export function Hero() {
   return (
@@ -51,16 +51,14 @@ export function Hero() {
             href="/dashboard"
             className="group flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-all duration-300 w-full sm:w-auto"
           >
-            Enter Operations Center
+            Explore Dashboard
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
-            href="https://github.com/Aaryan-2903/CityNerve"
-            target="_blank"
+            href="/#architecture"
             className="flex items-center justify-center gap-2 px-8 py-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 text-white rounded-xl font-medium transition-all duration-300 w-full sm:w-auto"
           >
-            <ExternalLink className="w-4 h-4" />
-            View on GitHub
+            View Architecture
           </Link>
         </motion.div>
       </div>

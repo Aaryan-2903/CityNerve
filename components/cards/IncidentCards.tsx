@@ -5,6 +5,7 @@ import { MapPin, Clock, Users, AlertTriangle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
+import { useDashboardData } from '@/hooks/useDashboardData';
 import type { SimIncident } from '@/data/simulationScenario';
 
 type Severity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
@@ -21,48 +22,6 @@ interface Incident {
   isNew?: boolean;
 }
 
-const INCIDENTS: Incident[] = [
-  {
-    id: 'INC-001',
-    title: 'Riverside Underpass',
-    severity: 'CRITICAL',
-    time: '22:20',
-    team: 'Bravo-2',
-    status: 'Responding',
-    impact: '1,180 residents affected',
-    location: 'Ward 6, South Zone',
-  },
-  {
-    id: 'INC-002',
-    title: 'Bridge 4 Approach',
-    severity: 'HIGH',
-    time: '22:23',
-    team: 'Traffic-7',
-    status: 'Closure pending',
-    impact: '6 road segments blocked',
-    location: 'East River Corridor',
-  },
-  {
-    id: 'INC-003',
-    title: 'Dharavi Sector 9',
-    severity: 'HIGH',
-    time: '22:15',
-    team: 'Delta-1',
-    status: 'Evacuating',
-    impact: '340 families displaced',
-    location: 'Central Ward',
-  },
-  {
-    id: 'INC-004',
-    title: 'Bandra Pumping Station',
-    severity: 'MEDIUM',
-    time: '22:08',
-    team: 'Eng-3',
-    status: 'Under repair',
-    impact: 'Drainage backup — 2 sq km',
-    location: 'North District',
-  },
-];
 
 const SEVERITY_CONFIG: Record<
   Severity,
@@ -189,12 +148,13 @@ function IncidentCardItem({ incident, index }: IncidentCardItemProps) {
 
 export function IncidentCards() {
   const sim = useSimulationContext();
+  const { baseIncidents } = useDashboardData();
   const simIncidents = sim?.simIncidents ?? [];
 
   // Merge sim incidents (prepended) with static incidents
   const allIncidents: Incident[] = [
     ...(simIncidents as Incident[]),
-    ...INCIDENTS,
+    ...(baseIncidents as Incident[]),
   ];
 
   const criticalCount = allIncidents.filter((i) => i.severity === 'CRITICAL').length;

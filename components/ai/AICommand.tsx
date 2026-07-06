@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useCity } from '@/src/context/CityContext';
+import { CITY_SCENARIOS } from '@/data/cityScenarios';
 import type { ThreatLevel } from '@/data/simulationScenario';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -47,7 +48,8 @@ export function AICommand() {
   const showActionPlan = sim?.showActionPlan ?? false;
   const showPrediction = sim?.showPrediction ?? false;
 
-  const targetArea = currentCity.id === 'mumbai' ? 'Kurla' : `${currentCity.name} Central`;
+  const scenario = CITY_SCENARIOS[currentCity.id] || CITY_SCENARIOS['mumbai'];
+  const targetArea = scenario.targetArea;
 
   const PREDICTION_TEXT: Partial<Record<ThreatLevel, string>> = {
     HIGH:     `Flood expected to reach ${targetArea} within 30 minutes.`,

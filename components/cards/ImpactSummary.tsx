@@ -2,15 +2,16 @@
 
 import { Users, MapPinOff, Home, PlusSquare } from 'lucide-react';
 import { GlassCard } from '@/components/shared/GlassCard';
+import { useDashboardData } from '@/hooks/useDashboardData';
 
-interface ImpactSummaryProps {
-  population: string;
-  roadsClosed: number;
-  sheltersOpen: number;
-  hospitalsNearby: number;
-}
+export function ImpactSummary() {
+  const { metricsData } = useDashboardData();
+  
+  const population = metricsData.population.value;
+  const roadsClosed = parseInt(metricsData.roads.value, 10);
+  const sheltersOpen = parseInt(metricsData.shelters.value, 10);
+  const hospitalsNearby = parseInt(metricsData.hospitals.value, 10);
 
-export function ImpactSummary({ population, roadsClosed, sheltersOpen, hospitalsNearby }: ImpactSummaryProps) {
   const metrics = [
     { label: 'Affected Population', value: population, icon: Users, color: '#7C3AED', bg: 'rgba(124,58,237,0.1)' },
     { label: 'Roads Closed', value: roadsClosed, icon: MapPinOff, color: '#F97316', bg: 'rgba(249,115,22,0.1)' },

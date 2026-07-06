@@ -26,7 +26,7 @@ export function DashboardPreview() {
             <div className="w-3 h-3 rounded-full bg-green-500/80" />
           </div>
           <img
-            src="/screenshots/dashboard-v2.png"
+            src="docs/screenshots/dashboard.png"
             alt="CityNerve Dashboard Preview"
             className="w-full h-auto object-cover border-b border-slate-800"
           />

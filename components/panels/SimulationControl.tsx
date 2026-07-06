@@ -14,10 +14,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, CheckCircle2, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
+import { useCity } from '@/src/context/CityContext';
+import { CITY_SCENARIOS } from '@/data/cityScenarios';
 import { STAGE_LABELS } from '@/data/simulationScenario';
 
 export function SimulationControl() {
   const sim = useSimulationContext();
+  const { currentCity } = useCity();
+  const scenario = CITY_SCENARIOS[currentCity.id] || CITY_SCENARIOS['mumbai'];
+
   const status   = sim?.status   ?? 'idle';
   const phase    = sim?.phase    ?? 0;
   const elapsed  = sim?.elapsed  ?? 0;
@@ -64,7 +69,7 @@ export function SimulationControl() {
               Start Flood Simulation
             </p>
             <p className="text-[10px] text-blue-400/70 font-medium tracking-widest uppercase">
-              Kurla Station · 60 sec
+              {scenario.simulationTitle} · 60 sec
             </p>
           </div>
 

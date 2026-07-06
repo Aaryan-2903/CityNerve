@@ -19,6 +19,9 @@ import { StatusIndicator } from '@/components/shared/StatusIndicator';
 import type { Resource, ResourceStatus, ResourceType } from '@/types/resource';
 import { formatRelativeTime, formatETA } from '@/utils/format';
 import { useState, useEffect } from 'react';
+import { useSimulationContext } from '@/context/SimulationContext';
+import { useCity } from '@/src/context/CityContext';
+import { CITY_SCENARIOS } from '@/data/cityScenarios';
 
 const TYPE_ICONS: Record<ResourceType, React.ElementType> = {
   fire_engine: Flame,
@@ -108,13 +111,36 @@ function ResourceCard({ resource }: { resource: Resource }) {
   );
 }
 
-interface ResourceTrackerProps {
-  resources: Resource[];
-}
+export function ResourceTracker() {
+  const sim = useSimulationContext();
+  const { currentCity } = useCity();
+  const scenario = CITY_SCENARIOS[currentCity.id] || CITY_SCENARIOS['mumbai'];
 
-export function ResourceTracker({ resources }: ResourceTrackerProps) {
-  const deployed = resources.filter((r) => r.status === 'deployed' || r.status === 'en_route');
-  const available = resources.filter((r) => r.status === 'available' || r.status === 'standby');
+  const deployed: Resource[] = scenario.mapLayers.rescue.map((r: any, i: number) => ({
+    id: r.id,
+    type: 'rescue_team',
+    status: 'deployed',
+    callSign: r.name,
+    agency: 'NDRF',
+    unit: 'Search & Rescue',
+    eta: 300,
+    personnel: 12,
+    assignedIncidentId: `INC-00${i + 1}`,
+    lastUpdated: new Date().toISOString(),
+  }));
+
+  const available: Resource[] = [
+    {
+      id: 'avail-1',
+      type: 'medical_unit',
+      status: 'available',
+      callSign: 'Medical Unit 4',
+      agency: 'Health Dept',
+      unit: 'First Aid',
+      personnel: 5,
+      lastUpdated: new Date().toISOString(),
+    }
+  ];
 
   const agencyGroups = deployed.reduce<Record<string, Resource[]>>((acc, r) => {
     const key = r.agency;

@@ -43,7 +43,6 @@ export function localizeData<T>(data: T, city: CityProfile): T {
   const localizedStr = jsonStr
     // Replace text occurrences
     .replace(/Mumbai/g, city.name)
-    .replace(/Kurla|Sion|Dharavi|BKC/g, `${city.name} Central`)
     .replace(/Bandra-Worli Sea Link/g, `${city.name} Expressway`)
     .replace(/CSMT/g, `${city.name} Station`)
     // Replace lat/lng via regex (basic numerical shifting for mock data)

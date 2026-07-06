@@ -9,14 +9,11 @@ import { MetricCards } from '@/components/cards/MetricCards';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useCity } from '@/src/context/CityContext';
-import { localizeData } from '@/src/data/cities';
-import { KURLA_FLOOD_GEOJSON } from '@/data/simulationScenario';
+import { CITY_SCENARIOS } from '@/data/cityScenarios';
 
 /* ─── Dark tile style (CartoDB, free, no API key) ───────────────────────── */
 
 const DARK_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
-
-/* ─── Mock Data (Mumbai) ─────────────────────────────────────────────────── */
 
 interface FloodIncident {
   id: string;
@@ -27,56 +24,6 @@ interface FloodIncident {
   affected: string;
   status: string;
 }
-
-const FLOOD_INCIDENTS: FloodIncident[] = [
-  { id: 'inc-1', lng: 72.8777, lat: 19.0760, name: 'Riverside Underpass Flooding', severity: 'CRITICAL', affected: '1,180', status: 'Responding' },
-  { id: 'inc-2', lng: 72.8550, lat: 19.0550, name: 'Bridge 4 Approach Flood',      severity: 'HIGH',     affected: '450',   status: 'Closure pending' },
-  { id: 'inc-3', lng: 72.8950, lat: 19.0650, name: 'Dharavi Sector 9 Waterlogged', severity: 'HIGH',     affected: '1,050', status: 'Evacuating' },
-];
-
-const RESCUE_TEAMS = [
-  { id: 'res-1', lng: 72.8600, lat: 19.0600, name: 'Rescue Team Bravo' },
-  { id: 'res-2', lng: 72.8900, lat: 19.0800, name: 'Rescue Team Delta' },
-];
-
-const SHELTERS = [
-  { id: 'shl-1', lng: 72.8700, lat: 19.0900, name: 'Shelter Alpha — Cap. 500' },
-  { id: 'shl-2', lng: 72.8400, lat: 19.0400, name: 'Shelter Beta — Cap. 300' },
-];
-
-const HOSPITALS = [
-  { id: 'hosp-1', lng: 72.8350, lat: 19.1150, name: 'KEM Hospital — Surge Ready' },
-  { id: 'hosp-2', lng: 72.9180, lat: 19.0280, name: 'Sion Hospital — 89% capacity' },
-];
-
-/* ─── GeoJSON overlays ───────────────────────────────────────────────────── */
-
-const FLOOD_ZONE_GEOJSON = {
-  type: 'FeatureCollection' as const,
-  features: [{
-    type: 'Feature' as const,
-    properties: {},
-    geometry: {
-      type: 'Polygon' as const,
-      coordinates: [[[72.8600, 19.0500],[72.8900, 19.0500],[72.9000, 19.0700],[72.8800, 19.0900],[72.8500, 19.0700],[72.8600, 19.0500]]],
-    },
-  }],
-};
-
-const EVAC_ROUTE_GEOJSON = {
-  type: 'FeatureCollection' as const,
-  features: [{
-    type: 'Feature' as const,
-    properties: {},
-    geometry: {
-      type: 'LineString' as const,
-      coordinates: [[72.8777, 19.0760],[72.8700, 19.0900],[72.8500, 19.1100],[72.8200, 19.1300]],
-    },
-  }],
-};
-
-// Simulation flood overlay — Kurla Station area (imported from scenario data)
-// Rendered at stage 4+ via showFloodOverlay from context
 
 /* ─── Layer paint configs ────────────────────────────────────────────────── */
 
@@ -112,16 +59,10 @@ export function RiskMap() {
 
   const { currentCity } = useCity();
 
-  // Localize all mock markers/zones to the selected city's exact coordinates
-  const localized = localizeData({
-    incidents: FLOOD_INCIDENTS,
-    rescue: RESCUE_TEAMS,
-    shelters: SHELTERS,
-    hospitals: HOSPITALS,
-    floodZone: FLOOD_ZONE_GEOJSON,
-    evacRoute: EVAC_ROUTE_GEOJSON,
-    simFlood: KURLA_FLOOD_GEOJSON
-  }, currentCity);
+  // Load the active city scenario (fallback to Mumbai if not explicitly mapped)
+  const scenario = CITY_SCENARIOS[currentCity.id] || CITY_SCENARIOS['mumbai'];
+  const localized = scenario.mapLayers;
+
 
   return (
     <motion.div
@@ -160,7 +101,7 @@ export function RiskMap() {
           </Source>
         )}
 
-        {/* ── Simulation: Kurla Flood Overlay (stage 4+) ── */}
+        {/* ── Simulation: Flood Overlay (stage 4+) ── */}
         {showFloodOverlay && (
           <Source id="sim-flood-source" type="geojson" data={localized.simFlood}>
             <Layer {...simFloodFill} />
