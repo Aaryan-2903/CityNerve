@@ -1,5 +1,3 @@
-<div align="center">
-  
 # CityNerve
 
 **AI-Powered Disaster Intelligence & Emergency Operations Platform**
@@ -15,19 +13,28 @@ An intelligent command dashboard that transforms how disaster management agencie
 ![MIT License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 ![Status: In Development](https://img.shields.io/badge/Status-In%20Development-orange?style=for-the-badge)
 
-<br />
-
 <p align="center">
   <img src="./docs/screenshots/dashboard-v2.png" alt="Current Operations Dashboard" width="1000"/>
 </p>
-
-</div>
 
 ---
 
 ## ⚡ About CityNerve
 
 **CityNerve** is an AI-powered Emergency Operations Center (EOC) that helps disaster management agencies monitor incidents, analyze risks, coordinate emergency response, and support faster decision-making through an intelligent command dashboard. Built with a focus on mission-critical clarity and real-time situational awareness, CityNerve aims to bridge the gap between complex data and actionable insights during urban emergencies.
+
+---
+
+## 🔄 System Workflow
+
+```mermaid
+graph TD
+A[Data Sources] --> B[Simulation Engine]
+B --> C[AI Decision Engine]
+C --> D[Operations Dashboard]
+D --> E[Response Actions]
+E --> F[Recovery]
+```
 
 ---
 
@@ -70,6 +77,77 @@ An intelligent command dashboard that transforms how disaster management agencie
 ---
 
 ## 📂 Project Architecture
+
+### 1. Overall System Architecture
+
+```mermaid
+graph TD
+    A[Citizen Reports] --> B[Simulation Engine]
+    C[Weather APIs] --> B
+    D[Government Data] --> B
+    B --> E[AI Decision Engine]
+    B --> F[Dashboard]
+    B --> G[Interactive Map]
+    B --> H[Alert System]
+```
+
+### 2. Dashboard Data Flow
+
+```mermaid
+graph TD
+    A[Simulation Engine] --> B[Simulation Context]
+    B --> C[useSimulation Hook]
+    C --> D[Metrics Cards]
+    C --> E[Incident Feed]
+    C --> F[Weather Widget]
+    C --> G[AI Command]
+    C --> H[Risk Map]
+    C --> I[Resource Tracker]
+    C --> J[Impact Summary]
+```
+
+### 3. Disaster Simulation Flow
+
+```mermaid
+graph TD
+    A[Normal] --> B[Heavy Rain]
+    B --> C[Citizen Reports]
+    C --> D[Water Level Rising]
+    D --> E[Flood Warning]
+    E --> F[Road Closure]
+    F --> G[Shelter Activated]
+    G --> H[Rescue Deployment]
+    H --> I[Recovery]
+    I --> J[Completed]
+```
+
+### 4. Application Architecture
+
+```mermaid
+graph TD
+    A[App] --> B[Layout]
+    B --> C[Sidebar]
+    B --> D[Navbar]
+    B --> E[Dashboard]
+    E --> F[Simulation Provider]
+    F --> G[Simulation Engine]
+    G --> H[Simulation Data]
+    H --> I[Simulation Stages]
+```
+
+### 5. AI Decision Pipeline
+
+```mermaid
+graph TD
+    A[Simulation Data] --> B[Risk Analysis]
+    B --> C[Threat Assessment]
+    C --> D[Resource Allocation]
+    D --> E[Incident Prediction]
+    E --> F[AI Recommendation]
+    F --> G[Operations Dashboard]
+```
+
+### 6. Directory Structure
 
 ```text
 citynerve/
@@ -184,9 +262,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-<div align="center">
-  <p>Built with ❤️ by <b>Aryan Mandal</b></p>
-  <p>
-    <a href="https://github.com/Aaryan-2903">GitHub Profile</a>
-  </p>
-</div>
+Built with ❤️ by **Aryan Mandal**
+
+[GitHub Profile](https://github.com/Aaryan-2903)
+

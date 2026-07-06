@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 450" width="1060" height="450">
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.06"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/>
+    </marker>
+    <style>
+      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1px; filter: url(#shadow); }
+      .box-blue { fill: #eff6ff; stroke: #3b82f6; stroke-width: 1.5px; filter: url(#shadow); }
+      .text { font-family: 'Inter', -apple-system, sans-serif; font-size: 13px; fill: #0f172a; text-anchor: middle; dominant-baseline: middle; font-weight: 500; }
+      .text-blue { font-family: 'Inter', -apple-system, sans-serif; font-size: 13px; fill: #1d4ed8; text-anchor: middle; dominant-baseline: middle; font-weight: 600; }
+      .line { stroke: #94a3b8; stroke-width: 1.5px; fill: none; marker-end: url(#arrow); }
+      .line-no-arrow { stroke: #94a3b8; stroke-width: 1.5px; fill: none; }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="#ffffff" />
+  <rect x="450" y="50" width="160" height="44" rx="6" class="box-blue" />
+  <text x="530" y="73" class="text-blue">Simulation Engine</text>
+  <path d="M 530 94 L 530 145" class="line"/>
+  <rect x="450" y="150" width="160" height="44" rx="6" class="box" />
+  <text x="530" y="173" class="text">Simulation Context</text>
+  <path d="M 530 194 L 530 245" class="line"/>
+  <rect x="450" y="250" width="160" height="44" rx="6" class="box" />
+  <text x="530" y="273" class="text">useSimulation()</text>
+  <rect x="12.5" y="350" width="135" height="44" rx="6" class="box" />
+  <text x="80" y="373" class="text">Metric Cards</text>
+  <path d="M 530 294 L 530 320 L 80 320 L 80 345" class="line"/>
+  <rect x="162.5" y="350" width="135" height="44" rx="6" class="box" />
+  <text x="230" y="373" class="text">Incident Feed</text>
+  <path d="M 530 294 L 530 320 L 230 320 L 230 345" class="line"/>
+  <rect x="312.5" y="350" width="135" height="44" rx="6" class="box" />
+  <text x="380" y="373" class="text">Weather Widget</text>
+  <path d="M 530 294 L 530 320 L 380 320 L 380 345" class="line"/>
+  <rect x="462.5" y="350" width="135" height="44" rx="6" class="box" />
+  <text x="530" y="373" class="text">Resource Tracker</text>
+  <path d="M 530 294 L 530 320 L 530 320 L 530 345" class="line"/>
+  <rect x="612.5" y="350" width="135" height="44" rx="6" class="box" />
+  <text x="680" y="373" class="text">AI Command</text>
+  <path d="M 530 294 L 530 320 L 680 320 L 680 345" class="line"/>
+  <rect x="762.5" y="350" width="135" height="44" rx="6" class="box" />
+  <text x="830" y="373" class="text">Impact Summary</text>
+  <path d="M 530 294 L 530 320 L 830 320 L 830 345" class="line"/>
+  <rect x="912.5" y="350" width="135" height="44" rx="6" class="box" />
+  <text x="980" y="373" class="text">Risk Map</text>
+  <path d="M 530 294 L 530 320 L 980 320 L 980 345" class="line"/>
+</svg>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.06"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/>
+    </marker>
+    <style>
+      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1px; filter: url(#shadow); }
+      .box-blue { fill: #eff6ff; stroke: #3b82f6; stroke-width: 1.5px; filter: url(#shadow); }
+      .text { font-family: 'Inter', -apple-system, sans-serif; font-size: 13px; fill: #0f172a; text-anchor: middle; dominant-baseline: middle; font-weight: 500; }
+      .text-blue { font-family: 'Inter', -apple-system, sans-serif; font-size: 13px; fill: #1d4ed8; text-anchor: middle; dominant-baseline: middle; font-weight: 600; }
+      .line { stroke: #94a3b8; stroke-width: 1.5px; fill: none; marker-end: url(#arrow); }
+      .line-no-arrow { stroke: #94a3b8; stroke-width: 1.5px; fill: none; }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="#ffffff" />
+  <rect x="70" y="50" width="150" height="44" rx="6" class="box" />
+  <text x="145" y="73" class="text">Citizen Reports</text>
+  <path d="M 145 94 L 145 120 L 400 120 L 400 145" class="line"/>
+  <rect x="240" y="50" width="150" height="44" rx="6" class="box" />
+  <text x="315" y="73" class="text">Weather APIs</text>
+  <path d="M 315 94 L 315 120 L 400 120 L 400 145" class="line"/>
+  <rect x="410" y="50" width="150" height="44" rx="6" class="box" />
+  <text x="485" y="73" class="text">Government APIs</text>
+  <path d="M 485 94 L 485 120 L 400 120 L 400 145" class="line"/>
+  <rect x="580" y="50" width="150" height="44" rx="6" class="box" />
+  <text x="655" y="73" class="text">Satellite Data</text>
+  <path d="M 655 94 L 655 120 L 400 120 L 400 145" class="line"/>
+  <rect x="320" y="150" width="160" height="44" rx="6" class="box-blue" />
+  <text x="400" y="173" class="text-blue">Simulation Engine</text>
+  <path d="M 400 194 L 400 245" class="line"/>
+  <rect x="320" y="250" width="160" height="44" rx="6" class="box-blue" />
+  <text x="400" y="273" class="text-blue">AI Decision Engine</text>
+  <rect x="20" y="350" width="140" height="44" rx="6" class="box" />
+  <text x="90" y="373" class="text">Dashboard</text>
+  <path d="M 400 294 L 400 320 L 90 320 L 90 345" class="line"/>
+  <rect x="175" y="350" width="140" height="44" rx="6" class="box" />
+  <text x="245" y="373" class="text">Interactive Map</text>
+  <path d="M 400 294 L 400 320 L 245 320 L 245 345" class="line"/>
+  <rect x="330" y="350" width="140" height="44" rx="6" class="box" />
+  <text x="400" y="373" class="text">Alert System</text>
+  <path d="M 400 294 L 400 320 L 400 320 L 400 345" class="line"/>
+  <rect x="485" y="350" width="140" height="44" rx="6" class="box" />
+  <text x="555" y="373" class="text">Resource Manager</text>
+  <path d="M 400 294 L 400 320 L 555 320 L 555 345" class="line"/>
+  <rect x="640" y="350" width="140" height="44" rx="6" class="box" />
+  <text x="710" y="373" class="text">Weather Intelligence</text>
+  <path d="M 400 294 L 400 320 L 710 320 L 710 345" class="line"/>
+</svg>

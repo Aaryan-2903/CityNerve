@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 240" width="540" height="240">
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.06"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/>
+    </marker>
+    <style>
+      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1px; filter: url(#shadow); }
+      .box-blue { fill: #eff6ff; stroke: #3b82f6; stroke-width: 1.5px; filter: url(#shadow); }
+      .text { font-family: 'Inter', -apple-system, sans-serif; font-size: 13px; fill: #0f172a; text-anchor: middle; dominant-baseline: middle; font-weight: 500; }
+      .text-blue { font-family: 'Inter', -apple-system, sans-serif; font-size: 13px; fill: #1d4ed8; text-anchor: middle; dominant-baseline: middle; font-weight: 600; }
+      .line { stroke: #94a3b8; stroke-width: 1.5px; fill: none; marker-end: url(#arrow); }
+      .line-no-arrow { stroke: #94a3b8; stroke-width: 1.5px; fill: none; }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="#ffffff" />
+  <rect x="20" y="40" width="140" height="44" rx="6" class="box" />
+  <text x="90" y="63" class="text">Disaster Data</text>
+  <path d="M 160 62 L 195 62" class="line"/>
+  <rect x="200" y="40" width="140" height="44" rx="6" class="box" />
+  <text x="270" y="63" class="text">Risk Analysis</text>
+  <path d="M 340 62 L 375 62" class="line"/>
+  <rect x="380" y="40" width="140" height="44" rx="6" class="box" />
+  <text x="450" y="63" class="text">Threat Assessment</text>
+  <path d="M 450 84 L 450 139" class="line"/>
+  <rect x="380" y="144" width="140" height="44" rx="6" class="box" />
+  <text x="450" y="167" class="text">Resource Allocation</text>
+  <path d="M 380 166 L 345 166" class="line"/>
+  <rect x="200" y="144" width="140" height="44" rx="6" class="box-blue" />
+  <text x="270" y="167" class="text-blue">AI Recommendations</text>
+  <path d="M 200 166 L 165 166" class="line"/>
+  <rect x="20" y="144" width="140" height="44" rx="6" class="box-blue" />
+  <text x="90" y="167" class="text-blue">Operations Dashboard</text>
+</svg>
