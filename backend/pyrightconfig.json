@@ -1,0 +1,13 @@
+{
+  "include": ["app/**/*.py"],
+  "exclude": ["venv/**", ".venv/**", "__pycache__/**"],
+
+  "venvPath": ".",
+  "venv": "venv",
+
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "basic",
+
+  "reportMissingImports": true,
+  "reportMissingModuleSource": false
+}

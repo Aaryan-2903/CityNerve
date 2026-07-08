@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import type { Incident, Severity, IncidentType, IncidentStatus } from '@/types/incident';
 import { MOCK_INCIDENTS } from '@/data/mockIncidents';
 import { SEVERITY_ORDER } from '@/utils/severity';
 import { useCity } from '@/src/context/CityContext';
 import { localizeData } from '@/src/data/cities';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
 
 export interface IncidentFilters {
   severity: Severity | 'all';
@@ -23,8 +25,60 @@ const DEFAULT_FILTERS: IncidentFilters = {
 
 export function useIncidents() {
   const { currentCity } = useCity();
-  const incidents = useMemo(() => localizeData(MOCK_INCIDENTS, currentCity), [currentCity]);
-  
+
+  // ── Incident data — starts from localised mock, replaced by API when available ──
+  const mockFallback = useMemo(
+    () => localizeData(MOCK_INCIDENTS, currentCity),
+    [currentCity],
+  );
+  const [incidents, setIncidents] = useState<Incident[]>(mockFallback);
+  const [isLoadingIncidents, setIsLoadingIncidents] = useState(false);
+
+  // ── Sync mock fallback when city changes (before API responds) ───────────
+  useEffect(() => {
+    setIncidents(mockFallback);
+  }, [mockFallback]);
+
+  // ── Fetch from backend on city change ────────────────────────────────────
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    async function fetchIncidents() {
+      setIsLoadingIncidents(true);
+      try {
+        const res = await fetch(
+          `${API_BASE}/api/v1/incidents?cityId=${currentCity.id}`,
+          { signal: controller.signal },
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data: Incident[] = await res.json();
+        if (!cancelled && data.length > 0) {
+          setIncidents(data);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.warn(
+            '[CityNerve] Incidents API unavailable — using local mock data.',
+            err,
+          );
+          // mockFallback is already set via the effect above — no-op needed
+        }
+      } finally {
+        if (!cancelled) setIsLoadingIncidents(false);
+        clearTimeout(timeoutId);
+      }
+    }
+
+    fetchIncidents();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [currentCity.id]);
+
+  // ── Filters & selection (unchanged logic) ────────────────────────────────
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [filters, setFilters] = useState<IncidentFilters>(DEFAULT_FILTERS);
 
@@ -88,8 +142,10 @@ export function useIncidents() {
     selectedIncidentId,
     filters,
     stats,
+    isLoadingIncidents,
     selectIncident,
     updateFilter,
     resetFilters,
   };
 }
+

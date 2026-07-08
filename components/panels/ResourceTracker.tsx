@@ -118,26 +118,29 @@ export function ResourceTracker() {
 
   const deployed: Resource[] = scenario.mapLayers.rescue.map((r: any, i: number) => ({
     id: r.id,
-    type: 'rescue_team',
-    status: 'deployed',
+    type: 'rescue_team' as const,
+    status: 'deployed' as const,
     callSign: r.name,
     agency: 'NDRF',
     unit: 'Search & Rescue',
     eta: 300,
     personnel: 12,
     assignedIncidentId: `INC-00${i + 1}`,
+    location: { lat: r.latitude ?? 0, lng: r.longitude ?? 0, address: r.name ?? '' },
     lastUpdated: new Date().toISOString(),
   }));
 
   const available: Resource[] = [
     {
       id: 'avail-1',
-      type: 'medical_unit',
-      status: 'available',
+      type: 'medical_unit' as const,
+      status: 'available' as const,
       callSign: 'Medical Unit 4',
       agency: 'Health Dept',
       unit: 'First Aid',
       personnel: 5,
+      assignedIncidentId: null,
+      location: { lat: 0, lng: 0, address: '' },
       lastUpdated: new Date().toISOString(),
     }
   ];

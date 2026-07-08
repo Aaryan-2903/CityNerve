@@ -1,0 +1,25 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/venv/Scripts/python.exe",
+  "python.analysis.pythonPath": "${workspaceFolder}/backend/venv/Scripts/python.exe",
+
+  // Pylance (Pyrefly-compatible) settings
+  "python.languageServer": "Pylance",
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/backend"
+  ],
+
+  // Tell Pylance which venv to use for import resolution
+  "python.analysis.venvPath": "${workspaceFolder}/backend",
+  "python.analysis.venv": "venv",
+
+  // Pyrefly (Meta's type checker) — points to the same venv interpreter
+  "pyrefly.pythonInterpreter": "${workspaceFolder}/backend/venv/Scripts/python.exe",
+
+  // Exclude heavy directories from indexing
+  "python.analysis.exclude": [
+    "**/node_modules",
+    "**/.next",
+    "**/venv"
+  ]
+}

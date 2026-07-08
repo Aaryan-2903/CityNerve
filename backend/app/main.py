@@ -6,6 +6,7 @@ from app.core.config import settings
 from app.api.router import api_router
 from app.database.mongodb import connect_to_mongo, close_mongo_connection
 from app.services.city_service import seed_cities
+from app.services.incident_service import seed_incidents
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -13,6 +14,7 @@ async def lifespan(app: FastAPI):
     await connect_to_mongo(app)
     if app.state.database is not None:
         await seed_cities(app.state.database)
+        await seed_incidents(app.state.database)
     yield
     # Shutdown event
     await close_mongo_connection(app)

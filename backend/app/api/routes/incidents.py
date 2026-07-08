@@ -1,0 +1,64 @@
+from typing import List
+
+from fastapi import APIRouter, Depends, Query, status
+from motor.motor_asyncio import AsyncIOMotorDatabase
+
+from app.schemas.incident import IncidentCreate, IncidentUpdate, IncidentResponse
+from app.database.connection import get_database
+from app.services import incident_service
+
+router = APIRouter()
+
+
+@router.get(
+    "",
+    response_model=List[IncidentResponse],
+    status_code=status.HTTP_200_OK,
+    summary="List incidents for a city",
+)
+async def list_incidents(
+    cityId: str = Query(..., description="City ID, e.g. 'mumbai'"),
+    db: AsyncIOMotorDatabase = Depends(get_database),
+) -> List[IncidentResponse]:
+    """Return all incidents for the specified city, sorted by AI risk score descending."""
+    return await incident_service.get_incidents_by_city(db, cityId)
+
+
+@router.get(
+    "/{incident_id}",
+    response_model=IncidentResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get a single incident",
+)
+async def get_incident(
+    incident_id: str,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+) -> IncidentResponse:
+    return await incident_service.get_incident_by_id(db, incident_id)
+
+
+@router.post(
+    "",
+    response_model=IncidentResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a new incident",
+)
+async def create_incident(
+    data: IncidentCreate,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+) -> IncidentResponse:
+    return await incident_service.create_incident(db, data)
+
+
+@router.patch(
+    "/{incident_id}",
+    response_model=IncidentResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Partially update an incident",
+)
+async def update_incident(
+    incident_id: str,
+    data: IncidentUpdate,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+) -> IncidentResponse:
+    return await incident_service.update_incident(db, incident_id, data)

@@ -32,11 +32,10 @@ function BrandMark() {
 
 import { useState, useRef, useEffect } from 'react';
 import { useCity } from '@/src/context/CityContext';
-import { SUPPORTED_CITIES } from '@/src/data/cities';
 import { MapPin, Navigation } from 'lucide-react';
 
 function CommandZoneSelector() {
-  const { currentCity, setCity, isDetecting, detectLocation } = useCity();
+  const { currentCity, setCity, isDetecting, detectLocation, availableCities, isLoadingCities } = useCity();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -80,24 +79,28 @@ function CommandZoneSelector() {
           </div>
           <div className="h-px bg-white/[0.06] mx-2" />
           <div className="p-1.5 max-h-[300px] overflow-y-auto">
-            {SUPPORTED_CITIES.map((city) => (
-              <button
-                key={city.id}
-                onClick={() => {
-                  setCity(city.id);
-                  setIsOpen(false);
-                }}
-                className={cn(
-                  "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left",
-                  currentCity.id === city.id 
-                    ? "bg-white/10 text-white font-semibold" 
-                    : "text-white/60 hover:bg-white/5 hover:text-white/90"
-                )}
-              >
-                <MapPin className="w-3 h-3 opacity-50" />
-                {city.name}
-              </button>
-            ))}
+            {isLoadingCities ? (
+              <p className="px-3 py-2 text-xs text-white/30 italic">Loading cities…</p>
+            ) : (
+              availableCities.map((city) => (
+                <button
+                  key={city.id}
+                  onClick={() => {
+                    setCity(city.id);
+                    setIsOpen(false);
+                  }}
+                  className={cn(
+                    "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left",
+                    currentCity.id === city.id
+                      ? "bg-white/10 text-white font-semibold"
+                      : "text-white/60 hover:bg-white/5 hover:text-white/90"
+                  )}
+                >
+                  <MapPin className="w-3 h-3 opacity-50" />
+                  {city.name}
+                </button>
+              ))
+            )}
           </div>
         </div>
       )}

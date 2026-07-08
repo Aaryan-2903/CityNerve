@@ -24,11 +24,11 @@ async def connect_to_mongo(app: FastAPI) -> None:
         app.state.mongodb_client = client
         app.state.database = client[settings.DATABASE_NAME]
         
-        print("✓ Connected to MongoDB")
-        logger.info("✓ Connected to MongoDB")
+        print("[OK] Connected to MongoDB")
+        logger.info("[OK] Connected to MongoDB")
     except ConnectionFailure as e:
-        print("✗ MongoDB connection failed")
-        logger.error(f"✗ MongoDB connection failed: {e}")
+        print("[FAIL] MongoDB connection failed")
+        logger.error(f"[FAIL] MongoDB connection failed: {e}")
         # Depending on requirements, we could raise the error to prevent startup
         # But we'll handle it gracefully as requested
         app.state.mongodb_client = None
