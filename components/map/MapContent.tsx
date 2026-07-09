@@ -86,27 +86,46 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
 
   useEffect(() => {
     if (!selectedIncidentId || !mapRef.current) return;
-    const target = localized.incidents.find(
-      (inc: FloodIncident) => inc.id === selectedIncidentId,
-    );
+    
+    // Find the target incident by mapping INC-00x to the localized layer index
+    const match = selectedIncidentId.match(/INC-00(\d+)/);
+    let target = null;
+    if (match) {
+      const index = parseInt(match[1], 10) - 1;
+      target = localized.incidents[index];
+    } else {
+      target = localized.incidents.find((inc: FloodIncident) => inc.id === selectedIncidentId);
+    }
+
     if (target) {
+      // Smoothly move the map to the incident and slightly increase zoom
       mapRef.current.flyTo({
         center: [target.lng, target.lat],
         zoom: 13.5,
-        pitch: 50,
-        duration: 900,
+        pitch: 45,
+        duration: 1000,
+        essential: true,
+      });
+    } else {
+      // If an incident has no coordinates, use the city's center instead to prevent crashes
+      mapRef.current.flyTo({
+        center: [currentCity.longitude, currentCity.latitude],
+        zoom: 12.0,
+        pitch: 40,
+        duration: 1000,
         essential: true,
       });
     }
-  }, [selectedIncidentId, localized.incidents]);
+  }, [selectedIncidentId, localized.incidents, currentCity]);
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5, delay: 0.1 }}
-      className="absolute inset-0 bg-[#080D18]"
+      className="relative flex flex-col h-full w-full bg-[#080D18] min-h-0"
     >
+      <div className="absolute inset-0 z-0">
       <Map
         ref={mapRef}
         key={currentCity.id}
@@ -147,7 +166,7 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
         )}
 
         {/* ── Flood Incident Markers 🌊 ── */}
-        {showIncidents && localized.incidents.map((inc) => (
+        {showIncidents && localized.incidents.map((inc: FloodIncident) => (
           <Marker
             key={inc.id}
             longitude={inc.lng}
@@ -280,17 +299,18 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
           )}
         </AnimatePresence>
       </Map>
+      </div>
 
       {/* ── Edge vignette (moved to background layer) ── */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none z-0"
         style={{
           background: 'radial-gradient(ellipse 120% 120% at 50% 50%, transparent 60%, rgba(5,8,16,0.7) 100%)',
         }}
       />
 
       {/* ── UI Overlay Layer (Normal Document Flow) ── */}
-      <div className="absolute inset-0 pointer-events-none flex flex-col justify-between z-10 overflow-y-auto overflow-x-hidden scrollbar-hide">
+      <div className="relative flex flex-col flex-1 z-10 overflow-y-auto overflow-x-hidden scrollbar-hide pointer-events-none min-h-0">
         
         {/* Top Area: Filters + Weather */}
         <div className="flex flex-col shrink-0">
@@ -341,8 +361,7 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
 
         {/* Bottom Area: Metric Cards (KPI) */}
         {showMetricCards && (
-          <div className="relative w-full pointer-events-auto shrink-0 mt-4">
-            <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#080D18]/90 via-[#080D18]/40 to-transparent pointer-events-none -z-10" />
+          <div className="flex flex-col shrink-0 mt-auto pointer-events-auto w-full bg-gradient-to-t from-[#080D18]/90 via-[#080D18]/40 to-transparent pt-8">
             <MetricCards />
           </div>
         )}

@@ -9,13 +9,15 @@
 // Internal index 0 = Stage 1, index 6 = Stage 7
 
 export const PHASE_TIMESTAMPS: Record<number, number> = {
-  0: 0,   // Stage 1 — Initial state, threat LOW
-  1: 8,   // Stage 2 — Heavy rain begins
-  2: 18,  // Stage 3 — Citizen report: Kurla Station
-  3: 28,  // Stage 4 — AI analysis, threat → HIGH
-  4: 38,  // Stage 5 — Flood polygon on map, markers pulse
-  5: 48,  // Stage 6 — Rescue deployed, shelter OPEN, incident RESPONDING
-  6: 58,  // Stage 7 — Recovery, threat → MODERATE, simulation ends
+  0: 0,   // Normal
+  1: 8,   // Heavy Rain
+  2: 18,  // Citizen Reports
+  3: 28,  // Flood Warning
+  4: 38,  // Road Closure
+  5: 48,  // Shelter Activated
+  6: 58,  // Rescue Deployment
+  7: 68,  // Recovery
+  8: 78,  // Completed
 };
 
 export const SIMULATION_DURATION = 60; // seconds
@@ -23,11 +25,13 @@ export const SIMULATION_DURATION = 60; // seconds
 export const STAGE_LABELS: Record<number, string> = {
   0: 'Initial State',
   1: 'Heavy Rain',
-  2: 'Citizen Report',
-  3: 'AI Analysis',
-  4: 'Flood Expansion',
-  5: 'Rescue Deployed',
-  6: 'Recovery',
+  2: 'Citizen Reports',
+  3: 'Flood Warning',
+  4: 'Road Closure',
+  5: 'Shelter Activated',
+  6: 'Rescue Deployment',
+  7: 'Recovery',
+  8: 'Completed',
 };
 
 // ─── Threat levels by stage ───────────────────────────────────────────────────
@@ -41,7 +45,9 @@ export const PHASE_THREAT: Record<number, ThreatLevel> = {
   3: 'HIGH',
   4: 'HIGH',
   5: 'HIGH',
-  6: 'MODERATE',
+  6: 'HIGH',
+  7: 'MODERATE',
+  8: 'MODERATE',
 };
 
 // ─── AI confidence by stage ───────────────────────────────────────────────────
@@ -50,10 +56,12 @@ export const PHASE_CONFIDENCE: Record<number, number> = {
   0: 68,
   1: 73,
   2: 79,
-  3: 94,
-  4: 94,
-  5: 96,
-  6: 88,
+  3: 88,
+  4: 92,
+  5: 94,
+  6: 96,
+  7: 90,
+  8: 88,
 };
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
@@ -100,5 +108,7 @@ export const PHASE_RESOURCES: Record<number, SimResources> = {
   3: { deployed: 4, available: 12, personnel: 28 },
   4: { deployed: 6, available: 10, personnel: 40 },
   5: { deployed: 9, available: 7,  personnel: 62 },
-  6: { deployed: 7, available: 9,  personnel: 50 },
+  6: { deployed: 12, available: 4,  personnel: 80 },
+  7: { deployed: 7, available: 9,  personnel: 50 },
+  8: { deployed: 4, available: 12, personnel: 30 },
 };

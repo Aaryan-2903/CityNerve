@@ -31,28 +31,27 @@ export default function DashboardPage() {
             {/* ════════════════════════════════════════════════════════════════
                 DESKTOP layout  (md and up)
                 ════════════════════════════════════════════════════════════════ */}
-            <div className="hidden md:flex h-full flex-col overflow-hidden">
+            <div className="hidden md:flex h-full flex-col overflow-y-auto overflow-x-hidden">
 
               {/* Upper: Risk Map */}
-              <div className="relative flex-1 overflow-hidden border-b border-white/[0.05] min-h-0">
+              <div className="relative flex-1 min-h-[400px] shrink-0 border-b border-white/[0.05]">
                 <RiskMap onExpandClick={openMap} />
               </div>
 
               {/* ── Simulation + Command strip ── */}
-              {/* A slim 36px bar above the panels that docks the sim control */}
               <div className="h-[36px] shrink-0 flex items-center gap-3 px-3 border-b border-white/[0.05] bg-[#070B14]">
                 <SimulationControl compact />
               </div>
 
               {/* Lower: Three-column command section */}
-              <div className="h-[230px] shrink-0 flex min-h-0 overflow-hidden">
-                <div className="w-[26%] min-w-0 overflow-hidden">
+              <div className="shrink-0 flex min-h-[300px]">
+                <div className="w-[26%] min-w-0">
                   <CommandFeed />
                 </div>
-                <div className="flex-1 min-w-0 overflow-hidden">
+                <div className="flex-1 min-w-0">
                   <IncidentCards />
                 </div>
-                <div className="w-[32%] min-w-0 overflow-hidden">
+                <div className="w-[32%] min-w-0">
                   <AICommand />
                 </div>
               </div>

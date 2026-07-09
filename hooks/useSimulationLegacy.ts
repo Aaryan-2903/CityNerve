@@ -58,6 +58,7 @@ export interface SimulationState {
   resetSimulation: () => void;
   nextStage: () => void;
   previousStage: () => void;
+  setStage: (index: number) => void;
 }
 
 /** Returns the stage index (0-6) for a given elapsed time */
@@ -169,6 +170,11 @@ export function useSimulation(): SimulationState {
     });
   }, []);
 
+  const setStage = useCallback((index: number) => {
+    // Each stage is 10 seconds of elapsed time (0-80)
+    setElapsed(Math.max(0, Math.min(80, index * 10)));
+  }, []);
+
   return {
     status,
     phase,
@@ -194,5 +200,6 @@ export function useSimulation(): SimulationState {
     resetSimulation: reset,
     nextStage,
     previousStage,
+    setStage,
   };
 }

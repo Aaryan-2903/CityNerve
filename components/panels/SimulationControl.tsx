@@ -117,20 +117,42 @@ export function SimulationControl({ compact = false }: SimulationControlProps) {
                 S{phase + 1} · {STAGE_LABELS[phase] ?? '—'}
               </motion.span>
 
-              {/* Progress bar */}
-              <div className="relative flex-1 h-1 rounded-full bg-white/[0.06] overflow-hidden min-w-[60px]">
-                <motion.div
-                  className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400"
-                  animate={{ width: `${progress * 100}%` }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
-                />
-                {[8, 18, 28, 38, 48, 58].map((t) => (
-                  <div
-                    key={t}
-                    className="absolute top-0 w-px h-full bg-white/20"
-                    style={{ left: `${(t / 60) * 100}%` }}
+              {/* Timeline Scrubber */}
+              <div className="relative flex-1 flex items-center min-w-[60px] h-4 group">
+                <div className="absolute left-0 right-0 h-1 rounded-full bg-white/[0.06] overflow-hidden pointer-events-none top-1/2 -translate-y-1/2">
+                  <motion.div
+                    className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400"
+                    animate={{ width: `${(phase / 8) * 100}%` }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
                   />
-                ))}
+                  {Object.keys(STAGE_LABELS).map((_, i) => (
+                    i > 0 && i < 8 && (
+                      <div
+                        key={i}
+                        className="absolute top-0 w-px h-full bg-[#070B14]"
+                        style={{ left: `${(i / 8) * 100}%` }}
+                      />
+                    )
+                  ))}
+                </div>
+                
+                <input
+                  type="range"
+                  min="0"
+                  max="8"
+                  value={phase}
+                  onChange={(e) => sim?.setStage?.(parseInt(e.target.value, 10))}
+                  disabled={!sim?.setStage}
+                  className="w-full absolute inset-0 opacity-0 cursor-pointer"
+                  style={{ WebkitAppearance: 'none' }}
+                  title="Scrub timeline"
+                />
+                
+                <motion.div 
+                  className="absolute w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)] pointer-events-none top-1/2 -translate-y-1/2 -ml-[5px]"
+                  animate={{ left: `${(phase / 8) * 100}%` }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                />
               </div>
 
               <span className="text-[10px] font-mono text-white/25 tabular-nums shrink-0">{elapsed}s</span>
@@ -263,15 +285,42 @@ export function SimulationControl({ compact = false }: SimulationControlProps) {
           </motion.div>
 
           <div className="flex-1 flex items-center gap-2 min-w-0">
-            <div className="relative flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-              <motion.div
-                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400"
-                animate={{ width: `${progress * 100}%` }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
+            {/* Timeline Scrubber */}
+            <div className="relative flex-1 flex items-center min-w-0 h-6 group">
+              <div className="absolute left-0 right-0 h-1.5 rounded-full bg-white/[0.06] overflow-hidden pointer-events-none top-1/2 -translate-y-1/2">
+                <motion.div
+                  className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400"
+                  animate={{ width: `${(phase / 8) * 100}%` }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                />
+                {Object.keys(STAGE_LABELS).map((_, i) => (
+                  i > 0 && i < 8 && (
+                    <div
+                      key={i}
+                      className="absolute top-0 w-px h-full bg-[#070C1A]"
+                      style={{ left: `${(i / 8) * 100}%` }}
+                    />
+                  )
+                ))}
+              </div>
+              
+              <input
+                type="range"
+                min="0"
+                max="8"
+                value={phase}
+                onChange={(e) => sim?.setStage?.(parseInt(e.target.value, 10))}
+                disabled={!sim?.setStage}
+                className="w-full absolute inset-0 opacity-0 cursor-pointer"
+                style={{ WebkitAppearance: 'none' }}
+                title="Scrub timeline"
               />
-              {[8, 18, 28, 38, 48, 58].map((t) => (
-                <div key={t} className="absolute top-0 w-px h-full bg-white/20" style={{ left: `${(t / 60) * 100}%` }} />
-              ))}
+              
+              <motion.div 
+                className="absolute w-3.5 h-3.5 rounded-full bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.8)] pointer-events-none top-1/2 -translate-y-1/2 -ml-[7px]"
+                animate={{ left: `${(phase / 8) * 100}%` }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+              />
             </div>
             <span className="text-[10px] font-mono text-white/30 tabular-nums shrink-0">{elapsed}s</span>
           </div>
