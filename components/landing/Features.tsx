@@ -49,16 +49,16 @@ const features = [
 
 export function Features() {
   return (
-    <section className="py-24 bg-[#0A101C]">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Mission-Critical Capabilities</h2>
-          <p className="text-slate-400 text-lg">
+    <section className="py-16 sm:py-24 bg-[#0A101C]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">Mission-Critical Capabilities</h2>
+          <p className="text-slate-400 text-base sm:text-lg">
             Purpose-built tools for emergency operations with a UI optimized for high-pressure decision making.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {features.map((feat, idx) => (
             <motion.div
               key={idx}
@@ -66,13 +66,13 @@ export function Features() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
-              className="p-8 rounded-3xl bg-[#0F172A] border border-slate-800 hover:border-slate-700 transition-colors"
+              className="p-6 sm:p-8 rounded-3xl bg-[#0F172A] border border-slate-800 hover:border-slate-700 transition-colors"
             >
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-6 ${feat.bg}`}>
-                <feat.icon className={`w-6 h-6 ${feat.color}`} />
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mb-4 sm:mb-6 ${feat.bg}`}>
+                <feat.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${feat.color}`} />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">{feat.title}</h3>
-              <p className="text-slate-400 leading-relaxed">
+              <h3 className="text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-3">{feat.title}</h3>
+              <p className="text-slate-400 leading-relaxed text-sm sm:text-base">
                 {feat.description}
               </p>
             </motion.div>
@@ -82,3 +82,4 @@ export function Features() {
     </section>
   );
 }
+

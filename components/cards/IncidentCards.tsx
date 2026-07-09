@@ -1,11 +1,12 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Clock, Users, AlertTriangle } from 'lucide-react';
+import { MapPin, Clock, Users, AlertTriangle, Crosshair } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { useDashboardInteraction } from '@/context/DashboardInteractionContext';
 import type { SimIncident } from '@/data/simulationScenario';
 
 type Severity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
@@ -22,39 +23,14 @@ interface Incident {
   isNew?: boolean;
 }
 
-
 const SEVERITY_CONFIG: Record<
   Severity,
   { label: string; color: string; bg: string; border: string; icon: string }
 > = {
-  CRITICAL: {
-    label: 'CRITICAL',
-    color: '#EF4444',
-    bg: 'rgba(239,68,68,0.12)',
-    border: 'rgba(239,68,68,0.25)',
-    icon: '🔴',
-  },
-  HIGH: {
-    label: 'HIGH',
-    color: '#F97316',
-    bg: 'rgba(249,115,22,0.12)',
-    border: 'rgba(249,115,22,0.25)',
-    icon: '🟠',
-  },
-  MEDIUM: {
-    label: 'MEDIUM',
-    color: '#EAB308',
-    bg: 'rgba(234,179,8,0.12)',
-    border: 'rgba(234,179,8,0.25)',
-    icon: '🟡',
-  },
-  LOW: {
-    label: 'LOW',
-    color: '#22C55E',
-    bg: 'rgba(34,197,94,0.12)',
-    border: 'rgba(34,197,94,0.25)',
-    icon: '🟢',
-  },
+  CRITICAL: { label: 'CRITICAL', color: '#EF4444', bg: 'rgba(239,68,68,0.12)',  border: 'rgba(239,68,68,0.25)',  icon: '🔴' },
+  HIGH:     { label: 'HIGH',     color: '#F97316', bg: 'rgba(249,115,22,0.12)', border: 'rgba(249,115,22,0.25)', icon: '🟠' },
+  MEDIUM:   { label: 'MEDIUM',   color: '#EAB308', bg: 'rgba(234,179,8,0.12)',  border: 'rgba(234,179,8,0.25)',  icon: '🟡' },
+  LOW:      { label: 'LOW',      color: '#22C55E', bg: 'rgba(34,197,94,0.12)',  border: 'rgba(34,197,94,0.25)',  icon: '🟢' },
 };
 
 const STATUS_COLOR: Record<string, string> = {
@@ -68,9 +44,11 @@ const STATUS_COLOR: Record<string, string> = {
 interface IncidentCardItemProps {
   incident: Incident;
   index: number;
+  isSelected: boolean;
+  onSelect: (id: string) => void;
 }
 
-function IncidentCardItem({ incident, index }: IncidentCardItemProps) {
+function IncidentCardItem({ incident, index, isSelected, onSelect }: IncidentCardItemProps) {
   const sConfig = SEVERITY_CONFIG[incident.severity];
   const statusColor = STATUS_COLOR[incident.status] ?? '#6B7280';
 
@@ -81,16 +59,36 @@ function IncidentCardItem({ incident, index }: IncidentCardItemProps) {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -4, scale: 0.98 }}
       transition={{ duration: 0.3, delay: incident.isNew ? 0 : 0.06 * index }}
+      onClick={() => onSelect(incident.id)}
       className={cn(
-        'rounded-xl border p-3.5 cursor-pointer transition-all duration-200',
-        'hover:brightness-110 hover:scale-[1.005]',
+        'rounded-xl border p-3.5 cursor-pointer transition-all duration-200 relative',
+        'hover:brightness-110 hover:scale-[1.005] active:scale-[0.998]',
         incident.isNew && 'ring-1 ring-orange-500/40',
+        isSelected && 'ring-2 shadow-lg',
       )}
       style={{
         backgroundColor: sConfig.bg,
-        borderColor: sConfig.border,
+        borderColor: isSelected ? sConfig.color : sConfig.border,
+        boxShadow: isSelected ? `0 0 0 2px ${sConfig.color}40, 0 4px 20px ${sConfig.color}15` : undefined,
       }}
     >
+      {/* Selected: focus-on-map badge */}
+      <AnimatePresence>
+        {isSelected && (
+          <motion.div
+            key="selected-badge"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="absolute top-2 right-2 flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold tracking-widest uppercase"
+            style={{ backgroundColor: `${sConfig.color}20`, color: sConfig.color, border: `1px solid ${sConfig.color}40` }}
+          >
+            <Crosshair className="w-2.5 h-2.5" />
+            Focused
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* New badge */}
       {incident.isNew && (
         <div className="flex items-center gap-1 mb-2">
@@ -102,20 +100,16 @@ function IncidentCardItem({ incident, index }: IncidentCardItemProps) {
 
       {/* Top row: title + severity */}
       <div className="flex items-start justify-between gap-2 mb-2.5">
-        <p className="text-[13px] font-semibold text-white/90 leading-tight">{incident.title}</p>
+        <p className="text-[13px] font-semibold text-white/90 leading-tight pr-14">{incident.title}</p>
         <span
           className="shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold tracking-widest uppercase"
-          style={{
-            color: sConfig.color,
-            backgroundColor: `${sConfig.color}18`,
-            border: `1px solid ${sConfig.border}`,
-          }}
+          style={{ color: sConfig.color, backgroundColor: `${sConfig.color}18`, border: `1px solid ${sConfig.border}` }}
         >
           {incident.severity}
         </span>
       </div>
 
-      {/* Detail row: time, team, status */}
+      {/* Detail row */}
       <div className="flex items-center gap-4 mb-2">
         <div className="flex items-center gap-1">
           <Clock className="w-3 h-3 text-white/20" />
@@ -149,9 +143,10 @@ function IncidentCardItem({ incident, index }: IncidentCardItemProps) {
 export function IncidentCards() {
   const sim = useSimulationContext();
   const { baseIncidents } = useDashboardData();
+  const { selectedIncidentId, setSelectedIncidentId } = useDashboardInteraction();
+
   const simIncidents = sim?.simIncidents ?? [];
 
-  // Merge sim incidents (prepended) with static incidents
   const allIncidents: Incident[] = [
     ...(simIncidents as Incident[]),
     ...(baseIncidents as Incident[]),
@@ -159,6 +154,11 @@ export function IncidentCards() {
 
   const criticalCount = allIncidents.filter((i) => i.severity === 'CRITICAL').length;
   const highCount     = allIncidents.filter((i) => i.severity === 'HIGH').length;
+
+  function handleSelect(id: string) {
+    // Toggle: clicking selected card deselects
+    setSelectedIncidentId(id === selectedIncidentId ? null : id);
+  }
 
   return (
     <motion.div
@@ -171,9 +171,7 @@ export function IncidentCards() {
       <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3 shrink-0">
         <div className="flex items-center gap-2.5">
           <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-          <h2 className="text-[11px] font-bold tracking-[0.15em] text-white/70 uppercase">
-            Incident Cards
-          </h2>
+          <h2 className="text-[11px] font-bold tracking-[0.15em] text-white/70 uppercase">Incident Cards</h2>
         </div>
         <div className="flex items-center gap-2">
           {criticalCount > 0 && (
@@ -188,15 +186,23 @@ export function IncidentCards() {
               <span className="text-[10px] font-bold text-orange-400">{highCount} high</span>
             </span>
           )}
+          {/* Hint text */}
+          <span className="text-[9px] text-white/20 hidden sm:block">click to focus map</span>
         </div>
       </div>
 
       {/* Incident list */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 min-h-0">
         <div className="flex flex-col gap-2 p-3">
           <AnimatePresence mode="popLayout">
             {allIncidents.map((incident, i) => (
-              <IncidentCardItem key={incident.id} incident={incident} index={i} />
+              <IncidentCardItem
+                key={incident.id}
+                incident={incident}
+                index={i}
+                isSelected={selectedIncidentId === incident.id}
+                onSelect={handleSelect}
+              />
             ))}
           </AnimatePresence>
         </div>
@@ -206,6 +212,9 @@ export function IncidentCards() {
       <div className="border-t border-white/[0.04] px-4 py-2 shrink-0">
         <p className="text-[10px] text-white/20 font-mono">
           {allIncidents.length} active · sorted by severity
+          {selectedIncidentId && (
+            <span className="ml-2 text-cyan-400/60">· map focused</span>
+          )}
         </p>
       </div>
     </motion.div>

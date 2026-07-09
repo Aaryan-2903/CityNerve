@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, CheckCircle2, ChevronRight, Zap, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -47,6 +48,16 @@ export function AICommand() {
   const confidence = sim?.confidence ?? 72;
   const showActionPlan = sim?.showActionPlan ?? false;
   const showPrediction = sim?.showPrediction ?? false;
+  const phase = sim?.phase ?? 0;
+
+  // Flash "analyzing" for 600ms whenever the phase changes
+  const [analyzing, setAnalyzing] = useState(false);
+  useEffect(() => {
+    if (phase === 0) return;
+    setAnalyzing(true);
+    const t = setTimeout(() => setAnalyzing(false), 600);
+    return () => clearTimeout(t);
+  }, [phase]);
 
   const scenario = CITY_SCENARIOS[currentCity.id] || CITY_SCENARIOS['mumbai'];
   const targetArea = scenario.targetArea;
@@ -83,7 +94,17 @@ export function AICommand() {
             <h2 className="text-sm font-bold text-white/90">AI Command</h2>
           </div>
           <p className="text-[10px] font-semibold tracking-[0.12em] text-purple-400/70 uppercase ml-7">
-            {showActionPlan ? 'Action Plan Ready' : showPrediction ? 'Analyzing...' : 'Monitoring'}
+            {analyzing ? (
+              <motion.span
+                key="analyzing"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 1, 0] }}
+                transition={{ duration: 0.6, times: [0, 0.4, 1] }}
+                className="text-purple-300"
+              >
+                ⚡ Analyzing...
+              </motion.span>
+            ) : showActionPlan ? 'Action Plan Ready' : showPrediction ? 'Analyzing...' : 'Monitoring'}
           </p>
         </div>
 
@@ -109,8 +130,8 @@ export function AICommand() {
         </motion.div>
       </div>
 
-      {/* Content */}
-      <div className="relative flex flex-col flex-1 overflow-y-auto p-4 gap-4 scrollbar-thin">
+      {/* Content — keyed on phase so it re-animates on each stage transition */}
+      <div key={phase} className="relative flex flex-col flex-1 min-h-0 overflow-y-auto p-4 gap-4 scrollbar-thin">
 
         {/* Prediction Block — visible from phase 3 */}
         <AnimatePresence>

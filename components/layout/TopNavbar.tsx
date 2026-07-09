@@ -1,16 +1,15 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ChevronDown, Bell, Cloud, Wind } from 'lucide-react';
+import { ChevronDown, Bell, Cloud, Wind, Menu } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 function BrandMark() {
   return (
-    <div className="flex items-center gap-3 px-5 shrink-0">
+    <div className="flex items-center gap-2.5 px-3 sm:px-5 shrink-0">
       {/* Animated brand icon */}
-      <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 shadow-lg shadow-blue-500/25">
+      <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 shadow-lg shadow-blue-500/25 shrink-0">
         {/* Outer ring pulse */}
         <span className="absolute inset-0 rounded-full border border-blue-400/30 animate-pulse" />
         {/* WiFi-like concentric arcs */}
@@ -22,7 +21,8 @@ function BrandMark() {
       </div>
       <div className="flex flex-col leading-none">
         <span className="text-[15px] font-bold tracking-tight text-white">CityNerve</span>
-        <span className="text-[9px] font-semibold tracking-[0.18em] text-white/30 uppercase mt-0.5">
+        {/* Hide subtitle on small screens to save space */}
+        <span className="hidden sm:block text-[9px] font-semibold tracking-[0.18em] text-white/30 uppercase mt-0.5">
           Urban Disaster Intelligence
         </span>
       </div>
@@ -51,15 +51,18 @@ function CommandZoneSelector() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-2 hover:bg-white/[0.06] hover:border-white/[0.12] transition-all group"
+        className="flex items-center gap-1.5 sm:gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-2.5 sm:px-3.5 py-2 hover:bg-white/[0.06] hover:border-white/[0.12] transition-all group"
       >
         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/20 border border-blue-500/30 shrink-0">
           <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
         </span>
-        <span className="text-sm font-semibold text-white/85">{currentCity.displayLabel}</span>
-        <ChevronDown className={cn("w-3.5 h-3.5 text-white/30 transition-transform", isOpen && "rotate-180")} />
+        {/* On very small screens show only the city dot; show label at sm+ */}
+        <span className="hidden sm:block text-sm font-semibold text-white/85 max-w-[120px] truncate">
+          {currentCity.displayLabel}
+        </span>
+        <ChevronDown className={cn("w-3.5 h-3.5 text-white/30 transition-transform hidden sm:block", isOpen && "rotate-180")} />
       </button>
 
       {isOpen && (
@@ -128,7 +131,7 @@ function WeatherInfo() {
 
 function NotificationBell() {
   return (
-    <button className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-white/40 hover:text-white/80 hover:border-white/[0.15] hover:bg-white/[0.06] transition-all">
+    <button className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-white/40 hover:text-white/80 hover:border-white/[0.15] hover:bg-white/[0.06] transition-all shrink-0">
       <Bell className="w-4 h-4" />
       <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white border-2 border-[#0B0F1C]">
         3
@@ -139,8 +142,8 @@ function NotificationBell() {
 
 function UserProfile() {
   return (
-    <button className="flex items-center gap-2.5 rounded-xl border border-white/[0.08] bg-white/[0.03] pl-2 pr-3.5 py-1.5 hover:bg-white/[0.06] hover:border-white/[0.12] transition-all">
-      <Avatar className="h-7 w-7">
+    <button className="flex items-center gap-2.5 rounded-xl border border-white/[0.08] bg-white/[0.03] pl-2 pr-3.5 py-1.5 hover:bg-white/[0.06] hover:border-white/[0.12] transition-all shrink-0">
+      <Avatar className="h-7 w-7 shrink-0">
         <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-[11px] font-bold text-white border-0">
           OR
         </AvatarFallback>
@@ -151,31 +154,45 @@ function UserProfile() {
   );
 }
 
-export function TopNavbar() {
+interface TopNavbarProps {
+  onMenuClick?: () => void;
+}
+
+export function TopNavbar({ onMenuClick }: TopNavbarProps) {
   return (
     <motion.header
       initial={{ y: -72, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
       className={cn(
-        'h-[72px] shrink-0 flex items-center justify-between gap-4',
+        'h-[60px] sm:h-[72px] shrink-0 flex items-center justify-between gap-2 sm:gap-4',
         'bg-[#0B0F1C] border-b border-white/[0.06]',
-        'px-4 z-50 relative',
+        'px-3 sm:px-4 z-50 relative',
       )}
     >
-      {/* Left: Brand */}
-      <BrandMark />
+      {/* Left: Hamburger (mobile only) + Brand */}
+      <div className="flex items-center gap-1 sm:gap-0 min-w-0">
+        {/* Hamburger — visible only on mobile */}
+        <button
+          onClick={onMenuClick}
+          className="md:hidden flex h-9 w-9 items-center justify-center rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.06] transition-all shrink-0 mr-1"
+          aria-label="Open navigation menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <BrandMark />
+      </div>
 
       {/* Center: Command Zone */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <CommandZoneSelector />
         <WeatherInfo />
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
         <NotificationBell />
-        <div className="h-5 w-px bg-white/[0.08]" />
+        <div className="h-5 w-px bg-white/[0.08] hidden sm:block" />
         <UserProfile />
       </div>
     </motion.header>

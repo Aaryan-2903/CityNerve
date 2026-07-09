@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -15,7 +16,6 @@ interface FeedEntry {
   category: 'dispatch' | 'shelter' | 'advisory' | 'report';
 }
 
-
 const CATEGORY_LABELS: Record<FeedEntry['category'], string> = {
   dispatch: 'DISPATCH',
   shelter:  'SHELTER',
@@ -27,9 +27,10 @@ interface FeedEntryRowProps {
   entry: FeedEntry;
   index: number;
   isNew?: boolean;
+  isLatest?: boolean;
 }
 
-function FeedEntryRow({ entry, index, isNew }: FeedEntryRowProps) {
+function FeedEntryRow({ entry, index, isNew, isLatest }: FeedEntryRowProps) {
   return (
     <motion.div
       layout
@@ -40,10 +41,20 @@ function FeedEntryRow({ entry, index, isNew }: FeedEntryRowProps) {
       className={cn(
         'flex items-start gap-3 py-2.5 px-4',
         'border-b border-white/[0.04] last:border-b-0',
-        'hover:bg-white/[0.02] transition-colors group',
+        'hover:bg-white/[0.02] transition-colors group cursor-default',
         isNew && 'bg-white/[0.025]',
+        // Latest entry gets a subtle left-border glow
+        isLatest && 'bg-gradient-to-r from-white/[0.03] to-transparent',
       )}
     >
+      {/* Newest-entry left accent bar */}
+      {isLatest && (
+        <span
+          className="absolute left-0 top-0 bottom-0 w-0.5 rounded-r-full opacity-80"
+          style={{ backgroundColor: entry.dotColor }}
+        />
+      )}
+
       {/* Timestamp */}
       <span className="font-mono text-[11px] text-white/25 shrink-0 pt-0.5 tabular-nums">
         {entry.time}
@@ -51,16 +62,21 @@ function FeedEntryRow({ entry, index, isNew }: FeedEntryRowProps) {
 
       {/* Dot indicator */}
       <span
-        className="mt-1.5 h-1.5 w-1.5 rounded-full shrink-0"
+        className={cn('mt-1.5 h-1.5 w-1.5 rounded-full shrink-0', isLatest && 'animate-pulse')}
         style={{ backgroundColor: entry.dotColor, boxShadow: `0 0 6px ${entry.dotColor}60` }}
       />
 
       {/* Text */}
-      <p className="text-[12px] leading-relaxed text-white/60 group-hover:text-white/80 transition-colors flex-1 min-w-0">
+      <p
+        className={cn(
+          'text-[12px] leading-relaxed flex-1 min-w-0 transition-colors',
+          isLatest ? 'text-white/85' : 'text-white/55 group-hover:text-white/75',
+        )}
+      >
         {entry.text}
       </p>
 
-      {/* Category tag (visible on hover) */}
+      {/* Category tag */}
       <span
         className="shrink-0 text-[9px] font-bold tracking-widest opacity-0 group-hover:opacity-100 transition-opacity pt-0.5"
         style={{ color: entry.dotColor }}
@@ -75,12 +91,25 @@ export function CommandFeed() {
   const sim = useSimulationContext();
   const { baseFeed } = useDashboardData();
   const feedEntries = sim?.feedEntries ?? [];
+  const phase = sim?.phase ?? -1;
 
-  // Sim entries are prepended (most recent first), then dynamic base entries follow
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top when a new sim entry arrives (new phase)
+  useEffect(() => {
+    if (feedEntries.length === 0) return;
+    const container = scrollRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+    if (container) {
+      container.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [phase]);
+
   const allEntries: FeedEntry[] = [
     ...(feedEntries as FeedEntry[]),
     ...baseFeed,
   ];
+
+  const latestSimId = feedEntries.length > 0 ? (feedEntries[0] as FeedEntry).id : null;
 
   return (
     <motion.div
@@ -109,22 +138,25 @@ export function CommandFeed() {
       </div>
 
       {/* Feed list */}
-      <ScrollArea className="flex-1">
-        <div className="flex flex-col">
-          <AnimatePresence mode="popLayout">
-            {allEntries.map((entry, i) => (
-              <FeedEntryRow
-                key={entry.id}
-                entry={entry}
-                index={i}
-                isNew={feedEntries.some((f: { id: string }) => f.id === entry.id)}
-              />
-            ))}
-          </AnimatePresence>
-        </div>
-      </ScrollArea>
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-hidden">
+        <ScrollArea className="h-full">
+          <div className="flex flex-col relative">
+            <AnimatePresence mode="popLayout">
+              {allEntries.map((entry, i) => (
+                <FeedEntryRow
+                  key={entry.id}
+                  entry={entry}
+                  index={i}
+                  isNew={feedEntries.some((f: { id: string }) => f.id === entry.id)}
+                  isLatest={entry.id === latestSimId}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
+        </ScrollArea>
+      </div>
 
-      {/* Footer: entry count */}
+      {/* Footer */}
       <div className="border-t border-white/[0.04] px-4 py-2 shrink-0">
         <p className="text-[10px] text-white/20 font-mono">
           {allEntries.length} events · auto-updating

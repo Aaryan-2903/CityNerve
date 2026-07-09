@@ -28,33 +28,33 @@ function MetricCardItem({ metric, index }: MetricCardItemProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.2 + index * 0.07, ease: 'easeOut' }}
       className={cn(
-        'flex flex-col gap-1.5 rounded-2xl border border-white/[0.08] px-5 py-4',
+        'flex flex-col gap-1.5 rounded-2xl border border-white/[0.08] px-3 sm:px-5 py-3 sm:py-4',
         'bg-[#0C1220]/85 backdrop-blur-xl',
-        'shadow-[0_4px_32px_rgba(0,0,0,0.5)]',
-        'min-w-[150px] flex-1',
+        // On desktop it's min-w constrained in flex row; on mobile it fills the grid cell
+        'md:min-w-[150px] md:flex-1',
       )}
       style={{
         boxShadow: `0 0 0 1px ${metric.dotColor}15, 0 4px 24px rgba(0,0,0,0.5)`,
       }}
     >
       {/* Label row */}
-      <div className="flex items-center gap-2">
-        <metric.icon className="w-3.5 h-3.5" style={{ color: metric.dotColor }} />
-        <span className="text-[11px] font-medium text-white/45 tracking-wide whitespace-nowrap">
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <metric.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" style={{ color: metric.dotColor }} />
+        <span className="text-[10px] sm:text-[11px] font-medium text-white/45 tracking-wide truncate">
           {metric.label}
         </span>
       </div>
 
       {/* Value */}
       <p
-        className="text-2xl font-bold tracking-tight tabular-nums leading-none"
+        className="text-xl sm:text-2xl font-bold tracking-tight tabular-nums leading-none"
         style={{ color: metric.dotColor }}
       >
         {metric.value}
       </p>
 
       {/* Subtext */}
-      <p className="text-[11px] text-white/30 leading-none whitespace-nowrap">{metric.subtext}</p>
+      <p className="text-[10px] sm:text-[11px] text-white/30 leading-none truncate">{metric.subtext}</p>
     </motion.div>
   );
 }
@@ -129,7 +129,8 @@ export function MetricCards() {
   ];
 
   return (
-    <div className="flex items-end gap-3 px-5 pb-5 w-full overflow-x-auto scrollbar-hide">
+    // Mobile: 2-column grid | Desktop: horizontal flex row (unchanged)
+    <div className="grid grid-cols-2 gap-2 px-3 pb-3 md:flex md:items-end md:gap-3 md:px-5 md:pb-5 md:overflow-x-auto md:w-full scrollbar-hide">
       {metricsArray.map((metric, i) => (
         <MetricCardItem key={metric.id} metric={metric} index={i} />
       ))}

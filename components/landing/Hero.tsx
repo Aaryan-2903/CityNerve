@@ -5,10 +5,10 @@ import { ArrowRight } from 'lucide-react';
 
 export function Hero() {
   return (
-    <section className="relative pt-32 pb-20 overflow-hidden">
+    <section className="relative pt-20 sm:pt-32 pb-16 sm:pb-20 overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(37,99,235,0.15),transparent_50%)]" />
       
-      <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -26,7 +26,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6"
+          className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-white mb-6"
         >
           AI-Powered Disaster <br className="hidden md:block" />
           Intelligence Platform
