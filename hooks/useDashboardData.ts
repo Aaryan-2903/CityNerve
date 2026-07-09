@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { useCity } from '@/src/context/CityContext';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { CITY_SCENARIOS } from '@/data/cityScenarios';
+import { useAIDecisionContext } from '@/context/AIDecisionContext';
 
 // ── Backend connection ────────────────────────────────────────────────────────
 const API_BASE =
@@ -34,6 +35,8 @@ export function useDashboardData() {
   const { currentCity } = useCity();
   const sim = useSimulationContext();
   const phase = sim?.phase ?? 0;
+  const aiDecision = useAIDecisionContext();
+  const extraDeployedUnits = aiDecision?.extraDeployedUnits ?? 0;
 
   const scenario = CITY_SCENARIOS[currentCity.id] || CITY_SCENARIOS['mumbai'];
 
@@ -103,7 +106,7 @@ export function useDashboardData() {
       (sim?.simIncidents?.length ?? 0) +
       Math.floor(phase / 2) +
       v;
-    const deployedUnits = (sim?.resources?.deployed ?? 2) + phase * 2 + v;
+    const deployedUnits = (sim?.resources?.deployed ?? 2) + phase * 2 + v + extraDeployedUnits;
     const avgResponseTime = Math.max(4, 24 - phase * 2 - v);
 
     // ── Overlay API baseline values when available (phase=0 seed from server) ─
@@ -151,18 +154,53 @@ export function useDashboardData() {
       },
     };
 
+    // Helper to evolve incident states based on simulation phase
+    const evolveIncident = (inc: any, i: number, currentPhase: number) => {
+      // Create a mutable copy of the status and severity
+      let status = inc.status;
+      let severity = inc.severity;
+
+      if (i === 0) {
+        // Underpass Flooding (Index 0)
+        if (currentPhase < 2) { status = 'Reported'; severity = 'HIGH'; }
+        else if (currentPhase < 4) { status = 'Verified'; severity = 'CRITICAL'; }
+        else if (currentPhase < 6) { status = 'Responding'; severity = 'CRITICAL'; }
+        else if (currentPhase < 8) { status = 'Clearing Debris'; severity = 'MEDIUM'; }
+        else { status = 'Resolved'; severity = 'LOW'; }
+      } else if (i === 1) {
+        // Bridge / Road Approach Flood (Index 1)
+        if (currentPhase < 3) { status = 'Closure pending'; severity = 'HIGH'; }
+        else if (currentPhase < 6) { status = 'Road Closed'; severity = 'CRITICAL'; }
+        else if (currentPhase < 8) { status = 'Road Partially Open'; severity = 'MEDIUM'; }
+        else { status = 'Road Open'; severity = 'LOW'; }
+      } else if (i === 2) {
+        // Sector Waterlogged (Index 2)
+        if (currentPhase < 3) { status = 'Evacuation warning'; severity = 'MEDIUM'; }
+        else if (currentPhase < 6) { status = 'Evacuating'; severity = 'HIGH'; }
+        else if (currentPhase < 8) { status = 'Pumping Water'; severity = 'MEDIUM'; }
+        else { status = 'Resolved'; severity = 'LOW'; }
+      }
+
+      return { status, severity };
+    };
+
     // Dynamically map base incidents from the city scenario mapLayers
-    const baseIncidents = scenario.mapLayers.incidents.map((inc: any, i: number) => ({
-      id: `INC-00${i + 1}`,
-      title: inc.name,
-      severity: inc.severity,
-      time: `22:${20 - i * 3}`,
-      team: i === 0 ? 'Bravo-2' : i === 1 ? 'Traffic-7' : 'Delta-1',
-      status: inc.status,
-      impact: `${inc.affected} affected`,
-      location: scenario.targetArea,
-      isNew: false,
-    }));
+    const baseIncidents = scenario.mapLayers.incidents.map((inc: any, i: number) => {
+      const evolved = evolveIncident(inc, i, phase);
+      return {
+        id: `INC-00${i + 1}`,
+        title: inc.name,
+        severity: evolved.severity,
+        time: `22:${20 - i * 3}`,
+        team: i === 0 ? 'Bravo-2' : i === 1 ? 'Traffic-7' : 'Delta-1',
+        status: evolved.status,
+        impact: `${inc.affected} affected`,
+        location: scenario.targetArea,
+        lng: inc.lng,
+        lat: inc.lat,
+        isNew: false,
+      };
+    });
 
     // Dynamically create background feed entries
     const baseFeed = [

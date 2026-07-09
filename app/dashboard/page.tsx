@@ -12,6 +12,7 @@ import { SimulationControl } from '@/components/panels/SimulationControl';
 import { SimulationProvider } from '@/context/SimulationContext';
 import { CityProvider } from '@/src/context/CityContext';
 import { DashboardInteractionProvider } from '@/context/DashboardInteractionContext';
+import { AIDecisionProvider } from '@/context/AIDecisionContext';
 
 export default function DashboardPage() {
   const [mapExpanded, setMapExpanded] = useState(false);
@@ -22,6 +23,7 @@ export default function DashboardPage() {
     <CityProvider>
       <SimulationProvider>
         <DashboardInteractionProvider>
+          <AIDecisionProvider>
 
           {/* ── Fullscreen map overlay ── */}
           <ExpandedMapOverlay isOpen={mapExpanded} onClose={closeMap} />
@@ -100,6 +102,7 @@ export default function DashboardPage() {
             </div>
 
           </DashboardLayout>
+          </AIDecisionProvider>
         </DashboardInteractionProvider>
       </SimulationProvider>
     </CityProvider>

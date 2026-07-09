@@ -7,6 +7,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { useDashboardInteraction } from '@/context/DashboardInteractionContext';
+import { useAIDecisionContext } from '@/context/AIDecisionContext';
 
 interface FeedEntry {
   id: string;
@@ -90,6 +92,8 @@ function FeedEntryRow({ entry, index, isNew, isLatest }: FeedEntryRowProps) {
 export function CommandFeed() {
   const sim = useSimulationContext();
   const { baseFeed } = useDashboardData();
+  const { selectedIncidentId } = useDashboardInteraction();
+  const { approvedFeedEntries } = useAIDecisionContext();
   const feedEntries = sim?.feedEntries ?? [];
   const phase = sim?.phase ?? -1;
 
@@ -105,11 +109,14 @@ export function CommandFeed() {
   }, [phase]);
 
   const allEntries: FeedEntry[] = [
+    ...(approvedFeedEntries as FeedEntry[]),
     ...(feedEntries as FeedEntry[]),
     ...baseFeed,
   ];
 
-  const latestSimId = feedEntries.length > 0 ? (feedEntries[0] as FeedEntry).id : null;
+  const latestSimId = (approvedFeedEntries.length > 0)
+    ? (approvedFeedEntries[0] as FeedEntry).id
+    : (feedEntries.length > 0 ? (feedEntries[0] as FeedEntry).id : null);
 
   return (
     <motion.div

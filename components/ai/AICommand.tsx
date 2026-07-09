@@ -9,21 +9,11 @@ import { useSimulationContext } from '@/context/SimulationContext';
 import { useCity } from '@/src/context/CityContext';
 import { CITY_SCENARIOS } from '@/data/cityScenarios';
 import type { ThreatLevel } from '@/data/simulationScenario';
+import { useAIDecisionContext } from '@/context/AIDecisionContext';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const REASONING = [
-  'Heavy rainfall',
-  'River overflow',
-  'Historical floodplain',
-  'Citizen reports',
-];
-
-const ACTION_SUGGESTIONS = [
-  { id: 'a1', text: 'Close Bridge 4' },
-  { id: 'a2', text: 'Open Shelter Alpha' },
-  { id: 'a3', text: 'Deploy Rescue Team Bravo' },
-];
+// Action suggestions will be generated dynamically
 
 const THREAT_CONFIG: Record<
   ThreatLevel,
@@ -43,9 +33,10 @@ const THREAT_CONFIG: Record<
 export function AICommand() {
   const sim = useSimulationContext();
   const { currentCity } = useCity();
+  const { currentRecommendation, approve, reject } = useAIDecisionContext();
 
   const threatLevel: ThreatLevel = sim?.threatLevel ?? 'LOW';
-  const confidence = sim?.confidence ?? 72;
+  const confidence = currentRecommendation?.confidence ?? sim?.confidence ?? 72;
   const showActionPlan = sim?.showActionPlan ?? false;
   const showPrediction = sim?.showPrediction ?? false;
   const phase = sim?.phase ?? 0;
@@ -70,6 +61,8 @@ export function AICommand() {
 
   const threatCfg = THREAT_CONFIG[threatLevel];
   const predictionText = PREDICTION_TEXT[threatLevel];
+
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
 
   return (
     <motion.div
@@ -166,7 +159,7 @@ export function AICommand() {
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <h3 className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">
-              Reasoning
+              AI Assessment
             </h3>
             <motion.span
               key={confidence}
@@ -177,45 +170,26 @@ export function AICommand() {
               {confidence}% CONFIDENCE
             </motion.span>
           </div>
-          <ul className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 space-y-2">
-            {REASONING.map((point, i) => (
-              <li key={i} className="flex items-start gap-2 text-[11.5px] text-white/70">
-                <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-white/20 mt-1.5" />
-                {point}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Action checklist — visible from phase 5 */}
-        <div>
-          <h3 className="text-[10px] font-semibold text-white/40 uppercase tracking-widest mb-1.5">
-            Recommended Actions
-          </h3>
-          <div className="flex flex-col gap-1.5">
+          <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 text-sm text-white/90">
+            <div className="font-semibold text-purple-300 mb-1">{currentRecommendation?.title}</div>
+            <div className="text-[12px] text-white/70 mb-2">{currentRecommendation?.recommendation}</div>
+            
             <AnimatePresence>
-              {ACTION_SUGGESTIONS.map((action, i) => (
-                <motion.div
-                  key={action.id}
-                  initial={{ opacity: 0, x: 6 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -6 }}
-                  transition={{ delay: showActionPlan ? 0.05 + i * 0.08 : 0 }}
-                  className={cn(
-                    'flex items-center gap-2.5 rounded-lg border px-3 py-2 text-[11px] font-medium transition-all duration-500',
-                    showActionPlan
-                      ? 'border-green-500/20 bg-green-500/10 text-green-400'
-                      : 'border-white/[0.06] bg-white/[0.02] text-white/30',
-                  )}
+              {detailsExpanded && (
+                <motion.ul
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-1 mt-2 border-t border-white/10 pt-2"
                 >
-                  {showActionPlan ? (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-green-400 shrink-0" />
-                  ) : (
-                    <ChevronRight className="w-3.5 h-3.5 text-white/15 shrink-0" />
-                  )}
-                  {action.text}
-                </motion.div>
-              ))}
+                  {currentRecommendation?.reasoning.map((point, i) => (
+                    <li key={i} className="flex items-start gap-2 text-[11px] text-white/50">
+                      <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-white/20" />
+                      {point}
+                    </li>
+                  ))}
+                </motion.ul>
+              )}
             </AnimatePresence>
           </div>
         </div>
@@ -224,33 +198,40 @@ export function AICommand() {
 
       {/* Footer */}
       <div className="relative border-t border-white/[0.06] p-3 shrink-0 flex flex-col gap-2">
-        <Button
-          disabled={!showActionPlan}
-          className={cn(
-            'w-full h-10 rounded-lg text-sm font-bold transition-all duration-300 shadow-lg',
-            showActionPlan
-              ? 'bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white shadow-purple-500/20 border-0'
-              : 'bg-white/[0.04] text-white/20 border border-white/[0.06] cursor-not-allowed shadow-none',
-          )}
-        >
-          {showActionPlan ? (
+        {currentRecommendation?.status === 'Pending' ? (
+          <div className="flex gap-2">
+            <Button
+              onClick={approve}
+              className="flex-1 h-9 rounded-lg text-xs font-bold transition-all duration-300 shadow-lg bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white shadow-purple-500/20 border-0"
+            >
+              Approve
+            </Button>
+            <Button
+              onClick={reject}
+              variant="outline"
+              className="h-9 px-4 rounded-lg text-xs font-semibold border-white/[0.08] bg-white/[0.02] text-white/60 hover:text-white/90 hover:bg-white/[0.05]"
+            >
+              Reject
+            </Button>
+          </div>
+        ) : (
+          <Button
+            disabled
+            className="w-full h-9 rounded-lg text-xs font-bold bg-white/[0.04] text-white/40 border border-white/[0.06] cursor-not-allowed shadow-none"
+          >
             <span className="flex items-center gap-2">
-              <Zap className="w-4 h-4" />
-              Approve Action Plan
+              <CheckCircle2 className="w-4 h-4 text-green-400/50" />
+              {currentRecommendation?.status === 'Approved' ? 'Executed' : 'Rejected'}
             </span>
-          ) : (
-            <span className="flex items-center gap-2">
-              <Shield className="w-4 h-4" />
-              Awaiting Analysis...
-            </span>
-          )}
-        </Button>
+          </Button>
+        )}
 
         <Button
+          onClick={() => setDetailsExpanded((prev) => !prev)}
           variant="outline"
-          className="w-full h-8 rounded-lg text-xs font-semibold border-white/[0.08] bg-transparent text-white/60 hover:text-white/90 hover:bg-white/[0.03]"
+          className="w-full h-8 rounded-lg text-[11px] font-semibold border-transparent bg-transparent text-white/40 hover:text-white/80 hover:bg-white/[0.02]"
         >
-          View Explanation
+          {detailsExpanded ? 'Hide Details' : 'View Details'}
         </Button>
       </div>
     </motion.div>

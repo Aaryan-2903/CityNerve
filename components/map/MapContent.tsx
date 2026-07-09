@@ -12,6 +12,7 @@ import { useSimulationContext } from '@/context/SimulationContext';
 import { useCity } from '@/src/context/CityContext';
 import { CITY_SCENARIOS } from '@/data/cityScenarios';
 import { useDashboardInteraction } from '@/context/DashboardInteractionContext';
+import { useDashboardData } from '@/hooks/useDashboardData';
 
 /* ─── Dark tile style (CartoDB, free, no API key) ───────────────────────── */
 
@@ -21,9 +22,9 @@ interface FloodIncident {
   id: string;
   lng: number;
   lat: number;
-  name: string;
-  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM';
-  affected: string;
+  title: string;
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  impact: string;
   status: string;
 }
 
@@ -81,6 +82,8 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
   const scenario = CITY_SCENARIOS[currentCity.id] || CITY_SCENARIOS['mumbai'];
   const localized = scenario.mapLayers;
 
+  const { baseIncidents } = useDashboardData();
+
   // Cross-panel selection: fly to an incident when selected from IncidentCards
   const { selectedIncidentId } = useDashboardInteraction();
 
@@ -92,9 +95,9 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
     let target = null;
     if (match) {
       const index = parseInt(match[1], 10) - 1;
-      target = localized.incidents[index];
+      target = baseIncidents[index];
     } else {
-      target = localized.incidents.find((inc: FloodIncident) => inc.id === selectedIncidentId);
+      target = baseIncidents.find((inc: any) => inc.id === selectedIncidentId);
     }
 
     if (target) {
@@ -166,7 +169,7 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
         )}
 
         {/* ── Flood Incident Markers 🌊 ── */}
-        {showIncidents && localized.incidents.map((inc: FloodIncident) => (
+        {showIncidents && baseIncidents.map((inc: any) => (
           <Marker
             key={inc.id}
             longitude={inc.lng}
@@ -182,7 +185,7 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.4, type: 'spring' }}
               className="relative flex h-6 w-6 cursor-pointer items-center justify-center"
-              title={inc.name}
+              title={inc.title}
             >
               <span
                 className="absolute inset-0 rounded-full opacity-40 animate-ping"
@@ -289,10 +292,10 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
                   </span>
                 </div>
                 <h3 className="mb-1 text-sm font-semibold text-white/90 leading-tight">
-                  🌊 {selectedIncident.name}
+                  🌊 {selectedIncident.title}
                 </h3>
                 <p className="text-xs text-white/60">
-                  <strong className="text-white/80 tabular-nums">{selectedIncident.affected}</strong> people affected
+                  <strong className="text-white/80 tabular-nums">{selectedIncident.impact}</strong>
                 </p>
               </motion.div>
             </Popup>
