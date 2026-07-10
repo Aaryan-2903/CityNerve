@@ -1,7 +1,32 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { type SimulationState, type SimStatus } from './useSimulationLegacy';
+export type SimStatus = 'idle' | 'running' | 'paused' | 'complete';
+export interface SimulationState {
+  status: SimStatus;
+  phase: number;
+  elapsed: number;
+  progress: number;
+  threatLevel: string;
+  confidence: number;
+  weather: any;
+  simIncidents: any[];
+  feedEntries: any[];
+  resources: any;
+  showFloodOverlay: boolean;
+  showActionPlan: boolean;
+  showPrediction: boolean;
+  start: () => void;
+  pause: () => void;
+  reset: () => void;
+  startSimulation: () => void;
+  pauseSimulation: () => void;
+  resumeSimulation: () => void;
+  resetSimulation: () => void;
+  nextStage: () => void;
+  previousStage: () => void;
+  setStage: (index: number) => void;
+}
 
 const API_BASE = 'http://127.0.0.1:8000/api/v1/simulation';
 

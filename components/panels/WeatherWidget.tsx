@@ -3,7 +3,7 @@
 import { Cloud, Droplets, AlertTriangle } from 'lucide-react';
 import { GlassCard } from '@/components/shared/GlassCard';
 import { useSimulationContext } from '@/context/SimulationContext';
-import { useCity } from '@/src/context/CityContext';
+import { useCity } from '@/context/CityContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useMemo } from 'react';
 

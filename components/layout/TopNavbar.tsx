@@ -31,7 +31,7 @@ function BrandMark() {
 }
 
 import { useState, useRef, useEffect } from 'react';
-import { useCity } from '@/src/context/CityContext';
+import { useCity } from '@/context/CityContext';
 import { MapPin, Navigation } from 'lucide-react';
 
 function CommandZoneSelector() {

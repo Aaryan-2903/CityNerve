@@ -6,7 +6,7 @@ import { Brain, CheckCircle2, ChevronRight, Zap, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
-import { useCity } from '@/src/context/CityContext';
+import { useCity } from '@/context/CityContext';
 import type { ThreatLevel } from '@/data/simulationScenario';
 import { useAIDecisionContext } from '@/context/AIDecisionContext';
 
@@ -34,7 +34,7 @@ export function AICommand() {
   const { currentCity } = useCity();
   const { currentRecommendation, approve, reject } = useAIDecisionContext();
 
-  const threatLevel: ThreatLevel = sim?.threatLevel ?? 'LOW';
+  const threatLevel = (sim?.threatLevel as ThreatLevel) ?? 'LOW';
   const confidence = currentRecommendation?.confidence ?? sim?.confidence ?? 72;
   const showActionPlan = sim?.showActionPlan ?? false;
   const showPrediction = sim?.showPrediction ?? false;

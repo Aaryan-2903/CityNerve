@@ -10,7 +10,7 @@ interface TopBarProps {
 }
 
 import { useState, useRef, useEffect } from 'react';
-import { useCity } from '@/src/context/CityContext';
+import { useCity } from '@/context/CityContext';
 import { MapPin, Navigation, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

@@ -4,18 +4,20 @@ export interface NavItem {
   href: string;
   icon: string;
   badge?: number;
+  isActive?: boolean;
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard', label: 'Operations Center', href: '/', icon: 'LayoutDashboard' },
+  { id: 'dashboard', label: 'Operations Center', href: '/dashboard', icon: 'LayoutDashboard' },
   { id: 'incidents', label: 'Incident Registry', href: '/incidents', icon: 'AlertTriangle' },
   { id: 'resources', label: 'Resource Management', href: '/resources', icon: 'Truck' },
   { id: 'analytics', label: 'Analytics', href: '/analytics', icon: 'BarChart3' },
   { id: 'ai-center', label: 'AI Command', href: '/ai-center', icon: 'Brain' },
   { id: 'comms', label: 'Communications', href: '/comms', icon: 'Radio' },
+  { id: 'settings', label: 'Settings', href: '/settings', icon: 'Settings' },
 ];
 
 export const BOTTOM_NAV_ITEMS: NavItem[] = [
   { id: 'alerts', label: 'Alert Preferences', href: '/alerts', icon: 'Bell' },
-  { id: 'settings', label: 'Settings', href: '/settings', icon: 'Settings' },
+  { id: 'profile', label: 'EOC Commander', href: '/profile', icon: 'User' },
 ];

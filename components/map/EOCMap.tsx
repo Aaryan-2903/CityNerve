@@ -9,7 +9,7 @@ import type { Incident } from '@/types/incident';
 import type { Resource } from '@/types/resource';
 import type { MapViewport } from '@/types/map';
 import { SEVERITY_CONFIG, INCIDENT_TYPE_CONFIG } from '@/constants/incidents';
-import { MAPLIBRE_STYLE } from '@/constants/map';
+import { MAPBOX_STYLE } from '@/constants/map';
 import { formatRelativeTime, formatPopulation } from '@/utils/format';
 import { SeverityBadge } from '@/components/shared/SeverityBadge';
 import { X, Maximize2, Users, Clock, TrendingUp } from 'lucide-react';
@@ -68,7 +68,7 @@ function IncidentMarkerPin({
           fontSize: size * 0.4,
         }}
       >
-        {typeConfig.emoji}
+        {typeConfig.icon}
       </div>
     </div>
   );
@@ -92,7 +92,7 @@ function ResourceMarkerPin({ resource }: { resource: Resource }) {
 
 /* ─── Main component ─────────────────────────────────────────────────────── */
 
-import { useCity } from '@/src/context/CityContext';
+import { useCity } from '@/context/CityContext';
 
 export function EOCMap({
   incidents,
@@ -133,7 +133,7 @@ export function EOCMap({
         {...viewport}
         onMove={(evt) => onViewportChange(evt.viewState)}
         onClick={handleMapClick}
-        mapStyle={MAPLIBRE_STYLE}
+        mapStyle={MAPBOX_STYLE}
         style={{ width: '100%', height: '100%' }}
         attributionControl={false}
       >
@@ -189,7 +189,7 @@ export function EOCMap({
             <div className="bg-[#0D1420] border border-white/[0.1] rounded-xl p-3 min-w-[240px] shadow-2xl shadow-black/50">
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">{INCIDENT_TYPE_CONFIG[popupIncident.type].emoji}</span>
+                  <span className="text-base">{INCIDENT_TYPE_CONFIG[popupIncident.type].icon}</span>
                   <div>
                     <SeverityBadge severity={popupIncident.severity} size="sm" pulse />
                     <p className="text-xs font-semibold text-white/90 mt-0.5 leading-tight">

@@ -20,7 +20,7 @@ import type { Resource, ResourceStatus, ResourceType } from '@/types/resource';
 import { formatRelativeTime, formatETA } from '@/utils/format';
 import { useState, useEffect } from 'react';
 import { useSimulationContext } from '@/context/SimulationContext';
-import { useCity } from '@/src/context/CityContext';
+import { useCity } from '@/context/CityContext';
 import { useResources } from '@/hooks/useResources';
 
 const TYPE_ICONS: Record<ResourceType, React.ElementType> = {

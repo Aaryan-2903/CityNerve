@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, ReactNode } from 'react';
-import { useCityInternal, type UseCityReturn } from '@/src/hooks/useCity';
+import { useCityInternal, type UseCityReturn } from '@/hooks/useCity';
 
 const CityContext = createContext<UseCityReturn | null>(null);
 

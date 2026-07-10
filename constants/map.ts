@@ -1,14 +1,16 @@
 import type { MapViewport, MapLayer } from '@/types/map';
 
 export const DEFAULT_VIEWPORT: MapViewport = {
-  longitude: 72.8777,
-  latitude:  19.0760,
-  zoom:      11.5,
-  pitch:     30,
-  bearing:   -5,
+  longitude: -74.006,
+  latitude: 40.7128,
+  zoom: 11.5,
+  pitch: 30,
+  bearing: -5,
 };
 
-export const MAPLIBRE_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+export const MAPBOX_STYLE = 'mapbox://styles/mapbox/dark-v11';
+
+export const MAPBOX_TOKEN_ENV = 'NEXT_PUBLIC_MAPBOX_TOKEN';
 
 export const DEFAULT_MAP_LAYERS: MapLayer[] = [
   { id: 'incidents', label: 'Incidents', enabled: true, icon: 'AlertTriangle' },

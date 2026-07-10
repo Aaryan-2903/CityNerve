@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { DEFAULT_CITY, type CityProfile } from '@/src/data/cities';
+import { DEFAULT_CITY, type CityProfile } from '@/data/cities';
 
 const API_BASE = 'http://127.0.0.1:8000';
 

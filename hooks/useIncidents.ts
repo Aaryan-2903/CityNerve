@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import type { Incident, Severity, IncidentType, IncidentStatus } from '@/types/incident';
 import { SEVERITY_ORDER } from '@/utils/severity';
-import { useCity } from '@/src/context/CityContext';
+import { useCity } from '@/context/CityContext';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
+const API_BASE = 'http://127.0.0.1:8000';
 
 export interface IncidentFilters {
   severity: Severity | 'all';
@@ -23,52 +23,29 @@ const DEFAULT_FILTERS: IncidentFilters = {
 
 export function useIncidents() {
   const { currentCity } = useCity();
-
-  // ── Incident data — fetched exclusively from API ──
-  const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [isLoadingIncidents, setIsLoadingIncidents] = useState(true);
-
-  // ── Fetch from backend on city change ────────────────────────────────────
-  useEffect(() => {
-    let cancelled = false;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-    async function fetchIncidents() {
-      setIsLoadingIncidents(true);
-      try {
-        const res = await fetch(
-          `${API_BASE}/api/v1/incidents?cityId=${currentCity.id}`,
-          { signal: controller.signal },
-        );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: Incident[] = await res.json();
-        if (!cancelled && data.length > 0) {
-          setIncidents(data);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          console.error(
-            '[CityNerve] Incidents API unavailable.',
-            err,
-          );
-        }
-      } finally {
-        if (!cancelled) setIsLoadingIncidents(false);
-        clearTimeout(timeoutId);
-      }
-    }
-
-    fetchIncidents();
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, [currentCity.id]);
-
-  // ── Filters & selection (unchanged logic) ────────────────────────────────
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [filters, setFilters] = useState<IncidentFilters>(DEFAULT_FILTERS);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchIncidents = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/incidents?cityId=${currentCity.id}`);
+        if (!res.ok) throw new Error('Failed to fetch incidents');
+        const data = await res.json();
+        if (!cancelled) setIncidents(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+    fetchIncidents();
+    return () => { cancelled = true; };
+  }, [currentCity.id]);
 
   const filteredIncidents = useMemo(() => {
     return incidents
@@ -95,7 +72,7 @@ export function useIncidents() {
 
   const selectedIncident = useMemo(
     () => incidents.find((i) => i.id === selectedIncidentId) ?? null,
-    [incidents, selectedIncidentId],
+    [incidents, selectedIncidentId]
   );
 
   const selectIncident = useCallback((id: string | null) => {
@@ -106,7 +83,7 @@ export function useIncidents() {
     <K extends keyof IncidentFilters>(key: K, value: IncidentFilters[K]) => {
       setFilters((prev) => ({ ...prev, [key]: value }));
     },
-    [],
+    []
   );
 
   const resetFilters = useCallback(() => {
@@ -120,20 +97,20 @@ export function useIncidents() {
       critical: incidents.filter((i) => i.severity === 'critical').length,
       totalCasualties: incidents.reduce((sum, i) => sum + i.casualties, 0),
     }),
-    [incidents],
+    [incidents]
   );
 
   return {
-    incidents,
-    filteredIncidents,
+    incidents: filteredIncidents,
+    allIncidents: incidents,
     selectedIncident,
     selectedIncidentId,
+    setSelectedIncidentId,
     filters,
-    stats,
-    isLoadingIncidents,
+    setFilters,
+    isLoading,
     selectIncident,
     updateFilter,
     resetFilters,
   };
 }
-

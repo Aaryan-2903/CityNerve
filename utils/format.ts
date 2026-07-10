@@ -1,5 +1,6 @@
 /**
  * Formats an ISO timestamp to a human-readable relative time string
+ * e.g. "3 minutes ago", "2 hours ago"
  */
 export function formatRelativeTime(isoString: string): string {
   const now = Date.now();
@@ -20,14 +21,12 @@ export function formatRelativeTime(isoString: string): string {
  */
 export function formatTimestamp(isoString: string): string {
   const date = new Date(isoString);
-  return (
-    date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-      timeZone: 'UTC',
-    }) + ' UTC'
-  );
+  return date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'UTC',
+  }) + ' UTC';
 }
 
 /**
@@ -40,7 +39,7 @@ export function formatCoordinates(lat: number, lng: number): string {
 }
 
 /**
- * Formats population number with compact suffix
+ * Formats population number with commas
  */
 export function formatPopulation(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -49,7 +48,7 @@ export function formatPopulation(n: number): string {
 }
 
 /**
- * Formats ETA in minutes to display string
+ * Formats ETA in minutes to a display string
  */
 export function formatETA(minutes: number): string {
   if (minutes < 1) return 'Arriving';
@@ -57,4 +56,19 @@ export function formatETA(minutes: number): string {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   return `${h}h ${m}m ETA`;
+}
+
+/**
+ * Formats a date to full datetime string for logs
+ */
+export function formatFullDate(isoString: string): string {
+  return new Date(isoString).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'UTC',
+  }) + ' UTC';
 }

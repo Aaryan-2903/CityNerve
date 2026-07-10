@@ -1,6 +1,9 @@
 import type { Severity } from '@/types/incident';
 import { SEVERITY_CONFIG } from '@/constants/incidents';
 
+/**
+ * Maps a numeric AI risk score (0-100) to a Severity level
+ */
 export function scoreToSeverity(score: number): Severity {
   if (score >= 85) return 'critical';
   if (score >= 65) return 'high';
@@ -9,14 +12,23 @@ export function scoreToSeverity(score: number): Severity {
   return 'resolved';
 }
 
+/**
+ * Returns the hex color for a given severity level
+ */
 export function getSeverityColor(severity: Severity): string {
   return SEVERITY_CONFIG[severity].color;
 }
 
+/**
+ * Returns the glow color for map markers
+ */
 export function getSeverityGlow(severity: Severity): string {
   return SEVERITY_CONFIG[severity].glowColor;
 }
 
+/**
+ * Sorts severities from most to least critical
+ */
 export const SEVERITY_ORDER: Record<Severity, number> = {
   critical: 0,
   high: 1,

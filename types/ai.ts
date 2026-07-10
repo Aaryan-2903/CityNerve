@@ -19,3 +19,11 @@ export interface AIBriefing {
   predictedEscalations: string[];
   modelVersion: string;
 }
+
+export interface AIInsight {
+  incidentId: string;
+  riskScore: number;
+  trendPrediction: 'escalating' | 'stable' | 'de-escalating';
+  affectedZones: string[];
+  estimatedContainmentTime: string;
+}

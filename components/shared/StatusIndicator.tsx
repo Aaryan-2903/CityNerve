@@ -1,8 +1,11 @@
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/cn';
 
 type StatusVariant = 'live' | 'active' | 'warning' | 'offline' | 'idle';
 
-const STATUS_CONFIG: Record<StatusVariant, { color: string; label: string; pulse: boolean }> = {
+const STATUS_CONFIG: Record<
+  StatusVariant,
+  { color: string; label: string; pulse: boolean }
+> = {
   live: { color: '#22C55E', label: 'LIVE', pulse: true },
   active: { color: '#3B82F6', label: 'ACTIVE', pulse: true },
   warning: { color: '#EAB308', label: 'WARNING', pulse: true },

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 
 export function useRealTimeClock() {
-  const [now, setNow] = useState<Date>(() => new Date());
+  const [now, setNow] = useState<Date>(new Date());
 
   useEffect(() => {
     const timer = setInterval(() => {

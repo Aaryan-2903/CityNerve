@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, CheckCircle2, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
-import { useCity } from '@/src/context/CityContext';
+import { useCity } from '@/context/CityContext';
 import { STAGE_LABELS } from '@/data/simulationScenario';
 
 interface SimulationControlProps {

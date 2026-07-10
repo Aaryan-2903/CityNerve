@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useCity } from '@/src/context/CityContext';
+import { useCity } from '@/context/CityContext';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useAIDecisionContext } from '@/context/AIDecisionContext';
 import { useShelters } from './useShelters';

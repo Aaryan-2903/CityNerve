@@ -10,7 +10,7 @@ import { AICommand } from '@/components/ai/AICommand';
 import { WeatherWidget } from '@/components/panels/WeatherWidget';
 import { SimulationControl } from '@/components/panels/SimulationControl';
 import { SimulationProvider } from '@/context/SimulationContext';
-import { CityProvider } from '@/src/context/CityContext';
+import { CityProvider } from '@/context/CityContext';
 import { DashboardInteractionProvider } from '@/context/DashboardInteractionContext';
 import { AIDecisionProvider } from '@/context/AIDecisionContext';
 

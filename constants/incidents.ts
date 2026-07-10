@@ -43,18 +43,18 @@ export const SEVERITY_CONFIG: Record<
 
 export const INCIDENT_TYPE_CONFIG: Record<
   IncidentType,
-  { label: string; emoji: string }
+  { label: string; icon: string; mapboxSymbol: string }
 > = {
-  fire: { label: 'Structure Fire', emoji: '🔥' },
-  flood: { label: 'Flooding', emoji: '🌊' },
-  earthquake: { label: 'Earthquake', emoji: '🌍' },
-  hazmat: { label: 'HazMat Spill', emoji: '☢️' },
-  mass_casualty: { label: 'Mass Casualty', emoji: '🚑' },
-  infrastructure: { label: 'Infrastructure', emoji: '🏗️' },
-  storm: { label: 'Severe Storm', emoji: '🌪️' },
-  blackout: { label: 'Power Blackout', emoji: '⚡' },
-  tsunami: { label: 'Tsunami', emoji: '🌊' },
-  civil_unrest: { label: 'Civil Unrest', emoji: '⚠️' },
+  fire: { label: 'Structure Fire', icon: '🔥', mapboxSymbol: 'fire-station' },
+  flood: { label: 'Flooding', icon: '🌊', mapboxSymbol: 'harbor' },
+  earthquake: { label: 'Earthquake', icon: '⚡', mapboxSymbol: 'danger' },
+  hazmat: { label: 'HazMat Spill', icon: '☢️', mapboxSymbol: 'danger' },
+  mass_casualty: { label: 'Mass Casualty', icon: '🚑', mapboxSymbol: 'hospital' },
+  infrastructure: { label: 'Infrastructure', icon: '🏗️', mapboxSymbol: 'roadblock' },
+  storm: { label: 'Severe Storm', icon: '🌪️', mapboxSymbol: 'danger' },
+  blackout: { label: 'Power Blackout', icon: '⚡', mapboxSymbol: 'danger' },
+  tsunami: { label: 'Tsunami Warning', icon: '🌊', mapboxSymbol: 'harbor' },
+  civil_unrest: { label: 'Civil Unrest', icon: '⚠️', mapboxSymbol: 'danger' },
 };
 
 export const INCIDENT_STATUS_CONFIG = {

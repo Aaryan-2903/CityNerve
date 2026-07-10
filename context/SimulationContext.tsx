@@ -1,19 +1,13 @@
 'use client';
 
 import { createContext, useContext, type ReactNode } from 'react';
-import { useSimulation, type SimulationState } from '@/hooks/useSimulationLegacy';
 import { useSimulationEngine } from '@/hooks/useSimulationEngine';
+import type { SimulationState } from '@/hooks/useSimulationEngine';
 
 const SimulationContext = createContext<SimulationState | null>(null);
 
 export function SimulationProvider({ children }: { children: ReactNode }) {
-  const legacySimulation = useSimulation();
-  const engineSimulation = useSimulationEngine();
-
-  // Fallback to legacy if backend is not available
-  const activeSimulation = engineSimulation.isBackendAvailable 
-    ? engineSimulation 
-    : legacySimulation;
+  const activeSimulation = useSimulationEngine();
 
   return (
     <SimulationContext.Provider value={activeSimulation}>

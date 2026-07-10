@@ -9,7 +9,7 @@ import { MetricCards } from '@/components/cards/MetricCards';
 import { WeatherWidget } from '@/components/panels/WeatherWidget';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
-import { useCity } from '@/src/context/CityContext';
+import { useCity } from '@/context/CityContext';
 import { useShelters } from '@/hooks/useShelters';
 import { useHospitals } from '@/hooks/useHospitals';
 import { useResources } from '@/hooks/useResources';

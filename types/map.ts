@@ -19,6 +19,13 @@ export interface HeatmapPoint {
   weight: number;
 }
 
+export interface BoundingBox {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+}
+
 export interface MapViewport {
   longitude: number;
   latitude: number;

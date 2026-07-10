@@ -59,7 +59,7 @@ function IncidentCard({ incident, isSelected, onClick }: IncidentCardProps) {
         {/* Top row: severity + type + time */}
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-sm">{typeConfig.emoji}</span>
+            <span className="text-sm">{typeConfig.icon}</span>
             <SeverityBadge severity={incident.severity} size="sm" pulse={incident.status === 'active' || incident.status === 'escalating'} />
             <span
               className="text-[10px] font-semibold uppercase tracking-wider"
