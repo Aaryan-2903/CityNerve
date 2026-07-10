@@ -10,7 +10,11 @@ import { WeatherWidget } from '@/components/panels/WeatherWidget';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useCity } from '@/src/context/CityContext';
-import { CITY_SCENARIOS } from '@/data/cityScenarios';
+import { useShelters } from '@/hooks/useShelters';
+import { useHospitals } from '@/hooks/useHospitals';
+import { useResources } from '@/hooks/useResources';
+import { useMapZones } from '@/hooks/useMapZones';
+import { useIncidents } from '@/hooks/useIncidents';
 import { useDashboardInteraction } from '@/context/DashboardInteractionContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
 
@@ -78,11 +82,17 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
 
   const { currentCity } = useCity();
 
-  // Load the active city scenario (fallback to Mumbai if not explicitly mapped)
-  const scenario = CITY_SCENARIOS[currentCity.id] || CITY_SCENARIOS['mumbai'];
-  const localized = scenario.mapLayers;
+  // Load backend data hooks instead of mock scenario
+  const { shelters } = useShelters(currentCity.id);
+  const { hospitals } = useHospitals(currentCity.id);
+  const { resources } = useResources(currentCity.id);
+  const { riskZones, evacRoutes } = useMapZones(currentCity.id);
+  const { incidents } = useIncidents(); // automatically uses currentCity
 
-  const { baseIncidents } = useDashboardData();
+  // Find specific zones
+  const floodZoneData = riskZones.find(z => z.type === 'floodZone')?.geometry;
+  const simFloodData = riskZones.find(z => z.type === 'simFlood')?.geometry;
+  const evacRouteData = evacRoutes[0]?.geometry;
 
   // Cross-panel selection: fly to an incident when selected from IncidentCards
   const { selectedIncidentId } = useDashboardInteraction();
@@ -90,20 +100,13 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
   useEffect(() => {
     if (!selectedIncidentId || !mapRef.current) return;
     
-    // Find the target incident by mapping INC-00x to the localized layer index
-    const match = selectedIncidentId.match(/INC-00(\d+)/);
-    let target = null;
-    if (match) {
-      const index = parseInt(match[1], 10) - 1;
-      target = baseIncidents[index];
-    } else {
-      target = baseIncidents.find((inc: any) => inc.id === selectedIncidentId);
-    }
+    // Find the target incident by ID
+    const target = incidents.find((inc: any) => inc.id === selectedIncidentId);
 
     if (target) {
       // Smoothly move the map to the incident and slightly increase zoom
       mapRef.current.flyTo({
-        center: [target.lng, target.lat],
+        center: [target.location.lng, target.location.lat],
         zoom: 13.5,
         pitch: 45,
         duration: 1000,
@@ -119,14 +122,14 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
         essential: true,
       });
     }
-  }, [selectedIncidentId, localized.incidents, currentCity]);
+  }, [selectedIncidentId, incidents, currentCity]);
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5, delay: 0.1 }}
-      className="relative flex flex-col h-full w-full bg-[#080D18] min-h-0"
+      className="relative flex flex-col min-h-full w-full bg-[#080D18]"
     >
       <div className="absolute inset-0 z-0">
       <Map
@@ -146,34 +149,34 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
         onClick={() => setSelectedIncident(null)}
       >
         {/* ── Risk Zones ── */}
-        {showRiskZones && (
-          <Source id="flood-zone-source" type="geojson" data={localized.floodZone}>
+        {showRiskZones && floodZoneData && (
+          <Source id="flood-zone-source" type="geojson" data={floodZoneData}>
             <Layer {...floodFillLayer} />
             <Layer {...floodLineLayer} />
           </Source>
         )}
 
         {/* ── Evacuation Routes ── */}
-        {showEvacRoutes && (
-          <Source id="evac-route-source" type="geojson" data={localized.evacRoute}>
+        {showEvacRoutes && evacRouteData && (
+          <Source id="evac-route-source" type="geojson" data={evacRouteData}>
             <Layer {...evacLineLayer} />
           </Source>
         )}
 
         {/* ── Simulation: Flood Overlay (stage 4+) ── */}
-        {showFloodOverlay && (
-          <Source id="sim-flood-source" type="geojson" data={localized.simFlood}>
+        {showFloodOverlay && simFloodData && (
+          <Source id="sim-flood-source" type="geojson" data={simFloodData}>
             <Layer {...simFloodFill} />
             <Layer {...simFloodLine} />
           </Source>
         )}
 
         {/* ── Flood Incident Markers 🌊 ── */}
-        {showIncidents && baseIncidents.map((inc: any) => (
+        {showIncidents && incidents.map((inc: any) => (
           <Marker
             key={inc.id}
-            longitude={inc.lng}
-            latitude={inc.lat}
+            longitude={inc.location.lng}
+            latitude={inc.location.lat}
             anchor="center"
             onClick={(e) => {
               e.originalEvent.stopPropagation();
@@ -205,7 +208,7 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
         ))}
 
         {/* ── Rescue Team Markers 🚑 ── */}
-        {showResources && localized.rescue.map((res) => (
+        {showResources && resources.map((res: any) => (
           <Marker key={res.id} longitude={res.lng} latitude={res.lat} anchor="center">
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
@@ -224,7 +227,7 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
         ))}
 
         {/* ── Shelter Markers 🏠 ── */}
-        {showResources && localized.shelters.map((shl) => (
+        {showResources && shelters.map((shl: any) => (
           <Marker key={shl.id} longitude={shl.lng} latitude={shl.lat} anchor="center">
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
@@ -243,7 +246,7 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
         ))}
 
         {/* ── Hospital Markers 🏥 ── */}
-        {showResources && localized.hospitals.map((hosp) => (
+        {showResources && hospitals.map((hosp: any) => (
           <Marker key={hosp.id} longitude={hosp.lng} latitude={hosp.lat} anchor="center">
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
@@ -313,7 +316,7 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
       />
 
       {/* ── UI Overlay Layer (Normal Document Flow) ── */}
-      <div className="relative flex flex-col flex-1 z-10 overflow-y-auto overflow-x-hidden scrollbar-hide pointer-events-none min-h-0">
+      <div className="relative flex flex-col z-10 overflow-x-hidden pointer-events-none min-h-full w-full">
         
         {/* Top Area: Filters + Weather */}
         <div className="flex flex-col shrink-0">

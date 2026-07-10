@@ -2,10 +2,8 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import type { Incident, Severity, IncidentType, IncidentStatus } from '@/types/incident';
-import { MOCK_INCIDENTS } from '@/data/mockIncidents';
 import { SEVERITY_ORDER } from '@/utils/severity';
 import { useCity } from '@/src/context/CityContext';
-import { localizeData } from '@/src/data/cities';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
 
@@ -26,18 +24,9 @@ const DEFAULT_FILTERS: IncidentFilters = {
 export function useIncidents() {
   const { currentCity } = useCity();
 
-  // ── Incident data — starts from localised mock, replaced by API when available ──
-  const mockFallback = useMemo(
-    () => localizeData(MOCK_INCIDENTS, currentCity),
-    [currentCity],
-  );
-  const [incidents, setIncidents] = useState<Incident[]>(mockFallback);
-  const [isLoadingIncidents, setIsLoadingIncidents] = useState(false);
-
-  // ── Sync mock fallback when city changes (before API responds) ───────────
-  useEffect(() => {
-    setIncidents(mockFallback);
-  }, [mockFallback]);
+  // ── Incident data — fetched exclusively from API ──
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [isLoadingIncidents, setIsLoadingIncidents] = useState(true);
 
   // ── Fetch from backend on city change ────────────────────────────────────
   useEffect(() => {
@@ -59,11 +48,10 @@ export function useIncidents() {
         }
       } catch (err) {
         if (!cancelled) {
-          console.warn(
-            '[CityNerve] Incidents API unavailable — using local mock data.',
+          console.error(
+            '[CityNerve] Incidents API unavailable.',
             err,
           );
-          // mockFallback is already set via the effect above — no-op needed
         }
       } finally {
         if (!cancelled) setIsLoadingIncidents(false);

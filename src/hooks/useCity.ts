@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { SUPPORTED_CITIES, DEFAULT_CITY, type CityProfile } from '@/src/data/cities';
+import { DEFAULT_CITY, type CityProfile } from '@/src/data/cities';
 
 const API_BASE = 'http://127.0.0.1:8000';
 
@@ -72,7 +72,7 @@ function findNearestCity(lat: number, lng: number, cities: CityProfile[]): CityP
 // Hook
 // ---------------------------------------------------------------------------
 export function useCityInternal(): UseCityReturn {
-  const [availableCities, setAvailableCities] = useState<CityProfile[]>(SUPPORTED_CITIES);
+  const [availableCities, setAvailableCities] = useState<CityProfile[]>([]);
   const [isLoadingCities, setIsLoadingCities] = useState(true);
   const [currentCity, setCurrentCity] = useState<CityProfile>(DEFAULT_CITY);
   const [isDetecting, setIsDetecting] = useState(false);
@@ -103,8 +103,7 @@ export function useCityInternal(): UseCityReturn {
         }
       } catch (err) {
         if (!cancelled) {
-          console.warn('[CityNerve] Could not reach backend — using local city data.', err);
-          // availableCities already initialised to SUPPORTED_CITIES
+          console.error('[CityNerve] Could not reach backend for cities.', err);
         }
       } finally {
         if (!cancelled) setIsLoadingCities(false);
@@ -121,8 +120,7 @@ export function useCityInternal(): UseCityReturn {
 
   const setCity = useCallback((cityId: string) => {
     // Search both the live list and the local fallback so selection never breaks
-    const city = availableCities.find(c => c.id === cityId)
-              ?? SUPPORTED_CITIES.find(c => c.id === cityId);
+    const city = availableCities.find(c => c.id === cityId);
     if (city) setCurrentCity(city);
   }, [availableCities]);
 

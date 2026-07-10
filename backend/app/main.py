@@ -4,20 +4,28 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.api.router import api_router
-from app.database.mongodb import connect_to_mongo, close_mongo_connection
+from app.database.database import engine, Base, async_session_maker
 from app.services.city_service import seed_cities
 from app.services.incident_service import seed_incidents
+from app.services.scenario_seed_service import seed_scenarios
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup event
-    await connect_to_mongo(app)
-    if app.state.database is not None:
-        await seed_cities(app.state.database)
-        await seed_incidents(app.state.database)
+    # Create tables
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+        
+    # Seed data
+    async with async_session_maker() as session:
+        await seed_cities(session)
+        await seed_incidents(session)
+        await seed_scenarios(session)
+        
     yield
+    
     # Shutdown event
-    await close_mongo_connection(app)
+    await engine.dispose()
 
 def create_app() -> FastAPI:
     app = FastAPI(
@@ -30,7 +38,10 @@ def create_app() -> FastAPI:
     # Configure CORS
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"], # In production, replace with specific origins
+        allow_origins=[
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

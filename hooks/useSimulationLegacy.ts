@@ -12,7 +12,6 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useCity } from '@/src/context/CityContext';
-import { CITY_SCENARIOS } from '@/data/cityScenarios';
 import {
   SIMULATION_DURATION,
   PHASE_TIMESTAMPS,
@@ -74,10 +73,7 @@ function getStageForElapsed(elapsed: number): number {
 export function useSimulation(): SimulationState {
   const { currentCity } = useCity();
 
-  // Load the active city scenario (fallback to Mumbai if not explicitly mapped)
-  const scenario = useMemo(() => {
-    return CITY_SCENARIOS[currentCity.id] || CITY_SCENARIOS['mumbai'];
-  }, [currentCity.id]);
+  // Scenario mock data removed — frontend now relies on API hooks
 
   const [status, setStatus] = useState<SimStatus>('idle');
   const [elapsed, setElapsed] = useState(0);
@@ -130,7 +126,7 @@ export function useSimulation(): SimulationState {
   const progress    = elapsed / SIMULATION_DURATION;
   const threatLevel = PHASE_THREAT[phase]      ?? 'LOW';
   const confidence  = PHASE_CONFIDENCE[phase]  ?? 68;
-  const weather     = scenario.weather[phase]  ?? scenario.weather[0];
+  const weather     = PHASE_RESOURCES[0] as any; // mock data removed
   const resources   = PHASE_RESOURCES[phase]   ?? PHASE_RESOURCES[0];
 
   // Stage 4+ → flood polygon visible on map
@@ -141,20 +137,9 @@ export function useSimulation(): SimulationState {
   const showPrediction   = phase >= 3;
 
   // Incident injection
-  const simIncidents = useMemo<SimIncident[]>(() => {
-    if (phase < 2)  return [];
-    if (phase >= 6) return [scenario.incidents[2]]; // Resolved
-    if (phase >= 5) return [scenario.incidents[1]]; // Responding
-    return [scenario.incidents[0]];                 // Report
-  }, [phase, scenario.incidents]);
+  const simIncidents = useMemo<SimIncident[]>(() => [], []);
 
-  const feedEntries = useMemo(() => {
-    const entries: SimFeedEntry[] = [];
-    for (let s = phase; s >= 0; s--) {
-      entries.push(...(scenario.feedEntries[s] ?? []));
-    }
-    return entries;
-  }, [phase, scenario.feedEntries]);
+  const feedEntries = useMemo(() => [], []);
 
   const nextStage = useCallback(() => {
     setElapsed((prev) => {

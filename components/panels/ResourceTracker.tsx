@@ -21,7 +21,7 @@ import { formatRelativeTime, formatETA } from '@/utils/format';
 import { useState, useEffect } from 'react';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useCity } from '@/src/context/CityContext';
-import { CITY_SCENARIOS } from '@/data/cityScenarios';
+import { useResources } from '@/hooks/useResources';
 
 const TYPE_ICONS: Record<ResourceType, React.ElementType> = {
   fire_engine: Flame,
@@ -114,9 +114,9 @@ function ResourceCard({ resource }: { resource: Resource }) {
 export function ResourceTracker() {
   const sim = useSimulationContext();
   const { currentCity } = useCity();
-  const scenario = CITY_SCENARIOS[currentCity.id] || CITY_SCENARIOS['mumbai'];
+  const { resources } = useResources(currentCity.id);
 
-  const deployed: Resource[] = scenario.mapLayers.rescue.map((r: any, i: number) => ({
+  const deployed: Resource[] = resources.map((r: any, i: number) => ({
     id: r.id,
     type: 'rescue_team' as const,
     status: 'deployed' as const,
@@ -126,7 +126,7 @@ export function ResourceTracker() {
     eta: 300,
     personnel: 12,
     assignedIncidentId: `INC-00${i + 1}`,
-    location: { lat: r.latitude ?? 0, lng: r.longitude ?? 0, address: r.name ?? '' },
+    location: { lat: r.lat ?? 0, lng: r.lng ?? 0, address: r.name ?? '' },
     lastUpdated: new Date().toISOString(),
   }));
 

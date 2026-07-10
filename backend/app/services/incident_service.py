@@ -9,11 +9,11 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
-from bson import ObjectId
 from fastapi import HTTPException, status
-from motor.motor_asyncio import AsyncIOMotorDatabase
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func, desc
 
-from app.models.incident import INCIDENT_COLLECTION
+from app.models.incident import Incident
 from app.schemas.incident import IncidentCreate, IncidentUpdate, IncidentResponse
 
 logger = logging.getLogger(__name__)
@@ -27,74 +27,80 @@ def _now() -> str:
 def _ago(minutes: int) -> str:
     return (datetime.now(timezone.utc) - timedelta(minutes=minutes)).isoformat()
 
-def map_incident(doc: dict) -> IncidentResponse:
+def map_incident(doc: Incident) -> IncidentResponse:
     return IncidentResponse(
-        id=str(doc["_id"]),
-        cityId=doc["cityId"],
-        type=doc["type"],
-        severity=doc["severity"],
-        status=doc["status"],
-        title=doc["title"],
-        description=doc["description"],
-        location=doc["location"],
-        timestamp=doc["timestamp"],
-        updatedAt=doc["updatedAt"],
-        affectedPopulation=doc["affectedPopulation"],
-        casualties=doc["casualties"],
-        resourcesDeployed=doc.get("resourcesDeployed", []),
-        aiRiskScore=doc["aiRiskScore"],
-        trending=doc["trending"],
+        id=doc.id,
+        cityId=doc.cityId,
+        type=doc.type,
+        severity=doc.severity,
+        status=doc.status,
+        title=doc.title,
+        description=doc.description,
+        location=doc.location,
+        timestamp=doc.timestamp,
+        updatedAt=doc.updatedAt,
+        affectedPopulation=doc.affectedPopulation,
+        casualties=doc.casualties,
+        resourcesDeployed=doc.resourcesDeployed or [],
+        aiRiskScore=doc.aiRiskScore,
+        trending=doc.trending,
     )
 
 
 # ── CRUD ──────────────────────────────────────────────────────────────────────
 
 async def get_incidents_by_city(
-    db: AsyncIOMotorDatabase, city_id: str
+    db: AsyncSession, city_id: str
 ) -> List[IncidentResponse]:
-    cursor = db[INCIDENT_COLLECTION].find({"cityId": city_id}).sort("aiRiskScore", -1)
-    docs = await cursor.to_list(length=50)
+    result = await db.execute(select(Incident).where(Incident.cityId == city_id).order_by(desc(Incident.aiRiskScore)).limit(50))
+    docs = result.scalars().all()
     return [map_incident(d) for d in docs]
 
 
 async def get_incident_by_id(
-    db: AsyncIOMotorDatabase, incident_id: str
+    db: AsyncSession, incident_id: str
 ) -> IncidentResponse:
-    if not ObjectId.is_valid(incident_id):
-        raise HTTPException(status_code=400, detail="Invalid incident ID format")
-    doc = await db[INCIDENT_COLLECTION].find_one({"_id": ObjectId(incident_id)})
+    result = await db.execute(select(Incident).where(Incident.id == incident_id))
+    doc = result.scalar_one_or_none()
     if not doc:
         raise HTTPException(status_code=404, detail="Incident not found")
     return map_incident(doc)
 
 
 async def create_incident(
-    db: AsyncIOMotorDatabase, data: IncidentCreate
+    db: AsyncSession, data: IncidentCreate
 ) -> IncidentResponse:
     now = _now()
     payload = data.model_dump()
     payload["timestamp"] = now
     payload["updatedAt"] = now
-    result = await db[INCIDENT_COLLECTION].insert_one(payload)
-    created = await db[INCIDENT_COLLECTION].find_one({"_id": result.inserted_id})
-    return map_incident(created)
+    
+    new_incident = Incident(**payload)
+    db.add(new_incident)
+    await db.commit()
+    await db.refresh(new_incident)
+    return map_incident(new_incident)
 
 
 async def update_incident(
-    db: AsyncIOMotorDatabase, incident_id: str, data: IncidentUpdate
+    db: AsyncSession, incident_id: str, data: IncidentUpdate
 ) -> IncidentResponse:
-    if not ObjectId.is_valid(incident_id):
-        raise HTTPException(status_code=400, detail="Invalid incident ID format")
     updates = {k: v for k, v in data.model_dump().items() if v is not None}
     if not updates:
         raise HTTPException(status_code=400, detail="No fields to update")
     updates["updatedAt"] = _now()
-    result = await db[INCIDENT_COLLECTION].update_one(
-        {"_id": ObjectId(incident_id)}, {"$set": updates}
-    )
-    if result.matched_count == 0:
+    
+    result = await db.execute(select(Incident).where(Incident.id == incident_id))
+    incident = result.scalar_one_or_none()
+    if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
-    return await get_incident_by_id(db, incident_id)
+        
+    for key, value in updates.items():
+        setattr(incident, key, value)
+        
+    await db.commit()
+    await db.refresh(incident)
+    return map_incident(incident)
 
 
 # ── Seed data (city-specific, 5 per city) ────────────────────────────────────
@@ -389,9 +395,10 @@ _SEED: List[dict] = [
 ]
 
 
-async def seed_incidents(db: AsyncIOMotorDatabase) -> None:
+async def seed_incidents(db: AsyncSession) -> None:
     """Seed incidents if the collection is empty."""
-    count = await db[INCIDENT_COLLECTION].count_documents({})
+    result = await db.execute(select(func.count(Incident.id)))
+    count = result.scalar_one()
     if count > 0:
         logger.info("Incidents collection already seeded (%d docs). Skipping.", count)
         return
@@ -404,7 +411,8 @@ async def seed_incidents(db: AsyncIOMotorDatabase) -> None:
         doc = dict(seed)
         doc["timestamp"] = _ago(15 + i * 20)
         doc["updatedAt"] = _ago(i * 3)
-        docs.append(doc)
+        docs.append(Incident(**doc))
 
-    await db[INCIDENT_COLLECTION].insert_many(docs)
+    db.add_all(docs)
+    await db.commit()
     logger.info("Successfully seeded %d incidents.", len(docs))

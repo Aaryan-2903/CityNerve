@@ -9,12 +9,12 @@ adds its own delta on top when a simulation is running.
 """
 
 import logging
-from typing import Optional
 
 from fastapi import HTTPException, status
-from motor.motor_asyncio import AsyncIOMotorDatabase
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
-from app.models.city import CITY_COLLECTION
+from app.models.city import City
 from app.schemas.dashboard import DashboardResponse, WeatherSummary
 
 logger = logging.getLogger(__name__)
@@ -76,8 +76,8 @@ def _city_key(name: str) -> str:
     return name.lower().replace(" ", "")
 
 
-def _compute_metrics(city_doc: dict) -> DashboardResponse:
-    raw_name = city_doc.get("name", "Unknown")
+def _compute_metrics(city_doc: City) -> DashboardResponse:
+    raw_name = city_doc.name
     city_key = _city_key(raw_name)
     city_id  = city_key  # matches frontend CityProfile.id convention
 
@@ -116,15 +116,16 @@ def _compute_metrics(city_doc: dict) -> DashboardResponse:
 
 
 async def get_dashboard_for_city(
-    db: AsyncIOMotorDatabase, city_name: str
+    db: AsyncSession, city_name: str
 ) -> DashboardResponse:
     """
     Fetch the city document by name (case-insensitive) and compute dashboard metrics.
-    Raises HTTP 404 if the city is not found in MongoDB.
+    Raises HTTP 404 if the city is not found.
     """
-    doc: Optional[dict] = await db[CITY_COLLECTION].find_one(
-        {"name": {"$regex": f"^{city_name}$", "$options": "i"}, "isActive": True}
+    result = await db.execute(
+        select(City).where(City.name.ilike(city_name), City.isActive == True)
     )
+    doc = result.scalar_one_or_none()
 
     if not doc:
         logger.warning("Dashboard requested for unknown city: %s", city_name)

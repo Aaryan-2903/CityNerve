@@ -1,10 +1,10 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, Query, status
-from motor.motor_asyncio import AsyncIOMotorDatabase
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.incident import IncidentCreate, IncidentUpdate, IncidentResponse
-from app.database.connection import get_database
+from app.database.connection import get_db
 from app.services import incident_service
 
 router = APIRouter()
@@ -18,7 +18,7 @@ router = APIRouter()
 )
 async def list_incidents(
     cityId: str = Query(..., description="City ID, e.g. 'mumbai'"),
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db: AsyncSession = Depends(get_db),
 ) -> List[IncidentResponse]:
     """Return all incidents for the specified city, sorted by AI risk score descending."""
     return await incident_service.get_incidents_by_city(db, cityId)
@@ -32,7 +32,7 @@ async def list_incidents(
 )
 async def get_incident(
     incident_id: str,
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db: AsyncSession = Depends(get_db),
 ) -> IncidentResponse:
     return await incident_service.get_incident_by_id(db, incident_id)
 
@@ -45,7 +45,7 @@ async def get_incident(
 )
 async def create_incident(
     data: IncidentCreate,
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db: AsyncSession = Depends(get_db),
 ) -> IncidentResponse:
     return await incident_service.create_incident(db, data)
 
@@ -59,6 +59,6 @@ async def create_incident(
 async def update_incident(
     incident_id: str,
     data: IncidentUpdate,
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db: AsyncSession = Depends(get_db),
 ) -> IncidentResponse:
     return await incident_service.update_incident(db, incident_id, data)

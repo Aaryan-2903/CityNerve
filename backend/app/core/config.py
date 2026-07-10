@@ -5,8 +5,7 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     ENVIRONMENT: str = "development"
     
-    MONGODB_URI: str = "mongodb://localhost:27017"
-    DATABASE_NAME: str = "citynerve"
+    DATABASE_URL: str = "sqlite+aiosqlite:///./app.db"
     
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

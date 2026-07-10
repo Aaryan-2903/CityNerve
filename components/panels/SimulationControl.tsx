@@ -5,7 +5,6 @@ import { Play, Pause, RotateCcw, CheckCircle2, Zap, ChevronLeft, ChevronRight } 
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useCity } from '@/src/context/CityContext';
-import { CITY_SCENARIOS } from '@/data/cityScenarios';
 import { STAGE_LABELS } from '@/data/simulationScenario';
 
 interface SimulationControlProps {
@@ -19,8 +18,6 @@ interface SimulationControlProps {
 export function SimulationControl({ compact = false }: SimulationControlProps) {
   const sim = useSimulationContext();
   const { currentCity } = useCity();
-  const scenario = CITY_SCENARIOS[currentCity.id] || CITY_SCENARIOS['mumbai'];
-
   const status      = sim?.status      ?? 'idle';
   const phase       = sim?.phase       ?? 0;
   const elapsed     = sim?.elapsed     ?? 0;
@@ -61,7 +58,7 @@ export function SimulationControl({ compact = false }: SimulationControlProps) {
               </span>
               <Zap className="w-3 h-3" />
               Start Simulation
-              <span className="text-blue-400/50 font-normal">· {scenario.simulationTitle}</span>
+              <span className="text-blue-400/50 font-normal">· {currentCity.name} Flash Flood</span>
             </motion.button>
           ) : isComplete ? (
             /* COMPLETE */
@@ -230,7 +227,7 @@ export function SimulationControl({ compact = false }: SimulationControlProps) {
               Start Flood Simulation
             </p>
             <p className="text-[10px] text-blue-400/70 font-medium tracking-widest uppercase">
-              {scenario.simulationTitle} · 60 sec
+              {currentCity.name} Flash Flood · 60 sec
             </p>
           </div>
           <Play className="relative w-4 h-4 text-blue-400 ml-1 group-hover:translate-x-0.5 transition-transform" />

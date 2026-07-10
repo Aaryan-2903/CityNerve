@@ -11,12 +11,11 @@ interface TopBarProps {
 
 import { useState, useRef, useEffect } from 'react';
 import { useCity } from '@/src/context/CityContext';
-import { SUPPORTED_CITIES } from '@/src/data/cities';
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin, Navigation, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function CitySwitcher() {
-  const { currentCity, setCity, isDetecting, detectLocation } = useCity();
+  const { currentCity, setCity, isDetecting, detectLocation, availableCities, isLoadingCities } = useCity();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +43,11 @@ function CitySwitcher() {
         {isOpen && (
           <div className="absolute top-full left-0 mt-2 w-48 rounded-lg border border-white/[0.1] bg-[#0F1524] shadow-2xl overflow-hidden z-50">
             <div className="max-h-[300px] overflow-y-auto p-1">
-              {SUPPORTED_CITIES.map((city) => (
+              {isLoadingCities ? (
+                <div className="p-4 flex justify-center"><Loader2 className="w-4 h-4 animate-spin text-white/50" /></div>
+              ) : availableCities.length === 0 ? (
+                <div className="p-3 text-xs text-white/50 text-center">No cities available</div>
+              ) : availableCities.map((city) => (
                 <button
                   key={city.id}
                   onClick={() => {

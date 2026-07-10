@@ -1,9 +1,9 @@
-from fastapi import Request
-from motor.motor_asyncio import AsyncIOMotorDatabase
+from typing import AsyncGenerator
+from sqlalchemy.ext.asyncio import AsyncSession
 
-def get_database(request: Request) -> AsyncIOMotorDatabase:
-    """
-    Dependency to retrieve the database instance from the app state.
-    This avoids global mutable state by fetching it from the incoming request.
-    """
-    return request.app.state.database
+from app.database.database import async_session_maker
+
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """Dependency to retrieve an AsyncSession for SQLAlchemy."""
+    async with async_session_maker() as session:
+        yield session
