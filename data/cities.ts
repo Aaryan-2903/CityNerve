@@ -15,3 +15,15 @@ export const DEFAULT_CITY: CityProfile = {
   latitude: 19.0760,
   longitude: 72.8777,
 };
+
+export const SUPPORTED_CITIES: CityProfile[] = [
+  DEFAULT_CITY,
+  {
+    id: 'delhi',
+    name: 'Delhi',
+    displayLabel: 'Delhi Command Zone',
+    weatherLabel: 'Delhi Metro Area',
+    latitude: 28.7041,
+    longitude: 77.1025,
+  }
+];

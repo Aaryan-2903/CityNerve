@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { DEFAULT_CITY, type CityProfile } from '@/data/cities';
+import { DEFAULT_CITY, type CityProfile } from '@/src/data/cities';
 
 const API_BASE = 'http://127.0.0.1:8000';
 
@@ -49,8 +49,8 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
@@ -96,7 +96,7 @@ export function useCityInternal(): UseCityReturn {
           setAvailableCities(mapped);
 
           // Re-sync currentCity to the mapped list (match by name to be safe)
-          setCurrentCity((prev: CityProfile) => {
+          setCurrentCity(prev => {
             const match = mapped.find(c => c.name === prev.name);
             return match ?? mapped[0] ?? prev;
           });
