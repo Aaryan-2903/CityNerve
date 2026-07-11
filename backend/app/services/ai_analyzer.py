@@ -22,7 +22,9 @@ def analyze_citizen_report(data: dict) -> Dict[str, Any]:
         "fallen_tree": "Fallen Tree Blocking Path",
         "building_damage": "Structural Damage Reported",
     }
-    title = title_map.get(incident_type, f"Citizen Report: {incident_type.title()}")
+    title = data.get("title")
+    if not title:
+        title = title_map.get(incident_type, f"Citizen Report: {incident_type.title()}")
     
     # Estimate Severity
     severity = "medium"

@@ -17,11 +17,12 @@ export function SimulationControls() {
   if (!sim) return null;
 
   const { 
-    status, 
-    phase, 
+    status,
+    phase,
     progress, 
+    elapsed,
     startSimulation, 
-    pauseSimulation, 
+    pauseSimulation,
     resumeSimulation, 
     resetSimulation, 
     nextStage, 
@@ -49,9 +50,12 @@ export function SimulationControls() {
           <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">
             Progress
           </span>
-          <span className="text-sm font-bold text-blue-400 tabular-nums">
-            {Math.round(progress * 100)}%
-          </span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-[10px] font-mono text-white/40">{elapsed}s</span>
+            <span className="text-sm font-bold text-blue-400 tabular-nums">
+              {Math.round(progress * 100)}%
+            </span>
+          </div>
         </div>
       </div>
 

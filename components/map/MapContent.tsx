@@ -7,6 +7,7 @@ import type { LayerProps } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { MetricCards } from '@/components/cards/MetricCards';
 import { WeatherWidget } from '@/components/panels/WeatherWidget';
+import { SimulationControls } from '@/components/simulation/SimulationControls';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useCity } from '@/context/CityContext';
@@ -376,8 +377,9 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
 
           {/* Weather Panel (Only in Desktop/Expanded mode, directly under filters) */}
           {showMetricCards && (
-            <div className="px-3 sm:px-5 pt-2 pointer-events-auto w-full max-w-[340px]">
+            <div className="flex flex-col gap-2 px-3 sm:px-5 pt-2 pointer-events-auto w-full max-w-[340px]">
               <WeatherWidget />
+              <SimulationControls />
             </div>
           )}
         </div>

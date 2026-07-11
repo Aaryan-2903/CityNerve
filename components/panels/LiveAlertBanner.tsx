@@ -1,68 +1,62 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, AlertCircle, Info } from 'lucide-react';
-import { useDashboardData } from '@/hooks/useDashboardData';
 import { useSimulationContext } from '@/context/SimulationContext';
+import { SIMULATION_ALERTS } from '@/data/simulationAlerts';
+import { useEffect, useState } from 'react';
 
 export function LiveAlertBanner() {
-  const { metricsData, riskScore, liveWeather } = useDashboardData();
   const sim = useSimulationContext();
-  
-  let alert = null;
-  const roadsClosed = parseInt(metricsData?.roads?.value ?? '0');
-  
-  if ((riskScore ?? 0) > 80) {
-    alert = {
-      type: 'critical',
-      message: 'CRITICAL ALERT: Imminent Threat in Sector 4',
-      icon: AlertTriangle,
-      color: 'bg-red-500/20 text-red-400 border-red-500/30',
-      dot: 'bg-red-400'
-    };
-  } else if ((sim?.phase ?? 0) > 3) {
-    alert = {
-      type: 'high',
-      message: 'FLASH FLOOD WARNING: Evacuation Orders in Effect',
-      icon: AlertTriangle,
-      color: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-      dot: 'bg-orange-400'
-    };
-  } else if (roadsClosed > 0) {
-    alert = {
-      type: 'medium',
-      message: `ROAD CLOSURES: ${roadsClosed} major arterials blocked`,
-      icon: AlertCircle,
-      color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-      dot: 'bg-yellow-400'
-    };
-  } else if (liveWeather?.label?.toLowerCase().includes('storm') || liveWeather?.label?.toLowerCase().includes('rain')) {
-    alert = {
-      type: 'info',
-      message: `WEATHER ADVISORY: ${liveWeather.label} approaching`,
-      icon: Info,
-      color: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      dot: 'bg-blue-400'
-    };
-  }
+  const phase = sim?.phase ?? 0;
+  const alert = SIMULATION_ALERTS[phase];
+
+  // We want to update the timestamp when the phase changes
+  const [timestamp, setTimestamp] = useState<string>('');
+
+  useEffect(() => {
+    setTimestamp(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+  }, [phase, sim?.status]);
+
+  if (!alert) return null;
+
+  const Icon = alert.icon;
 
   return (
-    <AnimatePresence>
-      {alert && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          className={`flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold tracking-widest uppercase border-b backdrop-blur-md z-50 ${alert.color}`}
-        >
-          <span className="relative flex h-2 w-2 mr-1">
-            <span className={`absolute inline-flex h-full w-full rounded-full animate-ping opacity-75 ${alert.dot}`} />
-            <span className={`relative inline-flex h-2 w-2 rounded-full ${alert.dot}`} />
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={phase}
+        initial={{ opacity: 0, y: -20, height: 0 }}
+        animate={{ opacity: 1, y: 0, height: 'auto' }}
+        exit={{ opacity: 0, y: -20, height: 0 }}
+        transition={{ duration: 0.4, ease: "easeInOut" }}
+        className={`flex items-center justify-between px-4 sm:px-6 py-2.5 sm:py-3 border-b backdrop-blur-md z-50 ${alert.colorClass}`}
+      >
+        <div className="flex items-center gap-3 sm:gap-4 flex-1">
+          <span className="relative flex h-2.5 w-2.5 shrink-0">
+            <span className={`absolute inline-flex h-full w-full rounded-full animate-ping opacity-75 ${alert.dotClass}`} />
+            <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${alert.dotClass}`} />
           </span>
-          <alert.icon className="w-4 h-4 mr-1" />
-          {alert.message}
-        </motion.div>
-      )}
+          <Icon className="w-5 h-5 shrink-0" />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 overflow-hidden">
+            <span className="text-xs sm:text-sm font-bold tracking-widest uppercase shrink-0">
+              {alert.title}
+            </span>
+            <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-current opacity-30 shrink-0" />
+            <span className="text-[11px] sm:text-xs font-medium opacity-90 truncate">
+              {alert.description}
+            </span>
+          </div>
+        </div>
+        
+        <div className="flex flex-col items-end shrink-0 ml-4">
+          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest opacity-60">
+            {alert.severity}
+          </span>
+          <span className="text-[10px] sm:text-[11px] font-mono opacity-80">
+            {timestamp}
+          </span>
+        </div>
+      </motion.div>
     </AnimatePresence>
   );
 }

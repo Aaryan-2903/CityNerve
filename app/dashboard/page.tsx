@@ -38,7 +38,7 @@ export default function DashboardPage() {
             <div className="hidden md:flex h-full flex-col overflow-y-auto overflow-x-hidden">
 
               {/* Upper: Risk Map */}
-              <div className="relative flex-1 min-h-[400px] shrink-0 border-b border-white/[0.05]">
+              <div className="relative flex flex-col flex-1 border-b border-white/[0.05]">
                 <RiskMap onExpandClick={openMap} />
               </div>
 

@@ -82,6 +82,7 @@ class IncidentResponse(BaseModel):
 class CitizenIncidentCreate(BaseModel):
     cityId: str
     type: IncidentType
+    title: Optional[str] = None
     description: str
     location: IncidentLocation
     reporterName: Optional[str] = None

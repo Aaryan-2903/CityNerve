@@ -28,24 +28,23 @@ export function useIncidents() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    const fetchIncidents = async () => {
-      setIsLoading(true);
-      try {
-        const res = await fetch(`${API_BASE}/api/v1/incidents?cityId=${currentCity.id}`);
-        if (!res.ok) throw new Error('Failed to fetch incidents');
-        const data = await res.json();
-        if (!cancelled) setIncidents(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    };
-    fetchIncidents();
-    return () => { cancelled = true; };
+  const fetchIncidents = useCallback(async (isSilent = false) => {
+    if (!isSilent) setIsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/incidents?cityId=${currentCity.id}`);
+      if (!res.ok) throw new Error('Failed to fetch incidents');
+      const data = await res.json();
+      setIncidents(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      if (!isSilent) setIsLoading(false);
+    }
   }, [currentCity.id]);
+
+  useEffect(() => {
+    fetchIncidents();
+  }, [fetchIncidents]);
 
   const filteredIncidents = useMemo(() => {
     return incidents
@@ -112,5 +111,6 @@ export function useIncidents() {
     selectIncident,
     updateFilter,
     resetFilters,
+    refetch: fetchIncidents,
   };
 }

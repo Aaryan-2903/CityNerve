@@ -6,6 +6,7 @@ import { X, Send, AlertTriangle, MapPin, Camera, User, Loader2, CheckCircle2 } f
 import { Button } from '@/components/ui/button';
 import { useCity } from '@/context/CityContext';
 import { useIncidents } from '@/hooks/useIncidents';
+import { useAIDecisionContext } from '@/context/AIDecisionContext';
 
 interface ReportIncidentModalProps {
   isOpen: boolean;
@@ -25,7 +26,8 @@ const INCIDENT_TYPES = [
 
 export function ReportIncidentModal({ isOpen, onClose }: ReportIncidentModalProps) {
   const { currentCity } = useCity();
-  const { updateFilter } = useIncidents(); 
+  const { updateFilter, refetch } = useIncidents(); 
+  const { addCustomRecommendation, addTimelineEvent } = useAIDecisionContext();
   
   const [type, setType] = useState('fire');
   const [title, setTitle] = useState('');
@@ -58,12 +60,9 @@ export function ReportIncidentModal({ isOpen, onClose }: ReportIncidentModalProp
     setError('');
     
     try {
-      // Create a standard incident, filling in default required fields
       const payload = {
         cityId: currentCity.id,
         type,
-        severity: 'low',
-        status: 'active',
         title,
         description,
         location: {
@@ -72,22 +71,46 @@ export function ReportIncidentModal({ isOpen, onClose }: ReportIncidentModalProp
           address: 'User Reported Location',
           district: 'Reported Area'
         },
-        imagePath: image ? image.name : null, // Mock storing the image name
-        affectedPopulation: 0,
-        casualties: 0,
-        resourcesDeployed: [],
-        aiRiskScore: 0,
-        trending: 'stable'
+        imagePath: image ? image.name : null, 
       };
 
-      const res = await fetch('http://127.0.0.1:8000/api/v1/incidents', {
+      const res = await fetch('http://127.0.0.1:8000/api/v1/incidents/citizen', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) throw new Error('Failed to submit report');
+      const data = await res.json();
       
+      // 1. Inject AI recommendation to context
+      if (data.aiRecommendation) {
+        addCustomRecommendation({
+          id: `ai-rec-${Date.now()}`,
+          title: data.aiRecommendation.title,
+          recommendation: data.aiRecommendation.recommendation,
+          confidence: data.aiRecommendation.confidence,
+          reasoning: data.aiRecommendation.reasoning,
+          priority: data.aiRecommendation.priority,
+          status: 'Pending'
+        });
+      }
+      
+      // 2. Inject timeline event
+      if (data.timelineEventText) {
+        addTimelineEvent({
+          id: `feed-evt-${Date.now()}`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          text: data.timelineEventText,
+          dotColor: '#F59E0B',
+          category: 'report',
+          severity: data.incident?.severity === 'critical' ? 'Critical' : 'High'
+        });
+      }
+
+      // 3. Silently refetch incidents to update map, KPI cards, and lists
+      refetch(true);
+
       setIsSuccess(true);
       
       setTimeout(() => {
@@ -99,9 +122,6 @@ export function ReportIncidentModal({ isOpen, onClose }: ReportIncidentModalProp
         setLng('');
         setImage(null);
         onClose();
-        // Force refresh of incidents 
-        updateFilter('search', ' ');
-        setTimeout(() => updateFilter('search', ''), 100);
       }, 2000);
       
     } catch (err: any) {
