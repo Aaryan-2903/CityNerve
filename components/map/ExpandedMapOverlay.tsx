@@ -91,10 +91,23 @@ export function ExpandedMapOverlay({ isOpen, onClose }: ExpandedMapOverlayProps)
           role="dialog"
           aria-label="Expanded map view"
         >
+          {/* ── Full-viewport map ─────────────────────────────────────────── */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              overflow: 'hidden',
+            }}
+          >
+            <MapContent showMetricCards />
+          </div>
+
           {/* ── Close controls — top-right, always on top ────────────────── */}
           <div
-            style={{ position: 'absolute', top: 12, right: 12, zIndex: 10 }}
-            className="flex items-center gap-2"
+            style={{ position: 'absolute', top: 12, right: 12, zIndex: 50 }}
+            className="flex items-center gap-2 pointer-events-auto"
           >
             {/* Label pill */}
             <div className="flex items-center gap-1.5 rounded-full border border-white/[0.1] bg-[#0B0F1C]/90 px-3 py-1.5 backdrop-blur-md shadow-lg">
@@ -114,19 +127,6 @@ export function ExpandedMapOverlay({ isOpen, onClose }: ExpandedMapOverlayProps)
             >
               <X className="w-4 h-4" />
             </button>
-          </div>
-
-          {/* ── Full-viewport map ─────────────────────────────────────────── */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              overflow: 'hidden',
-            }}
-          >
-            <MapContent showMetricCards />
           </div>
         </motion.div>
       )}
