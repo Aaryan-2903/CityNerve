@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useDashboardInteraction } from '@/context/DashboardInteractionContext';
+import { ResourceStatusGrid } from '@/components/panels/ResourceStatusGrid';
 import type { SimIncident } from '@/data/simulationScenario';
 
 type Severity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
@@ -60,11 +61,12 @@ function IncidentCardItem({ incident, index, isSelected, onSelect }: IncidentCar
       exit={{ opacity: 0, y: -4, scale: 0.98 }}
       transition={{ duration: 0.3, delay: incident.isNew ? 0 : 0.06 * index }}
       onClick={() => onSelect(incident.id)}
+      whileTap={{ scale: 0.98 }}
       className={cn(
         'rounded-xl border p-3.5 cursor-pointer transition-all duration-200 relative',
-        'hover:brightness-110 hover:scale-[1.005] active:scale-[0.998]',
+        'hover:brightness-110 hover:shadow-md hover:border-white/30',
         incident.isNew && 'ring-1 ring-orange-500/40',
-        isSelected && 'ring-2 shadow-lg',
+        isSelected && 'ring-2 shadow-lg z-10',
       )}
       style={{
         backgroundColor: sConfig.bg,
@@ -174,22 +176,42 @@ export function IncidentCards() {
           <h2 className="text-[11px] font-bold tracking-[0.15em] text-white/70 uppercase">Incident Cards</h2>
         </div>
         <div className="flex items-center gap-2">
-          {criticalCount > 0 && (
-            <span className="flex items-center gap-1 rounded-full bg-red-500/15 border border-red-500/25 px-2 py-0.5">
-              <span className="h-1 w-1 rounded-full bg-red-500" />
-              <span className="text-[10px] font-bold text-red-400">{criticalCount} critical</span>
-            </span>
-          )}
-          {highCount > 0 && (
-            <span className="flex items-center gap-1 rounded-full bg-orange-500/15 border border-orange-500/25 px-2 py-0.5">
-              <span className="h-1 w-1 rounded-full bg-orange-400" />
-              <span className="text-[10px] font-bold text-orange-400">{highCount} high</span>
-            </span>
-          )}
+          <AnimatePresence mode="popLayout">
+            {criticalCount > 0 && (
+              <motion.span 
+                key="crit-count"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="flex items-center gap-1 rounded-full bg-red-500/15 border border-red-500/25 px-2 py-0.5"
+              >
+                <span className="h-1 w-1 rounded-full bg-red-500 animate-pulse" />
+                <motion.span key={criticalCount} initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="text-[10px] font-bold text-red-400">
+                  {criticalCount} critical
+                </motion.span>
+              </motion.span>
+            )}
+            {highCount > 0 && (
+              <motion.span 
+                key="high-count"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="flex items-center gap-1 rounded-full bg-orange-500/15 border border-orange-500/25 px-2 py-0.5"
+              >
+                <span className="h-1 w-1 rounded-full bg-orange-400 animate-pulse" />
+                <motion.span key={highCount} initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="text-[10px] font-bold text-orange-400">
+                  {highCount} high
+                </motion.span>
+              </motion.span>
+            )}
+          </AnimatePresence>
           {/* Hint text */}
           <span className="text-[9px] text-white/20 hidden sm:block">click to focus map</span>
         </div>
       </div>
+
+      <ResourceStatusGrid />
 
       {/* Incident list */}
       <ScrollArea className="flex-1 min-h-0">

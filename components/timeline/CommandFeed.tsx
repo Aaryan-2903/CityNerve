@@ -2,12 +2,11 @@
 
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap } from 'lucide-react';
+import { Zap, ShieldAlert, Activity, Radio, Truck, AlertTriangle, ArrowDown } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
-import { useDashboardInteraction } from '@/context/DashboardInteractionContext';
 import { useAIDecisionContext } from '@/context/AIDecisionContext';
 
 interface FeedEntry {
@@ -16,13 +15,21 @@ interface FeedEntry {
   text: string;
   dotColor: string;
   category: 'dispatch' | 'shelter' | 'advisory' | 'report';
+  severity?: 'Critical' | 'High' | 'Medium' | 'Low';
 }
 
-const CATEGORY_LABELS: Record<FeedEntry['category'], string> = {
-  dispatch: 'DISPATCH',
-  shelter:  'SHELTER',
-  advisory: 'ADVISORY',
-  report:   'REPORT',
+const CATEGORY_ICONS: Record<FeedEntry['category'], React.ElementType> = {
+  dispatch: Truck,
+  shelter: ShieldAlert,
+  advisory: Activity,
+  report: Radio,
+};
+
+const SEVERITY_STYLES: Record<string, string> = {
+  Critical: 'bg-red-500/10 text-red-400 border-red-500/20',
+  High: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+  Medium: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+  Low: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
 };
 
 interface FeedEntryRowProps {
@@ -30,61 +37,64 @@ interface FeedEntryRowProps {
   index: number;
   isNew?: boolean;
   isLatest?: boolean;
+  isLast?: boolean;
 }
 
-function FeedEntryRow({ entry, index, isNew, isLatest }: FeedEntryRowProps) {
+function FeedEntryRow({ entry, index, isNew, isLatest, isLast }: FeedEntryRowProps) {
+  const Icon = CATEGORY_ICONS[entry.category] || Activity;
+  const severityStyle = entry.severity ? SEVERITY_STYLES[entry.severity] : 'bg-white/5 text-white/50 border-white/10';
+
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, x: -8 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -8 }}
-      transition={{ duration: 0.3, delay: isNew ? 0 : 0.05 * index }}
-      className={cn(
-        'flex items-start gap-3 py-2.5 px-4',
-        'border-b border-white/[0.04] last:border-b-0',
-        'hover:bg-white/[0.02] transition-colors group cursor-default',
-        isNew && 'bg-white/[0.025]',
-        // Latest entry gets a subtle left-border glow
-        isLatest && 'bg-gradient-to-r from-white/[0.03] to-transparent',
-      )}
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.4, delay: isNew ? 0 : index * 0.05 }}
+      className="relative flex items-start gap-4 py-3 px-4 group"
     >
-      {/* Newest-entry left accent bar */}
-      {isLatest && (
-        <span
-          className="absolute left-0 top-0 bottom-0 w-0.5 rounded-r-full opacity-80"
-          style={{ backgroundColor: entry.dotColor }}
-        />
+      {/* Timeline connection line */}
+      {!isLast && (
+        <div className="absolute left-[33px] top-[40px] bottom-[-12px] w-[1px] bg-white/[0.05] flex justify-center">
+          <ArrowDown className="w-2.5 h-2.5 text-white/[0.1] absolute top-1/2 -translate-y-1/2" />
+        </div>
       )}
 
-      {/* Timestamp */}
-      <span className="font-mono text-[11px] text-white/25 shrink-0 pt-0.5 tabular-nums">
-        {entry.time}
-      </span>
-
-      {/* Dot indicator */}
-      <span
-        className={cn('mt-1.5 h-1.5 w-1.5 rounded-full shrink-0', isLatest && 'animate-pulse')}
-        style={{ backgroundColor: entry.dotColor, boxShadow: `0 0 6px ${entry.dotColor}60` }}
-      />
-
-      {/* Text */}
-      <p
-        className={cn(
-          'text-[12px] leading-relaxed flex-1 min-w-0 transition-colors',
-          isLatest ? 'text-white/85' : 'text-white/55 group-hover:text-white/75',
+      {/* Icon node */}
+      <div className="relative shrink-0 flex items-center justify-center mt-1 z-10">
+        <div 
+          className={cn("w-8 h-8 rounded-full flex items-center justify-center border", isLatest ? "border-white/20 bg-white/10" : "border-white/5 bg-[#0A0E1A]")}
+          style={isLatest ? { boxShadow: `0 0 15px ${entry.dotColor}30` } : {}}
+        >
+          <Icon className="w-3.5 h-3.5" style={{ color: entry.dotColor }} />
+        </div>
+        {isLatest && (
+          <span className="absolute inset-0 rounded-full border border-white/40 animate-ping opacity-20" style={{ borderColor: entry.dotColor }} />
         )}
-      >
-        {entry.text}
-      </p>
+      </div>
 
-      {/* Category tag */}
-      <span
-        className="shrink-0 text-[9px] font-bold tracking-widest opacity-0 group-hover:opacity-100 transition-opacity pt-0.5"
-        style={{ color: entry.dotColor }}
-      >
-        {CATEGORY_LABELS[entry.category]}
-      </span>
+      {/* Content */}
+      <div className={cn(
+        "flex-1 min-w-0 flex flex-col gap-1.5 p-3 rounded-xl border transition-all duration-300",
+        isLatest ? "bg-white/[0.03] border-white/[0.08]" : "bg-transparent border-transparent group-hover:bg-white/[0.01] group-hover:border-white/[0.04]"
+      )}>
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-mono text-[10px] text-white/40 tabular-nums">
+            {entry.time}
+          </span>
+          {entry.severity && (
+            <span className={cn("text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border", severityStyle)}>
+              {entry.severity}
+            </span>
+          )}
+        </div>
+        <p className={cn(
+          "text-[12px] leading-relaxed transition-colors",
+          isLatest ? "text-white/90" : "text-white/60"
+        )}>
+          {entry.text}
+        </p>
+      </div>
     </motion.div>
   );
 }
@@ -92,31 +102,35 @@ function FeedEntryRow({ entry, index, isNew, isLatest }: FeedEntryRowProps) {
 export function CommandFeed() {
   const sim = useSimulationContext();
   const { baseFeed } = useDashboardData();
-  const { selectedIncidentId } = useDashboardInteraction();
   const { approvedFeedEntries } = useAIDecisionContext();
   const feedEntries = sim?.feedEntries ?? [];
   const phase = sim?.phase ?? -1;
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to top when a new sim entry arrives (new phase)
-  useEffect(() => {
-    if (feedEntries.length === 0) return;
-    const container = scrollRef.current?.querySelector('[data-radix-scroll-area-viewport]');
-    if (container) {
-      container.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [phase]);
-
+  // Combine and sort entries by time/creation order
   const allEntries: FeedEntry[] = [
     ...(approvedFeedEntries as FeedEntry[]),
     ...(feedEntries as FeedEntry[]),
     ...baseFeed,
-  ];
+  ].map((e: any, i) => ({
+    ...e,
+    // Add fake severity for UI demo purposes if none exists
+    severity: e.severity || (e.category === 'dispatch' ? 'High' : e.category === 'report' ? 'Critical' : 'Medium')
+  }));
 
-  const latestSimId = (approvedFeedEntries.length > 0)
-    ? (approvedFeedEntries[0] as FeedEntry).id
-    : (feedEntries.length > 0 ? (feedEntries[0] as FeedEntry).id : null);
+  // Auto-scroll to bottom since it's a feed, or top if we reverse
+  // The original implementation had new items at the top. Timeline usually goes top-to-bottom.
+  // We'll keep new items at the top for dashboard logic.
+  
+  useEffect(() => {
+    const container = scrollRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+    if (container) {
+      container.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [allEntries.length]);
+
+  const latestSimId = allEntries[0]?.id;
 
   return (
     <motion.div
@@ -132,7 +146,7 @@ export function CommandFeed() {
             <Zap className="w-3 h-3 text-yellow-400" />
           </div>
           <h2 className="text-[11px] font-bold tracking-[0.15em] text-white/70 uppercase">
-            Command Feed
+            Live Operations
           </h2>
         </div>
         <div className="flex items-center gap-1.5">
@@ -140,22 +154,23 @@ export function CommandFeed() {
             <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 animate-ping opacity-60" />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-400" />
           </span>
-          <span className="text-[10px] font-mono text-white/25">LIVE</span>
+          <span className="text-[10px] font-mono text-white/25">TIMELINE</span>
         </div>
       </div>
 
       {/* Feed list */}
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-hidden">
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-hidden relative">
         <ScrollArea className="h-full">
-          <div className="flex flex-col relative">
+          <div className="flex flex-col pb-4">
             <AnimatePresence mode="popLayout">
               {allEntries.map((entry, i) => (
                 <FeedEntryRow
                   key={entry.id}
                   entry={entry}
                   index={i}
-                  isNew={feedEntries.some((f: { id: string }) => f.id === entry.id)}
+                  isNew={i === 0}
                   isLatest={entry.id === latestSimId}
+                  isLast={i === allEntries.length - 1}
                 />
               ))}
             </AnimatePresence>
@@ -164,9 +179,10 @@ export function CommandFeed() {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-white/[0.04] px-4 py-2 shrink-0">
-        <p className="text-[10px] text-white/20 font-mono">
-          {allEntries.length} events · auto-updating
+      <div className="border-t border-white/[0.04] px-4 py-2 shrink-0 bg-black/20">
+        <p className="text-[10px] text-white/30 font-mono flex justify-between">
+          <span>{allEntries.length} events logged</span>
+          <span>Auto-sync active</span>
         </p>
       </div>
     </motion.div>

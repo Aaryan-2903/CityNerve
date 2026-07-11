@@ -6,7 +6,8 @@ import { RiskMap } from '@/components/map/RiskMap';
 import { ExpandedMapOverlay } from '@/components/map/ExpandedMapOverlay';
 import { CommandFeed } from '@/components/timeline/CommandFeed';
 import { IncidentCards } from '@/components/cards/IncidentCards';
-import { AICommand } from '@/components/ai/AICommand';
+import { AIIncidentCommander } from '@/components/ai/AIIncidentCommander';
+import { LiveAlertBanner } from '@/components/panels/LiveAlertBanner';
 import { WeatherWidget } from '@/components/panels/WeatherWidget';
 import { SimulationControl } from '@/components/panels/SimulationControl';
 import { SimulationProvider } from '@/context/SimulationContext';
@@ -29,6 +30,7 @@ export default function DashboardPage() {
           <ExpandedMapOverlay isOpen={mapExpanded} onClose={closeMap} />
 
           <DashboardLayout>
+            <LiveAlertBanner />
 
             {/* ════════════════════════════════════════════════════════════════
                 DESKTOP layout  (md and up)
@@ -54,7 +56,7 @@ export default function DashboardPage() {
                   <IncidentCards />
                 </div>
                 <div className="w-[32%] min-w-0">
-                  <AICommand />
+                  <AIIncidentCommander />
                 </div>
               </div>
             </div>
@@ -96,7 +98,7 @@ export default function DashboardPage() {
               {/* 6. AI Command */}
               <div className="px-3 pt-3 pb-6">
                 <div className="rounded-2xl border border-white/[0.06] overflow-hidden h-[350px] overscroll-contain">
-                  <AICommand />
+                  <AIIncidentCommander />
                 </div>
               </div>
             </div>
