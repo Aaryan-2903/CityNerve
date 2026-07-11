@@ -17,6 +17,7 @@ IncidentStatus   = Literal["active", "contained", "resolved", "escalating"]
 IncidentType     = Literal[
     "fire", "flood", "earthquake", "hazmat", "mass_casualty",
     "infrastructure", "storm", "blackout", "tsunami", "civil_unrest",
+    "road_block", "medical", "power_outage", "fallen_tree", "building_damage"
 ]
 TrendingDir      = Literal["up", "down", "stable"]
 
@@ -35,6 +36,8 @@ class IncidentCreate(BaseModel):
     resourcesDeployed: List[str] = Field(default_factory=list)
     aiRiskScore: int = 0
     trending: TrendingDir = "stable"
+    reporterName: Optional[str] = None
+    imagePath: Optional[str] = None
 
 
 class IncidentUpdate(BaseModel):
@@ -49,6 +52,8 @@ class IncidentUpdate(BaseModel):
     resourcesDeployed: Optional[List[str]] = None
     aiRiskScore: Optional[int] = None
     trending: Optional[TrendingDir] = None
+    reporterName: Optional[str] = None
+    imagePath: Optional[str] = None
 
 
 # ── Response (what the frontend receives) ────────────────────────────────────
@@ -68,5 +73,16 @@ class IncidentResponse(BaseModel):
     resourcesDeployed: List[str]
     aiRiskScore: int
     trending: TrendingDir
+    reporterName: Optional[str] = None
+    imagePath: Optional[str] = None
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, from_attributes=True)
+
+# ── Citizen Reporting ─────────────────────────────────────────────────────────
+class CitizenIncidentCreate(BaseModel):
+    cityId: str
+    type: IncidentType
+    description: str
+    location: IncidentLocation
+    reporterName: Optional[str] = None
+    imagePath: Optional[str] = None

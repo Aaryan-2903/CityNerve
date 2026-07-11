@@ -22,8 +22,9 @@ interface DashboardAPIResponse {
   weather: {
     label: string;
     emoji: string;
-    rainfall: string;
-    forecast: string;
+    rainfall: number;
+    wind_speed: number;
+    humidity: number;
     alertText: string;
     alertLevel: string;
   };

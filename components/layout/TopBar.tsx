@@ -11,8 +11,9 @@ interface TopBarProps {
 
 import { useState, useRef, useEffect } from 'react';
 import { useCity } from '@/context/CityContext';
-import { MapPin, Navigation, Loader2 } from 'lucide-react';
+import { MapPin, Navigation, Loader2, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ReportIncidentModal } from '@/components/modals/ReportIncidentModal';
 
 function CitySwitcher() {
   const { currentCity, setCity, isDetecting, detectLocation, availableCities, isLoadingCities } = useCity();
@@ -84,9 +85,12 @@ function CitySwitcher() {
 
 export function TopBar({ activeIncidents, criticalCount }: TopBarProps) {
   const { utcTime, utcDate } = useRealTimeClock();
+  const [reportModalOpen, setReportModalOpen] = useState(false);
 
   return (
-    <header className="relative z-50 flex h-12 shrink-0 items-center gap-4 border-b border-white/[0.06] bg-[#070B14]/80 px-4 backdrop-blur-xl">
+    <>
+      <ReportIncidentModal isOpen={reportModalOpen} onClose={() => setReportModalOpen(false)} />
+      <header className="relative z-50 flex h-12 shrink-0 items-center gap-4 border-b border-white/[0.06] bg-[#070B14]/80 px-4 backdrop-blur-xl">
       {/* Left: Breadcrumb + Incident count */}
       <div className="flex items-center gap-3 min-w-0">
         <div className="flex items-center gap-2">
@@ -113,6 +117,14 @@ export function TopBar({ activeIncidents, criticalCount }: TopBarProps) {
 
       {/* Right: System indicators + Clock */}
       <div className="flex items-center gap-4">
+        <button
+          onClick={() => setReportModalOpen(true)}
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-colors"
+        >
+          <Plus className="w-3.5 h-3.5" /> Report Incident
+        </button>
+        <div className="h-4 w-px bg-white/10 hidden sm:block" />
+
         {/* Data feed status */}
         <div className="hidden md:flex items-center gap-3">
           <div className="flex items-center gap-1.5">
@@ -158,5 +170,6 @@ export function TopBar({ activeIncidents, criticalCount }: TopBarProps) {
         </button>
       </div>
     </header>
+    </>
   );
 }

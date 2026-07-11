@@ -14,7 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, desc
 
 from app.models.incident import Incident
-from app.schemas.incident import IncidentCreate, IncidentUpdate, IncidentResponse
+from app.schemas.incident import IncidentCreate, IncidentUpdate, IncidentResponse, CitizenIncidentCreate
+from app.services.ai_analyzer import analyze_citizen_report
 
 logger = logging.getLogger(__name__)
 
@@ -28,33 +29,23 @@ def _ago(minutes: int) -> str:
     return (datetime.now(timezone.utc) - timedelta(minutes=minutes)).isoformat()
 
 def map_incident(doc: Incident) -> IncidentResponse:
-    return IncidentResponse(
-        id=doc.id,
-        cityId=doc.cityId,
-        type=doc.type,
-        severity=doc.severity,
-        status=doc.status,
-        title=doc.title,
-        description=doc.description,
-        location=doc.location,
-        timestamp=doc.timestamp,
-        updatedAt=doc.updatedAt,
-        affectedPopulation=doc.affectedPopulation,
-        casualties=doc.casualties,
-        resourcesDeployed=doc.resourcesDeployed or [],
-        aiRiskScore=doc.aiRiskScore,
-        trending=doc.trending,
-    )
+    return IncidentResponse.model_validate(doc)
 
 
 # ── CRUD ──────────────────────────────────────────────────────────────────────
 
+from sqlalchemy.exc import OperationalError
+
 async def get_incidents_by_city(
     db: AsyncSession, city_id: str
 ) -> List[IncidentResponse]:
-    result = await db.execute(select(Incident).where(Incident.cityId == city_id).order_by(desc(Incident.aiRiskScore)).limit(50))
-    docs = result.scalars().all()
-    return [map_incident(d) for d in docs]
+    try:
+        result = await db.execute(select(Incident).where(Incident.cityId == city_id).order_by(desc(Incident.aiRiskScore)).limit(50))
+        docs = result.scalars().all()
+        return [map_incident(d) for d in docs]
+    except OperationalError as e:
+        logger.warning(f"Database operational error (likely schema mismatch or missing table): {e}")
+        return []
 
 
 async def get_incident_by_id(
@@ -80,6 +71,37 @@ async def create_incident(
     await db.commit()
     await db.refresh(new_incident)
     return map_incident(new_incident)
+
+async def process_citizen_report(
+    db: AsyncSession, data: CitizenIncidentCreate
+) -> dict:
+    # 1. Run AI analysis
+    ai_data = analyze_citizen_report(data.model_dump())
+    
+    # 2. Build standard IncidentCreate payload
+    incident_create = IncidentCreate(
+        cityId=data.cityId,
+        type=data.type,
+        severity=ai_data["severity"],
+        status=ai_data["status"],
+        title=ai_data["title"],
+        description=data.description,
+        location=data.location,
+        aiRiskScore=ai_data["aiRiskScore"],
+        trending=ai_data["trending"],
+        reporterName=data.reporterName,
+        imagePath=data.imagePath
+    )
+    
+    # 3. Create incident
+    incident = await create_incident(db, incident_create)
+    
+    # 4. Return incident with AI metadata appended for frontend consumption
+    return {
+        "incident": incident.model_dump(),
+        "aiRecommendation": ai_data["aiRecommendation"],
+        "timelineEventText": ai_data["timelineEventText"]
+    }
 
 
 async def update_incident(

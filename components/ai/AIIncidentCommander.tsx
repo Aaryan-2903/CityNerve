@@ -35,7 +35,7 @@ const THINKING_STEPS = [
 
 export function AIIncidentCommander() {
   const sim = useSimulationContext();
-  const { statuses, approve, reject, decisionHistory } = useAIDecisionContext();
+  const { statuses, approve, reject, decisionHistory, customRecommendations } = useAIDecisionContext();
   const { metricsData, liveWeather, riskScore } = useDashboardData();
   
   const threatLevel = (sim?.threatLevel as ThreatLevel) ?? 'LOW';
@@ -54,10 +54,15 @@ export function AIIncidentCommander() {
     hospitalCapacityPercent,
     shelterAvailabilityPercent,
     weatherLabel: liveWeather?.label ?? 'Clear',
+    rainfall: Number(liveWeather?.rainfall) || 0,
+    windSpeed: Number(liveWeather?.wind_speed) || 0,
+    humidity: Number(liveWeather?.humidity) || 0,
     deployedUnits
   }), [riskScore, activeIncidents, roadsClosed, hospitalCapacityPercent, shelterAvailabilityPercent, liveWeather, deployedUnits, sim?.phase]);
 
-  const rawRecommendations = useMemo(() => generateRecommendations(systemState), [systemState]);
+  const rawRecommendations = useMemo(() => {
+    return [...customRecommendations, ...generateRecommendations(systemState)];
+  }, [systemState, customRecommendations]);
   
   const recommendations = rawRecommendations.map(rec => ({
     ...rec,

@@ -54,7 +54,36 @@ export const INCIDENT_TYPE_CONFIG: Record<
   storm: { label: 'Severe Storm', icon: '🌪️', mapboxSymbol: 'danger' },
   blackout: { label: 'Power Blackout', icon: '⚡', mapboxSymbol: 'danger' },
   tsunami: { label: 'Tsunami Warning', icon: '🌊', mapboxSymbol: 'harbor' },
-  civil_unrest: { label: 'Civil Unrest', icon: '⚠️', mapboxSymbol: 'danger' },
+  civil_unrest: {
+    label: 'Civil Unrest',
+    icon: '⚠️',
+    mapboxSymbol: 'police',
+  },
+  road_block: {
+    label: 'Road Block',
+    icon: '🚧',
+    mapboxSymbol: 'roadblock',
+  },
+  medical: {
+    label: 'Medical Emergency',
+    icon: '🚑',
+    mapboxSymbol: 'hospital',
+  },
+  power_outage: {
+    label: 'Power Outage',
+    icon: '🔌',
+    mapboxSymbol: 'electricity',
+  },
+  fallen_tree: {
+    label: 'Fallen Tree',
+    icon: '🌲',
+    mapboxSymbol: 'park',
+  },
+  building_damage: {
+    label: 'Building Damage',
+    icon: '🏢',
+    mapboxSymbol: 'monument',
+  },
 };
 
 export const INCIDENT_STATUS_CONFIG = {

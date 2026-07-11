@@ -31,8 +31,11 @@ export interface AIDecisionState {
   approvedFeedEntries: any[];
   extraDeployedUnits: number;
   decisionHistory: AIDecisionHistoryEntry[];
+  customRecommendations: AIRecommendation[];
   approve: (rec: AIRecommendation) => void;
   reject: (rec: AIRecommendation) => void;
+  addCustomRecommendation: (rec: AIRecommendation) => void;
+  addTimelineEvent: (event: any) => void;
 }
 
 const AIDecisionContext = createContext<AIDecisionState | null>(null);
@@ -42,6 +45,7 @@ export function AIDecisionProvider({ children }: { children: React.ReactNode }) 
   const [approvedFeedEntries, setApprovedFeedEntries] = useState<any[]>([]);
   const [extraDeployedUnits, setExtraDeployedUnits] = useState<number>(0);
   const [decisionHistory, setDecisionHistory] = useState<AIDecisionHistoryEntry[]>([]);
+  const [customRecommendations, setCustomRecommendations] = useState<AIRecommendation[]>([]);
 
   const approve = useCallback((rec: AIRecommendation) => {
     setStatuses((prev) => ({ ...prev, [rec.id]: 'Approved' }));
@@ -110,13 +114,26 @@ export function AIDecisionProvider({ children }: { children: React.ReactNode }) 
     });
   }, []);
 
+  const addCustomRecommendation = useCallback((rec: AIRecommendation) => {
+    // Add it to statuses as pending and to customRecommendations list
+    setStatuses((prev) => ({ ...prev, [rec.id]: 'Pending' }));
+    setCustomRecommendations((prev) => [rec, ...prev]);
+  }, []);
+
+  const addTimelineEvent = useCallback((event: any) => {
+    setApprovedFeedEntries((prev) => [event, ...prev]);
+  }, []);
+
   const value = {
     statuses,
     approvedFeedEntries,
     extraDeployedUnits,
     decisionHistory,
+    customRecommendations,
     approve,
     reject,
+    addCustomRecommendation,
+    addTimelineEvent,
   };
 
   return (

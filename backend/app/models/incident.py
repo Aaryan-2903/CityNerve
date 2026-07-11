@@ -27,3 +27,5 @@ class Incident(Base):
     resourcesDeployed = Column(JSON, default=list)
     aiRiskScore = Column(Integer, default=0)
     trending = Column(String, default="stable")
+    reporterName = Column(String, nullable=True)
+    imagePath = Column(String, nullable=True)

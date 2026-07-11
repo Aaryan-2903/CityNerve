@@ -1,5 +1,5 @@
 """
-Dashboard service — compute per-city metrics from the MongoDB city document.
+Dashboard service — compute per-city metrics from the city document.
 
 Metric formulas mirror the logic that was previously baked into the frontend
 `useDashboardData.ts` hook so values are consistent across client and server.

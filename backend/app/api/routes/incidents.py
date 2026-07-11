@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.incident import IncidentCreate, IncidentUpdate, IncidentResponse
+from app.schemas.incident import IncidentCreate, IncidentUpdate, IncidentResponse, CitizenIncidentCreate
 from app.database.connection import get_db
 from app.services import incident_service
 
@@ -48,6 +48,18 @@ async def create_incident(
     db: AsyncSession = Depends(get_db),
 ) -> IncidentResponse:
     return await incident_service.create_incident(db, data)
+
+
+@router.post(
+    "/citizen",
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a new incident from citizen report",
+)
+async def create_citizen_incident(
+    data: CitizenIncidentCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    return await incident_service.process_citizen_report(db, data)
 
 
 @router.patch(

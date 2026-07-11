@@ -102,6 +102,9 @@ export function SituationReportModal({ isOpen, onClose, systemState, threatLevel
                   <Wind className="w-3.5 h-3.5" /> Weather
                 </div>
                 <div className="text-sm font-medium text-white/90 mt-1 line-clamp-2">{systemState.weatherLabel}</div>
+                <div className="text-[10px] text-white/50 mt-1">
+                  {systemState.rainfall} mm/h | {systemState.windSpeed} km/h | {systemState.humidity}% RH
+                </div>
               </div>
               <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
                 <div className="flex items-center gap-2 text-white/40 mb-2 text-[11px] uppercase tracking-wider font-bold">

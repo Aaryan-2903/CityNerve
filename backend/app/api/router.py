@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.routes import root, health, cities, dashboard, incidents, simulation, poi, resources, zones, scenario
+from app.api.routes import root, health, cities, dashboard, incidents, simulation, poi, resources, zones, scenario, weather
 
 api_router = APIRouter()
 
@@ -13,3 +13,4 @@ api_router.include_router(poi.router, prefix="/api/v1/poi", tags=["Poi"])
 api_router.include_router(resources.router, prefix="/api/v1/resources", tags=["Resources"])
 api_router.include_router(zones.router, prefix="/api/v1/zones", tags=["Zones"])
 api_router.include_router(scenario.router, prefix="/api/v1/scenario", tags=["Scenario"])
+api_router.include_router(weather.router, prefix="/api/v1/weather", tags=["Weather"])

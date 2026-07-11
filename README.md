@@ -2,14 +2,14 @@
 
 **Full-Stack Disaster Intelligence & Emergency Operations Platform**
 
-A mission-critical command platform that empowers disaster management agencies with real-time situational awareness, city-aware dashboards, simulation-driven planning, and a production-grade FastAPI backend connected to MongoDB Atlas.
+A mission-critical command platform that empowers disaster management agencies with real-time situational awareness, city-aware dashboards, simulation-driven planning, and a production-grade FastAPI backend connected to SQLite.
 
 ![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB_Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 ![MapLibre](https://img.shields.io/badge/MapLibre-GL-4A5568?style=for-the-badge)
 ![OpenStreetMap](https://img.shields.io/badge/OpenStreetMap-7EBC6F?style=for-the-badge&logo=openstreetmap&logoColor=white)
 ![MIT License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
@@ -25,9 +25,11 @@ A mission-critical command platform that empowers disaster management agencies w
 
 ## About CityNerve
 
-**CityNerve** is a full-stack disaster intelligence platform built for Emergency Operations Centers (EOCs). It combines a premium Next.js frontend with a production FastAPI backend and MongoDB Atlas to give command teams real-time situational awareness, city-specific incident tracking, and simulation-driven planning tools.
+**CityNerve** is a full-stack disaster intelligence platform built for Emergency Operations Centers (EOCs). It combines a premium Next.js frontend with a robust Python FastAPI backend and SQLite database to give command teams real-time situational awareness, city-specific incident tracking, and AI-driven decision support.
 
-From the moment a disaster event begins, CityNerve surfaces the right data — active incidents, resource status, weather conditions, and population impact — in a unified, high-clarity interface designed for fast decision-making. City-aware dashboards adapt dynamically based on the selected municipality, and a stage-based simulation engine models how disasters escalate so operators can plan responses before they're needed.
+From the moment a disaster event begins, CityNerve surfaces the right data — active incidents, resource status, live weather conditions, and population impact — in a unified, high-clarity interface designed for fast decision-making. City-aware dashboards adapt dynamically based on the selected municipality, and the integrated AI Incident Commander models how disasters escalate so operators can plan responses effectively.
+
+*(Note: CityNerve previously used MongoDB, but has been successfully migrated to a lightweight and embedded SQLite + SQLAlchemy architecture for simplified local deployment and robust relational data modeling).*
 
 ---
 
@@ -37,76 +39,67 @@ Disaster response agencies today operate across fragmented tools: separate syste
 
 CityNerve consolidates everything into a single intelligent operations center:
 
-- **Unified situational picture** — incidents, weather, and resources in one view
+- **Unified situational picture** — incidents, live weather, and resources in one view
+- **AI Incident Commander** — intelligent rule-based engine providing real-time operational recommendations
 - **City-aware intelligence** — dashboards and data adapt per municipality
 - **Simulation-first planning** — model disaster escalation before it happens
-- **Backend-driven accuracy** — live API data from FastAPI + MongoDB Atlas, not just mocks
-- **AI-ready architecture** — decision support and predictive analytics coming next
+- **Backend-driven accuracy** — live API data powered by FastAPI, with automated data seeding
 
 ---
 
 ## Key Features
 
-### Dashboard & Visualization
-- Premium dark-mode operations dashboard with real-time-looking UI
-- Multi-city support — switch between cities seamlessly
-- Current location detection and city auto-selection
-- Incident feed, weather widget, resource tracker, and impact summary
-- Smooth micro-animations via Framer Motion
+### Dashboard & EOC UI
+- Premium dark-mode operations dashboard with professional EOC aesthetics.
+- Multi-city support — switch between cities seamlessly.
+- **Live Operations Timeline**: Vertical scrolling feed for tracking dispatches, reports, and alerts.
+- **Resource Status Grid**: Real-time availability tracking for Police, Fire, Ambulance, and Rescue units.
+- **Live Alert Banner**: Automatically highlights critical warnings based on threat levels and live conditions.
+- Smooth micro-animations, glassmorphism, and responsive layout scaling across all devices.
 
-### Backend & Data
-- FastAPI backend with structured Python/Pydantic architecture
-- MongoDB Atlas cloud database — live connection established
-- Cities API and Dashboard API — fully operational
-- Frontend-to-backend integration with mock fallback when backend is unavailable
-- Environment-variable-driven configuration (`.env` / `.env.local`)
+### AI Incident Commander & Analytics
+- **Rule-Based Recommendation Engine**: Analyzes system state (risk score, weather, hospital capacity) and automatically generates actionable prescriptions (e.g. "Recommend Evacuation Readiness" or "Deploy Flood Barriers").
+- **Decision History Log**: Keeps an immutable, scrollable ledger of all accepted or dismissed AI commands.
+- **Situation Report Export**: Instantly compiles a high-density, printable Situation Report (SITREP) aggregating all live metrics.
 
-### Simulation & Operations
-- Stage-based disaster simulation flow (Normal → Warning → Active → Recovery)
-- Simulation controls UI for triggering and advancing scenarios
-- City-aware simulation direction in progress
-- Designed for training, planning, and live ops support
+### Backend & Data Integration
+- FastAPI backend built with Python, Pydantic, and SQLAlchemy.
+- Relational SQLite database with automated seeding on startup.
+- **Live Weather Integration**: Direct connection to Open-Meteo API for real-time rainfall, wind speed, and humidity, which dynamically trigger AI recommendations.
+- Stable API structure offering comprehensive endpoints (e.g., `/api/v1/cities`, `/api/v1/dashboard/{city}`).
 
-### Maps & City Intelligence
-- High-performance vector maps via MapLibre GL
-- OpenStreetMap geographic data — free, open, and accurate
-- Incident plotting, risk zones, and route overlays
-- City-specific map centering and data overlays
-
-### AI & Future Intelligence
-- AI Decision Pipeline architecture defined
-- Gemini API integration planned for predictive threat modeling
-- Automated action recommendations and risk scoring — in roadmap
+### Maps & Spatial Intelligence
+- High-performance vector maps via MapLibre GL.
+- OpenStreetMap geographic data — free, open, and accurate.
+- Incident plotting, risk zones, and dynamic route overlays automatically adjusting to city bounds.
 
 ---
 
 ## Technology Stack
 
 ### Frontend
-- **Next.js** — App Router, SSR, and API routes
-- **React** — Component architecture and state management
-- **TypeScript** — Strict type safety across the platform
-- **Tailwind CSS** — Utility-first, responsive, premium dark-mode styling
-- **shadcn/ui** — Accessible and customizable component primitives
-- **Framer Motion** — Fluid micro-animations and transitions
-
-### Maps
-- **MapLibre GL** — Open-source, high-performance WebGL map rendering
-- **OpenStreetMap** — Free and open geographic data
+- **Next.js** (App Router, SSR) & **React**
+- **TypeScript**
+- **Tailwind CSS**, **shadcn/ui**, **Framer Motion** (for fluid animations)
+- **MapLibre GL** & **OpenStreetMap**
 
 ### Backend
 - **FastAPI** — High-performance async Python API framework
-- **Python** — Core backend runtime
-- **Pydantic** — Request/response validation and settings management
-- **Motor** — Async MongoDB driver for Python
-- **MongoDB Atlas** — Cloud-hosted database with live connection
+- **SQLAlchemy** & **SQLite** — Relational database modeling and storage
+- **Pydantic** — Request/response validation
+- **httpx** — For external API integrations (e.g., Open-Meteo)
 
-### AI *(Planned)*
-- **Gemini API** — Decision support, predictive analytics, and threat modeling
+---
 
-### Deployment *(Planned)*
-- **Vercel** — Frontend edge deployment and CI/CD
-- **Railway / Render** — Backend hosting
+## API Overview
+
+When the backend is running, the interactive API documentation is automatically generated and accessible via Swagger UI at `http://127.0.0.1:8000/docs`.
+
+### Core Endpoints:
+- `GET /api/v1/cities` — Retrieves a list of all supported cities.
+- `GET /api/v1/dashboard/{city_name}` — Returns baseline aggregated metrics for the dashboard (e.g., `/api/v1/dashboard/mumbai`).
+- `GET /api/v1/weather/{city_name}` — Fetches live, cached weather data from Open-Meteo for the specified city.
+- `GET /api/v1/incidents`, `/api/v1/resources`, `/api/v1/poi` — Fetch related operational entities.
 
 ---
 
@@ -114,227 +107,100 @@ CityNerve consolidates everything into a single intelligent operations center:
 
 ```mermaid
 graph TD
-A[Data Sources] --> B[Simulation Engine]
-B --> C[AI Decision Engine]
-C --> D[Operations Dashboard]
-D --> E[Response Actions]
-E --> F[Recovery]
+A[Data Sources & Live Weather] --> B[FastAPI Backend]
+B --> C[Operations Dashboard]
+C --> D[AI Decision Engine]
+D --> E[Response Recommendations]
+E --> F[Command Execution & Logs]
 ```
 
 ---
 
-## Project Architecture
-
-### 1. Overall System Architecture
-
-```mermaid
-graph TD
-    A[Citizen Reports] --> B[Simulation Engine]
-    C[Weather APIs] --> B
-    D[Government Data] --> B
-    B --> E[AI Decision Engine]
-    B --> F[Dashboard]
-    B --> G[Interactive Map]
-    B --> H[Alert System]
-```
-
-### 2. Dashboard Data Flow
-
-```mermaid
-graph TD
-    A[Simulation Engine] --> B[Simulation Context]
-    B --> C[useSimulation Hook]
-    C --> D[Metrics Cards]
-    C --> E[Incident Feed]
-    C --> F[Weather Widget]
-    C --> G[AI Command]
-    C --> H[Risk Map]
-    C --> I[Resource Tracker]
-    C --> J[Impact Summary]
-```
-
-### 3. Disaster Simulation Flow
-
-```mermaid
-graph TD
-    A[Normal] --> B[Heavy Rain]
-    B --> C[Citizen Reports]
-    C --> D[Water Level Rising]
-    D --> E[Flood Warning]
-    E --> F[Road Closure]
-    F --> G[Shelter Activated]
-    G --> H[Rescue Deployment]
-    H --> I[Recovery]
-    I --> J[Completed]
-```
-
-### 4. Application Architecture
-
-```mermaid
-graph TD
-    A[App] --> B[Layout]
-    B --> C[Sidebar]
-    B --> D[Navbar]
-    B --> E[Dashboard]
-    E --> F[Simulation Provider]
-    F --> G[Simulation Engine]
-    G --> H[Simulation Data]
-    H --> I[Simulation Stages]
-```
-
-### 5. AI Decision Pipeline
-
-```mermaid
-graph TD
-    A[Simulation Data] --> B[Risk Analysis]
-    B --> C[Threat Assessment]
-    C --> D[Resource Allocation]
-    D --> E[Incident Prediction]
-    E --> F[AI Recommendation]
-    F --> G[Operations Dashboard]
-```
-
-The frontend and backend run as separate services. The Next.js app communicates with the FastAPI server via REST APIs. MongoDB Atlas stores city, incident, and resource data. When the backend is unavailable, the frontend falls back to local mock data automatically — ensuring the dashboard is always usable.
-
-### 6. Directory Structure
-
-```text
-citynerve/
-├── app/                  # Next.js App Router pages and layouts
-├── backend/              # FastAPI backend (Python)
-│   ├── app/
-│   │   ├── api/          # Route handlers (cities, dashboard, incidents)
-│   │   ├── core/         # Configuration and settings
-│   │   ├── database/     # MongoDB Atlas connection
-│   │   ├── models/       # Database models
-│   │   ├── schemas/      # Pydantic request/response schemas
-│   │   └── services/     # Business logic layer
-│   └── requirements.txt
-├── components/           # Reusable UI components
-│   ├── ai/               # AI reasoning and briefing panels
-│   ├── cards/            # Incident and metric display cards
-│   ├── layout/           # Dashboard shell, sidebar, and navigation
-│   ├── map/              # MapLibre wrappers and layer controls
-│   ├── panels/           # Control widgets (Weather, Resources, etc.)
-│   └── shared/           # Generic buttons, badges, and base elements
-├── constants/            # Configuration constants and theme setups
-├── context/              # React Context providers (Simulation Engine)
-├── data/                 # Mock datasets and simulation scenarios
-├── hooks/                # Custom React hooks
-├── lib/                  # Utility functions and generic helpers
-├── public/               # Static assets and images
-├── simulation/           # Simulation engine logic
-└── types/                # TypeScript interface definitions
-```
-
----
-
-## Current Progress
+## Current Development Status
 
 ### Completed
-- [x] Premium landing page
-- [x] Professional operations dashboard
-- [x] Multi-city support with city switcher
-- [x] Current location detection and auto city selection
-- [x] Dynamic simulation UI and controls
-- [x] Interactive map with MapLibre GL
-- [x] Incident feed, weather widget, resource tracker, and impact summary
-- [x] FastAPI backend initialized and structured
-- [x] Python virtual environment configured
-- [x] MongoDB Atlas connected successfully
-- [x] Cities API — operational
-- [x] Dashboard API — operational
-- [x] Frontend-to-backend integration
-- [x] Mock data fallback when backend is unavailable
-- [x] Simulation engine architecture and stage-based disaster flow
+- [x] Premium operations dashboard and responsive EOC UI
+- [x] Full FastAPI backend structure with SQLite and SQLAlchemy
+- [x] Successful migration from MongoDB to SQLite for simplified deployments
+- [x] Live Open-Meteo weather integration with local caching
+- [x] AI Incident Commander (Rule-Based Recommendation Engine)
+- [x] Multi-city support with dynamic geographic data loading
+- [x] Interactive map (MapLibre) with fullscreen bug fixes and stable rendering
+- [x] Live Timeline Feed, Resource Status Grid, and Alert Banners
+- [x] Production build passes completely
 
-### In Progress
-- [ ] City-aware simulation direction and data binding
-- [ ] Incident creation and management APIs
-- [ ] Resource tracking APIs
-- [ ] Expanding simulation stages with backend-driven data
-
-### Upcoming
-- [ ] AI decision support (Gemini API integration)
-- [ ] Real-time updates via WebSockets
-- [ ] Authentication and role-based access
-- [ ] Citizen reporting integration
-- [ ] Predictive analytics and threat scoring
-- [ ] Production deployment (Vercel + backend hosting)
-
----
-
-## Roadmap
-
-| Phase | Milestone | Status |
-| :---: | :--- | :---: |
-| **Phase 1** | Frontend Dashboard & Interactive Map | ✅ Done |
-| **Phase 2** | Simulation Engine & Stage-Based Flow | 🔄 In Progress |
-| **Phase 3** | FastAPI Backend & MongoDB Atlas | ✅ Done |
-| **Phase 4** | Incident, Resource & City APIs | 🔄 In Progress |
-| **Phase 5** | AI Decision Support (Gemini API) | ⬜ Upcoming |
-| **Phase 6** | Real-Time Updates & WebSockets | ⬜ Upcoming |
-| **Phase 7** | Authentication & Production Deployment | ⬜ Upcoming |
+### Upcoming / Roadmap
+- [ ] LLM Integration (replacing the rule engine with Gemini for dynamic reasoning)
+- [ ] Real-time operational sync via WebSockets
+- [ ] Authentication and role-based access control
+- [ ] Automated CI/CD pipeline and GitHub Actions workflows
+- [ ] Direct-to-PDF Situation Report generation
 
 ---
 
 ## Getting Started
 
-Both the frontend and backend must be running together for full functionality. The frontend will fall back to mock data automatically if the backend is not available.
+CityNerve comes configured with a concurrent startup script so you can launch both the frontend and the backend simultaneously using a single command. 
 
 ### Prerequisites
-- Node.js 18+
-- Python 3.11+
-- A MongoDB Atlas account and cluster URI
+- **Node.js** 18+
+- **Python** 3.11+
 
----
-
-### Frontend
+### 1. Installation
 
 ```bash
-# 1. Clone the repository
+# Clone the repository
 git clone https://github.com/Aaryan-2903/CityNerve.git
 cd citynerve
 
-# 2. Install dependencies
+# Install frontend dependencies
 npm install
 
-# 3. Configure environment variables
-# Create a .env.local file with your backend URL:
-# NEXT_PUBLIC_API_URL=http://localhost:8000
+# Setup backend virtual environment
+cd backend
+python -m venv venv
 
-# 4. Start the development server
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# macOS / Linux:
+# source venv/bin/activate
+
+# Install backend dependencies
+pip install -r requirements.txt
+
+# Return to root directory
+cd ..
+```
+
+### 2. Configuration
+Create a `.env.local` file in the root directory:
+```env
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+```
+No database configuration is needed for the backend as it automatically initializes a local SQLite `app.db` and seeds it on startup!
+
+### 3. Run Locally
+
+Start both the Next.js frontend and the FastAPI backend simultaneously from the root directory:
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+- **Dashboard**: [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
+- **API Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+*(Note: The `npm run dev` script uses `concurrently` to launch both services. If you prefer to run them separately, you can use `npm run frontend` and `npm run backend` in different terminal tabs).*
 
 ---
 
-### Backend
+## Continuous Integration (CI) / Workflows
 
-```bash
-# 1. Navigate to the backend directory
-cd backend
-
-# 2. Create and activate a virtual environment
-python -m venv venv
-venv\Scripts\activate        # Windows
-# source venv/bin/activate   # macOS / Linux
-
-# 3. Install Python dependencies
-pip install -r requirements.txt
-
-# 4. Configure environment variables
-# Create a backend/.env file:
-# MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/citynerve
-# DATABASE_NAME=citynerve
-
-# 5. Start the FastAPI server
-uvicorn app.main:app --reload --port 8000
-```
-
-API documentation is available at [http://localhost:8000/docs](http://localhost:8000/docs) once the server is running.
+While CityNerve is currently in active development, we are preparing a robust CI/CD pipeline using **GitHub Actions**. Future workflows will include:
+- **Type Checking**: Automated `tsc` execution for Next.js to ensure strict typings.
+- **Backend Testing**: Automated `pytest` execution for the FastAPI backend and SQLite models.
+- **Linting & Formatting**: Enforcing `eslint` and `black` code standards.
 
 ---
 

@@ -12,7 +12,12 @@ export type IncidentType =
   | 'storm'
   | 'blackout'
   | 'tsunami'
-  | 'civil_unrest';
+  | 'civil_unrest'
+  | 'road_block'
+  | 'medical'
+  | 'power_outage'
+  | 'fallen_tree'
+  | 'building_damage';
 
 export interface IncidentLocation {
   lat: number;
@@ -37,4 +42,6 @@ export interface Incident {
   resourcesDeployed: string[];
   aiRiskScore: number;
   trending: 'up' | 'down' | 'stable';
+  reporterName?: string;
+  imagePath?: string;
 }
