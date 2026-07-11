@@ -22,15 +22,7 @@ import { useDashboardData } from '@/hooks/useDashboardData';
 
 const DARK_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
-interface FloodIncident {
-  id: string;
-  lng: number;
-  lat: number;
-  title: string;
-  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
-  impact: string;
-  status: string;
-}
+import type { Incident } from '@/types/incident';
 
 /* ─── Layer paint configs ────────────────────────────────────────────────── */
 
@@ -43,9 +35,10 @@ const simFloodLine: LayerProps   = { id: 'sim-flood-outline',  type: 'line', pai
 /* ─── Severity colours ───────────────────────────────────────────────────── */
 
 const SEV_COLOR: Record<string, string> = {
-  CRITICAL: '#EF4444',
-  HIGH:     '#F97316',
-  MEDIUM:   '#EAB308',
+  critical: '#EF4444',
+  high:     '#F97316',
+  medium:   '#EAB308',
+  low:      '#3B82F6',
 };
 
 /* ─── Props ──────────────────────────────────────────────────────────────── */
@@ -71,7 +64,7 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
   const [showEvacRoutes, setShowEvacRoutes] = useState(true);
 
   // Popup state
-  const [selectedIncident, setSelectedIncident] = useState<FloodIncident | null>(null);
+  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
 
   // Map ref for programmatic camera control
   const mapRef = useRef<MapRef>(null);
@@ -103,7 +96,7 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
     // Find the target incident by ID
     const target = incidents.find((inc: any) => inc.id === selectedIncidentId);
 
-    if (target) {
+    if (target && Number.isFinite(target.location?.lat) && Number.isFinite(target.location?.lng)) {
       // Smoothly move the map to the incident and slightly increase zoom
       mapRef.current.flyTo({
         center: [target.location.lng, target.location.lat],
@@ -172,11 +165,16 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
         )}
 
         {/* ── Flood Incident Markers 🌊 ── */}
-        {showIncidents && incidents.map((inc: any) => (
+        {showIncidents && incidents.map((inc: any) => {
+          const lat = inc?.location?.lat;
+          const lng = inc?.location?.lng;
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+          return (
           <Marker
             key={inc.id}
-            longitude={inc.location.lng}
-            latitude={inc.location.lat}
+            longitude={lng}
+            latitude={lat}
             anchor="center"
             onClick={(e) => {
               e.originalEvent.stopPropagation();
@@ -205,11 +203,17 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
               </span>
             </motion.div>
           </Marker>
-        ))}
+          );
+        })}
 
         {/* ── Rescue Team Markers 🚑 ── */}
-        {showResources && resources.map((res: any) => (
-          <Marker key={res.id} longitude={res.lng} latitude={res.lat} anchor="center">
+        {showResources && resources.map((res: any) => {
+          const lat = res?.lat;
+          const lng = res?.lng;
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+          return (
+          <Marker key={res.id} longitude={lng} latitude={lat} anchor="center">
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -224,11 +228,17 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
               🚑
             </motion.div>
           </Marker>
-        ))}
+          );
+        })}
 
         {/* ── Shelter Markers 🏠 ── */}
-        {showResources && shelters.map((shl: any) => (
-          <Marker key={shl.id} longitude={shl.lng} latitude={shl.lat} anchor="center">
+        {showResources && shelters.map((shl: any) => {
+          const lat = shl?.lat;
+          const lng = shl?.lng;
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+          return (
+          <Marker key={shl.id} longitude={lng} latitude={lat} anchor="center">
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -243,11 +253,17 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
               🏠
             </motion.div>
           </Marker>
-        ))}
+          );
+        })}
 
         {/* ── Hospital Markers 🏥 ── */}
-        {showResources && hospitals.map((hosp: any) => (
-          <Marker key={hosp.id} longitude={hosp.lng} latitude={hosp.lat} anchor="center">
+        {showResources && hospitals.map((hosp: any) => {
+          const lat = hosp?.lat;
+          const lng = hosp?.lng;
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+          return (
+          <Marker key={hosp.id} longitude={lng} latitude={lat} anchor="center">
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -262,14 +278,15 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
               🏥
             </motion.div>
           </Marker>
-        ))}
+          );
+        })}
 
         {/* ── Flood Incident Popup ── */}
         <AnimatePresence>
-          {selectedIncident && (
+          {selectedIncident && Number.isFinite(selectedIncident.location?.lat) && Number.isFinite(selectedIncident.location?.lng) && (
             <Popup
-              longitude={selectedIncident.lng}
-              latitude={selectedIncident.lat}
+              longitude={selectedIncident.location.lng}
+              latitude={selectedIncident.location.lat}
               anchor="bottom"
               onClose={() => setSelectedIncident(null)}
               closeButton={false}
@@ -298,7 +315,7 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
                   🌊 {selectedIncident.title}
                 </h3>
                 <p className="text-xs text-white/60">
-                  <strong className="text-white/80 tabular-nums">{selectedIncident.impact}</strong>
+                  <strong className="text-white/80 tabular-nums">{selectedIncident.description}</strong>
                 </p>
               </motion.div>
             </Popup>

@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, AlertTriangle, MapPin, Camera, User, Loader2, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCity } from '@/context/CityContext';
-import { useAIDecisionContext } from '@/context/AIDecisionContext';
 import { useIncidents } from '@/hooks/useIncidents';
 
 interface ReportIncidentModalProps {
@@ -26,13 +25,14 @@ const INCIDENT_TYPES = [
 
 export function ReportIncidentModal({ isOpen, onClose }: ReportIncidentModalProps) {
   const { currentCity } = useCity();
-  const { addCustomRecommendation, addTimelineEvent } = useAIDecisionContext();
-  const { updateFilter } = useIncidents(); // Just to re-trigger a fetch if we needed, though we can't easily refetch without a custom hook. For now, rely on standard refresh or mutate if we had SWR. 
+  const { updateFilter } = useIncidents(); 
   
   const [type, setType] = useState('fire');
+  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [locationStr, setLocationStr] = useState('');
-  const [reporterName, setReporterName] = useState('');
+  const [lat, setLat] = useState<string>('');
+  const [lng, setLng] = useState<string>('');
+  const [image, setImage] = useState<File | null>(null);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -42,8 +42,15 @@ export function ReportIncidentModal({ isOpen, onClose }: ReportIncidentModalProp
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description || !locationStr) {
-      setError('Please provide description and location.');
+    if (!title || !description || !lat || !lng) {
+      setError('Please fill in all required fields (Title, Description, Latitude, Longitude).');
+      return;
+    }
+    
+    const numLat = parseFloat(lat);
+    const numLng = parseFloat(lng);
+    if (isNaN(numLat) || isNaN(numLng)) {
+      setError('Latitude and Longitude must be valid numbers.');
       return;
     }
     
@@ -51,63 +58,48 @@ export function ReportIncidentModal({ isOpen, onClose }: ReportIncidentModalProp
     setError('');
     
     try {
+      // Create a standard incident, filling in default required fields
       const payload = {
         cityId: currentCity.id,
         type,
+        severity: 'low',
+        status: 'active',
+        title,
         description,
         location: {
-          lat: currentCity.latitude + (Math.random() - 0.5) * 0.05,
-          lng: currentCity.longitude + (Math.random() - 0.5) * 0.05,
-          address: locationStr,
+          lat: numLat,
+          lng: numLng,
+          address: 'User Reported Location',
           district: 'Reported Area'
         },
-        reporterName: reporterName || 'Anonymous Citizen'
+        imagePath: image ? image.name : null, // Mock storing the image name
+        affectedPopulation: 0,
+        casualties: 0,
+        resourcesDeployed: [],
+        aiRiskScore: 0,
+        trending: 'stable'
       };
 
-      const res = await fetch('http://127.0.0.1:8000/api/v1/incidents/citizen', {
+      const res = await fetch('http://127.0.0.1:8000/api/v1/incidents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) throw new Error('Failed to submit report');
-      const data = await res.json();
       
-      // Inject AI recommendation to context
-      if (data.aiRecommendation) {
-        addCustomRecommendation({
-          id: `ai-rec-${Date.now()}`,
-          title: data.aiRecommendation.title,
-          recommendation: data.aiRecommendation.recommendation,
-          confidence: data.aiRecommendation.confidence,
-          reasoning: data.aiRecommendation.reasoning,
-          priority: data.aiRecommendation.priority,
-          status: 'Pending'
-        });
-      }
-      
-      // Inject timeline event
-      if (data.timelineEventText) {
-        addTimelineEvent({
-          id: `feed-evt-${Date.now()}`,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          text: data.timelineEventText,
-          dotColor: '#F59E0B',
-          category: 'report',
-          severity: data.incident?.severity === 'critical' ? 'Critical' : 'High'
-        });
-      }
-
       setIsSuccess(true);
       
       setTimeout(() => {
         setIsSuccess(false);
         setType('fire');
+        setTitle('');
         setDescription('');
-        setLocationStr('');
-        setReporterName('');
+        setLat('');
+        setLng('');
+        setImage(null);
         onClose();
-        // Force refresh of incidents by updating filter back and forth (hack for now since we don't have mutate)
+        // Force refresh of incidents 
         updateFilter('search', ' ');
         setTimeout(() => updateFilter('search', ''), 100);
       }, 2000);
@@ -195,20 +187,53 @@ export function ReportIncidentModal({ isOpen, onClose }: ReportIncidentModalProp
                   </div>
                 </div>
 
-                {/* Location */}
+                {/* Title */}
                 <div>
                   <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest mb-2">
-                    Location
+                    Title
                   </label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                    <input
-                      type="text"
-                      placeholder="Enter address, landmark, or coordinates..."
-                      value={locationStr}
-                      onChange={(e) => setLocationStr(e.target.value)}
-                      className="w-full bg-[#050810] border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-colors"
-                    />
+                  <input
+                    type="text"
+                    placeholder="Brief title of the incident..."
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full bg-[#050810] border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-colors"
+                  />
+                </div>
+
+                {/* Location Coordinates */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest mb-2">
+                      Latitude
+                    </label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                      <input
+                        type="number"
+                        step="any"
+                        placeholder="e.g. 19.076"
+                        value={lat}
+                        onChange={(e) => setLat(e.target.value)}
+                        className="w-full bg-[#050810] border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-colors"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest mb-2">
+                      Longitude
+                    </label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                      <input
+                        type="number"
+                        step="any"
+                        placeholder="e.g. 72.877"
+                        value={lng}
+                        onChange={(e) => setLng(e.target.value)}
+                        className="w-full bg-[#050810] border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-colors"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -226,33 +251,25 @@ export function ReportIncidentModal({ isOpen, onClose }: ReportIncidentModalProp
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
                   {/* Optional Image */}
-                  <div>
-                    <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest mb-2">
-                      Photo (Optional)
-                    </label>
-                    <button type="button" className="w-full flex items-center justify-center gap-2 bg-[#050810] border border-dashed border-white/20 rounded-lg py-2.5 text-xs text-white/40 hover:bg-white/[0.02] hover:text-white/70 transition-colors">
-                      <Camera className="w-4 h-4" /> Upload Image
-                    </button>
-                  </div>
-
-                  {/* Optional Name */}
-                  <div>
-                    <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest mb-2">
-                      Your Name (Optional)
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                      <input
-                        type="text"
-                        placeholder="Anonymous"
-                        value={reporterName}
-                        onChange={(e) => setReporterName(e.target.value)}
-                        className="w-full bg-[#050810] border border-white/10 rounded-lg pl-9 pr-3 py-2.5 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-colors"
-                      />
-                    </div>
-                  </div>
+                  <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest mb-2">
+                    Photo (Optional)
+                  </label>
+                  <label className="w-full flex items-center justify-center gap-2 bg-[#050810] border border-dashed border-white/20 rounded-lg py-2.5 text-xs text-white/40 hover:bg-white/[0.02] hover:text-white/70 transition-colors cursor-pointer">
+                    <Camera className="w-4 h-4" /> 
+                    {image ? image.name : 'Upload Image'}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          setImage(e.target.files[0]);
+                        }
+                      }} 
+                    />
+                  </label>
                 </div>
 
                 {/* Footer */}
@@ -262,7 +279,7 @@ export function ReportIncidentModal({ isOpen, onClose }: ReportIncidentModalProp
                   </Button>
                   <Button 
                     type="submit" 
-                    disabled={isSubmitting || !description || !locationStr}
+                    disabled={isSubmitting || !title || !description || !lat || !lng}
                     className="bg-blue-600 hover:bg-blue-500 text-white gap-2 min-w-[120px]"
                   >
                     {isSubmitting ? (
