@@ -16,6 +16,7 @@ from sqlalchemy import select
 
 from app.models.city import City
 from app.schemas.dashboard import DashboardResponse, WeatherSummary
+from app.services.ai_commander import ai_commander_service
 
 logger = logging.getLogger(__name__)
 
@@ -97,8 +98,11 @@ def _compute_metrics(city_doc: City) -> DashboardResponse:
     weather_raw = _BASE_WEATHER.get(city_key, _DEFAULT_WEATHER)
     weather = WeatherSummary(**weather_raw)
 
-    ai_status  = _AI_STATUS.get(city_key, "Monitoring")
-    risk_score = _RISK_SCORE.get(city_key, 50)
+    risk_score, ai_status = ai_commander_service.evaluate_situation(
+        live_weather=weather_raw,
+        simulation_stage=0,
+        active_incidents=base_incidents
+    )
 
     return DashboardResponse(
         cityId=city_id,

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useAIDecisionContext, AIRecommendation, AIPriority } from '@/context/AIDecisionContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
-import { generateRecommendations, SystemState } from '@/lib/ai/ruleEngine';
+import { generateDynamicStageConfig, SystemState } from '@/lib/ai/ruleEngine';
 import type { ThreatLevel } from '@/data/simulationScenario';
 import { SituationReportModal } from '@/components/ai/SituationReportModal';
 import { AI_COMMANDER_CONFIG } from '@/data/aiCommanderConfig';
@@ -37,11 +37,9 @@ const THINKING_STEPS = [
 export function AIIncidentCommander() {
   const sim = useSimulationContext();
   const { statuses, approve, reject, decisionHistory, customRecommendations } = useAIDecisionContext();
-  const { metricsData, liveWeather, riskScore } = useDashboardData();
+  const { metricsData, liveWeather } = useDashboardData();
   
   const phase = sim?.phase ?? 0;
-  const stageConfig = AI_COMMANDER_CONFIG[phase] || AI_COMMANDER_CONFIG[0];
-  const threatLevel = stageConfig.threatLevel;
   
   const activeIncidents = parseInt(metricsData?.incidents?.value || '0');
   const roadsClosed = parseInt(metricsData?.roads?.value || '0');
@@ -51,7 +49,7 @@ export function AIIncidentCommander() {
   const shelterAvailabilityPercent = Math.max(0, 100 - (sim?.phase ?? 0) * 18);
 
   const systemState: SystemState = useMemo(() => ({
-    riskScore: stageConfig.riskScore,
+    riskScore: 0,
     activeIncidents,
     roadsClosed,
     hospitalCapacityPercent,
@@ -60,14 +58,19 @@ export function AIIncidentCommander() {
     rainfall: Number(liveWeather?.rainfall) || 0,
     windSpeed: Number(liveWeather?.wind_speed) || 0,
     humidity: Number(liveWeather?.humidity) || 0,
+    temperature: Number(liveWeather?.temperature) || 0,
     deployedUnits
-  }), [stageConfig.riskScore, activeIncidents, roadsClosed, hospitalCapacityPercent, shelterAvailabilityPercent, liveWeather, deployedUnits]);
+  }), [activeIncidents, roadsClosed, hospitalCapacityPercent, shelterAvailabilityPercent, liveWeather, deployedUnits]);
+
+  const stageConfig = useMemo(() => {
+    return generateDynamicStageConfig(systemState, phase);
+  }, [systemState, phase]);
+
+  const threatLevel = stageConfig.threatLevel;
 
   const rawRecommendations = useMemo(() => {
-    const dynamicRecs = generateRecommendations(systemState);
-    const filteredDynamic = dynamicRecs.filter(r => r.id !== 'rec-default');
-    return [...customRecommendations, ...stageConfig.recommendations, ...filteredDynamic];
-  }, [systemState, stageConfig.recommendations, customRecommendations]);
+    return [...customRecommendations, ...stageConfig.recommendations];
+  }, [stageConfig.recommendations, customRecommendations]);
   
   const recommendations = rawRecommendations.map(rec => ({
     ...rec,
