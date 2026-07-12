@@ -1,8 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Ambulance, Shield, Flame, Cross, LifeBuoy } from 'lucide-react';
-import { useSimulationContext } from '@/context/SimulationContext';
+import { Ambulance, Shield, Flame, LifeBuoy } from 'lucide-react';
+import { useCity } from '@/context/CityContext';
+import { useEmergencyResources } from '@/hooks/useEmergencyResources';
 
 type StatusType = 'Available' | 'En Route' | 'Busy';
 
@@ -13,40 +14,20 @@ interface ResourceCount {
 }
 
 const RESOURCE_TYPES = [
-  { id: 'ems', label: 'Ambulances', icon: Ambulance, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+  { id: 'ambulance', label: 'Ambulances', icon: Ambulance, color: 'text-blue-400', bg: 'bg-blue-500/10' },
   { id: 'police', label: 'Police', icon: Shield, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
   { id: 'fire', label: 'Fire', icon: Flame, color: 'text-red-400', bg: 'bg-red-500/10' },
   { id: 'rescue', label: 'Rescue', icon: LifeBuoy, color: 'text-orange-400', bg: 'bg-orange-500/10' },
 ];
 
 export function ResourceStatusGrid() {
-  const sim = useSimulationContext();
-  const phase = sim?.phase ?? 0;
-
-  // Simulate dynamic values based on phase
-  const getSimulatedData = (baseTotal: number): ResourceCount => {
-    // As phase increases, more units become busy or en route
-    const busyFactor = Math.min(phase * 0.15, 0.8);
-    const enRouteFactor = Math.min(phase * 0.05, 0.2);
-    
-    const busy = Math.floor(baseTotal * busyFactor);
-    const enRoute = Math.floor(baseTotal * enRouteFactor);
-    const available = baseTotal - busy - enRoute;
-    
-    return { available, enRoute, busy };
-  };
-
-  const statusData: Record<string, ResourceCount> = {
-    ems: getSimulatedData(45),
-    police: getSimulatedData(80),
-    fire: getSimulatedData(30),
-    rescue: getSimulatedData(20),
-  };
+  const { currentCity } = useCity();
+  const { data: statusData } = useEmergencyResources(currentCity.id);
 
   return (
     <div className="grid grid-cols-2 gap-2 p-3 pb-1 border-b border-white/[0.06]">
       {RESOURCE_TYPES.map((res, i) => {
-        const data = statusData[res.id];
+        const data = statusData[res.id as keyof typeof statusData];
         return (
           <motion.div
             key={res.id}

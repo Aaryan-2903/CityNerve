@@ -53,7 +53,7 @@ export function LiveAlertBanner() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className={`px-4 sm:px-6 py-2.5 sm:py-3 border-b backdrop-blur-md z-50 transition-colors duration-500 ease-in-out ${alert.colorClass}`}
+      className={`px-4 sm:px-6 py-2.5 sm:py-3 border-b backdrop-blur-md z-banner transition-colors duration-500 ease-in-out ${alert.colorClass}`}
     >
       <AnimatePresence mode="wait">
         <motion.div

@@ -74,7 +74,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             )}
 
             {/* Tooltip — desktop only */}
-            <span className="pointer-events-none absolute left-full ml-3 rounded-lg border border-white/[0.08] bg-[#0D1420] px-2.5 py-1.5 text-[11px] font-medium text-white/70 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl z-50 hidden md:block">
+            <span className="pointer-events-none absolute left-full ml-3 rounded-lg border border-white/[0.08] bg-[#0D1420] px-2.5 py-1.5 text-[11px] font-medium text-white/70 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl z-tooltip hidden md:block">
               {item.label}
             </span>
           </motion.button>
@@ -90,7 +90,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         initial={{ x: -90, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
-        className="hidden md:flex w-[90px] h-full shrink-0 flex-col items-center bg-[#070B14] border-r border-white/[0.05] py-3 relative z-10"
+        className="hidden md:flex w-[90px] h-full shrink-0 flex-col items-center bg-[#070B14] border-r border-white/[0.05] py-3 relative z-sidebar"
       >
         {navContent}
 
@@ -112,7 +112,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             animate={{ x: 0 }}
             exit={{ x: -280 }}
             transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed top-0 left-0 bottom-0 z-40 flex flex-col w-[280px] bg-[#070B14] border-r border-white/[0.08] shadow-2xl md:hidden"
+            className="fixed top-0 left-0 bottom-0 z-sidebar flex flex-col w-[280px] bg-[#070B14] border-r border-white/[0.08] shadow-2xl md:hidden"
           >
             {/* Drawer header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">

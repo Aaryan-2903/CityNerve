@@ -42,7 +42,7 @@ function CitySwitcher() {
         </button>
 
         {isOpen && (
-          <div className="absolute top-full left-0 mt-2 w-48 rounded-lg border border-white/[0.1] bg-[#0F1524] shadow-2xl overflow-hidden z-50">
+          <div className="absolute top-full left-0 mt-2 w-48 rounded-lg border border-white/[0.1] bg-[#0F1524] shadow-2xl overflow-hidden z-dropdown">
             <div className="max-h-[300px] overflow-y-auto p-1">
               {isLoadingCities ? (
                 <div className="p-4 flex justify-center"><Loader2 className="w-4 h-4 animate-spin text-white/50" /></div>
@@ -90,7 +90,7 @@ export function TopBar({ activeIncidents, criticalCount }: TopBarProps) {
   return (
     <>
       <ReportIncidentModal isOpen={reportModalOpen} onClose={() => setReportModalOpen(false)} />
-      <header className="relative z-50 flex h-12 shrink-0 items-center gap-4 border-b border-white/[0.06] bg-[#070B14]/80 px-4 backdrop-blur-xl">
+      <header className="relative z-floating flex h-12 shrink-0 items-center gap-4 border-b border-white/[0.06] bg-[#070B14]/80 px-4 backdrop-blur-xl">
       {/* Left: Breadcrumb + Incident count */}
       <div className="flex items-center gap-3 min-w-0">
         <div className="flex items-center gap-2">

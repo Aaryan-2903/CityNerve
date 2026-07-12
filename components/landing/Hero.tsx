@@ -8,7 +8,7 @@ export function Hero() {
     <section className="relative pt-20 sm:pt-32 pb-16 sm:pb-20 overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(37,99,235,0.15),transparent_50%)]" />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-base text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

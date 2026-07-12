@@ -79,7 +79,7 @@ export function ExpandedMapOverlay({ isOpen, onClose }: ExpandedMapOverlayProps)
             // even when the iOS Safari address bar is visible
             width: '100vw',
             height: '100dvh',
-            zIndex: 9999,
+            zIndex: 100,
             background: '#080D18',
             display: 'flex',
             flexDirection: 'column',
@@ -106,8 +106,8 @@ export function ExpandedMapOverlay({ isOpen, onClose }: ExpandedMapOverlayProps)
 
           {/* ── Close controls — top-right, always on top ────────────────── */}
           <div
-            style={{ position: 'absolute', top: 12, right: 12, zIndex: 50 }}
-            className="flex items-center gap-2 pointer-events-auto"
+            style={{ position: 'absolute', top: 12, right: 12 }}
+            className="flex items-center gap-2 pointer-events-auto z-floating"
           >
             {/* Label pill */}
             <div className="flex items-center gap-1.5 rounded-full border border-white/[0.1] bg-[#0B0F1C]/90 px-3 py-1.5 backdrop-blur-md shadow-lg">

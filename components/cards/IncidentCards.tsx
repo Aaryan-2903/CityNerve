@@ -66,7 +66,8 @@ function IncidentCardItem({ incident, index, isSelected, onSelect }: IncidentCar
         'rounded-xl border p-3.5 cursor-pointer transition-all duration-200 relative',
         'hover:brightness-110 hover:shadow-md hover:border-white/30',
         incident.isNew && 'ring-1 ring-orange-500/40',
-        isSelected && 'ring-2 shadow-lg z-10',
+        'transition-all duration-200 cursor-pointer text-left',
+        isSelected && 'ring-2 shadow-lg z-floating',
       )}
       style={{
         backgroundColor: sConfig.bg,

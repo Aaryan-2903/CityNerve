@@ -38,6 +38,8 @@ function mapBackendCity(c: BackendCity): CityProfile {
     longitude: c.longitude,
     displayLabel: `${c.name} Command Zone`,
     weatherLabel: `${c.name} Metro Area`,
+    state: c.state || '',
+    openMeteoCoordinates: { latitude: c.latitude, longitude: c.longitude },
   };
 }
 

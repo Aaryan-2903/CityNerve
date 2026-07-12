@@ -8,6 +8,7 @@ import { useResources } from './useResources';
 import { useNotifications } from './useNotifications';
 import { useWeather } from './useWeather';
 import { Weather } from '@/types/weather';
+import { useIncidentsContext } from '@/context/IncidentContext';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
 
@@ -41,6 +42,7 @@ export function useDashboardData() {
   const { resources } = useResources(currentCity.id);
   const { notifications } = useNotifications(currentCity.id, phase);
   const { weather } = useWeather(currentCity.id, phase);
+  const { incidents } = useIncidentsContext();
 
   useEffect(() => {
     let cancelled = false;
@@ -70,6 +72,31 @@ export function useDashboardData() {
     };
   }, [currentCity.id]);
 
+  const incidentFeed = useMemo(() => incidents.map(inc => ({
+    id: `feed-${inc.id}`,
+    time: new Date(inc.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    text: `Incident Update: ${inc.title}`,
+    dotColor: inc.severity === 'critical' ? '#EF4444' : inc.severity === 'high' ? '#F97316' : inc.severity === 'medium' ? '#EAB308' : '#3B82F6',
+    category: 'report' as const,
+    severity: (inc.severity.charAt(0).toUpperCase() + inc.severity.slice(1)) as any
+  })), [incidents]);
+
+  const mappedBaseIncidents = useMemo(() => incidents.map(inc => {
+    let severityStr = inc.severity.toUpperCase();
+    if (severityStr === 'RESOLVED') severityStr = 'LOW';
+    return {
+      id: inc.id,
+      title: inc.title,
+      severity: severityStr as 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW',
+      time: new Date(inc.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      team: inc.resourcesDeployed?.length ? `${inc.resourcesDeployed.length} Units` : 'Unassigned',
+      status: inc.status.charAt(0).toUpperCase() + inc.status.slice(1),
+      impact: `${inc.casualties || 0} Casualties`,
+      location: inc.location?.district || inc.location?.address || 'Unknown',
+      isNew: false
+    };
+  }), [incidents]);
+
   const data = useMemo(() => {
     // Dynamic overlay computation using real API data limits where possible
     const totalShelters = apiData?.sheltersAvailable ?? shelters.length;
@@ -80,7 +107,7 @@ export function useDashboardData() {
     const dynamicPop = apiData?.populationAffected ?? "12.4k";
     const dynamicRoads = (apiData?.roadsClosed ?? 0) + phase;
     const dynamicDeployed = totalResources + phase * 2 + extraDeployedUnits;
-    const dynamicIncidents = (apiData?.activeIncidents ?? 0) + (sim?.simIncidents?.length ?? 0) + Math.floor(phase / 2);
+    const dynamicIncidents = incidents.length + (sim?.simIncidents?.length ?? 0);
     const dynamicResponse = Math.max(4, parseInt(apiData?.averageResponseTime || "24") - phase * 2);
 
     const metricsData = {
@@ -110,12 +137,12 @@ export function useDashboardData() {
       },
       incidents: {
         value: String(dynamicIncidents),
-        subtext: `${sim?.simIncidents?.length ?? 0} new reports`,
+        subtext: `${incidents.length} active, ${sim?.simIncidents?.length ?? 0} new reports`,
       },
     };
 
     // Transform notifications into baseFeed
-    const baseFeed = notifications.map((n) => ({
+    const notificationsFeed = notifications.map((n) => ({
       id: n.id,
       time: n.time,
       text: n.text,
@@ -125,13 +152,13 @@ export function useDashboardData() {
 
     return {
       metricsData,
-      baseIncidents: [], // Handled separately by useIncidents if needed, or we can fetch them here.
-      baseFeed,
+      baseIncidents: mappedBaseIncidents,
+      baseFeed: [...incidentFeed, ...notificationsFeed],
       liveWeather: weather ?? apiData?.weather ?? null,
       aiStatus: apiData?.aiStatus ?? null,
       riskScore: apiData?.riskScore ?? null,
     };
-  }, [apiData, shelters, hospitals, resources, notifications, weather, phase, sim, extraDeployedUnits]);
+  }, [apiData, shelters, hospitals, resources, notifications, weather, phase, sim, extraDeployedUnits, incidents, mappedBaseIncidents, incidentFeed]);
 
   return { ...data, isLoadingDashboard };
 }

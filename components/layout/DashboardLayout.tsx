@@ -24,7 +24,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Mobile overlay backdrop */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-backdrop bg-black/60 backdrop-blur-sm md:hidden"
             onClick={() => setSidebarOpen(false)}
             aria-hidden="true"
           />

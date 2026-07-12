@@ -125,7 +125,7 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
       transition={{ duration: 0.5, delay: 0.1 }}
       className="relative flex flex-col min-h-full w-full bg-[#080D18]"
     >
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-base">
       <Map
         ref={mapRef}
         key={currentCity.id}
@@ -327,14 +327,14 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
 
       {/* ── Edge vignette (moved to background layer) ── */}
       <div
-        className="absolute inset-0 pointer-events-none z-0"
+        className="absolute inset-0 pointer-events-none z-base"
         style={{
           background: 'radial-gradient(ellipse 120% 120% at 50% 50%, transparent 60%, rgba(5,8,16,0.7) 100%)',
         }}
       />
 
       {/* ── UI Overlay Layer (Normal Document Flow) ── */}
-      <div className="relative flex flex-col z-10 overflow-x-hidden pointer-events-none min-h-full w-full">
+      <div className="relative flex flex-col z-map overflow-x-hidden pointer-events-none min-h-full w-full">
         
         {/* Top Area: Filters + Weather */}
         <div className="flex flex-col shrink-0">

@@ -61,7 +61,7 @@ function FeedEntryRow({ entry, index, isNew, isLatest, isLast }: FeedEntryRowPro
       )}
 
       {/* Icon node */}
-      <div className="relative shrink-0 flex items-center justify-center mt-1 z-10">
+      <div className="relative shrink-0 flex items-center justify-center mt-1 z-base">
         <div 
           className={cn("w-8 h-8 rounded-full flex items-center justify-center border", isLatest ? "border-white/20 bg-white/10" : "border-white/5 bg-[#0A0E1A]")}
           style={isLatest ? { boxShadow: `0 0 15px ${entry.dotColor}30` } : {}}
