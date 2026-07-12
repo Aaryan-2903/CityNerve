@@ -9,7 +9,7 @@ export interface NotificationEntry {
   time: string;
   text: string;
   dotColor: string;
-  category: string;
+  category: 'dispatch' | 'shelter' | 'advisory' | 'report';
 }
 
 export function useNotifications(cityId: string, phase: number) {

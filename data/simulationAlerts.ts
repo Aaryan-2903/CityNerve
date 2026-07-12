@@ -1,7 +1,7 @@
 import { AlertTriangle, AlertCircle, Info, CheckCircle2, ShieldAlert } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-export type AlertSeverity = 'normal' | 'advisory' | 'watch' | 'warning' | 'critical' | 'emergency';
+export type AlertSeverity = 'normal' | 'advisory' | 'watch' | 'warning' | 'critical' | 'emergency' | 'recovery';
 
 export interface SimulationAlert {
   title: string;
@@ -15,13 +15,13 @@ export interface SimulationAlert {
 const severityConfig: Record<AlertSeverity, { icon: LucideIcon, colorClass: string, dotClass: string }> = {
   normal: {
     icon: CheckCircle2,
-    colorClass: 'bg-green-500/20 text-green-400 border-green-500/30',
-    dotClass: 'bg-green-400'
+    colorClass: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    dotClass: 'bg-blue-400'
   },
   advisory: {
     icon: Info,
-    colorClass: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    dotClass: 'bg-blue-400'
+    colorClass: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+    dotClass: 'bg-cyan-400'
   },
   watch: {
     icon: AlertCircle,
@@ -40,8 +40,13 @@ const severityConfig: Record<AlertSeverity, { icon: LucideIcon, colorClass: stri
   },
   emergency: {
     icon: ShieldAlert,
-    colorClass: 'bg-rose-900/40 text-rose-400 border-rose-500/40',
-    dotClass: 'bg-rose-500'
+    colorClass: 'bg-red-950/60 text-red-500 border-red-800/50',
+    dotClass: 'bg-red-500'
+  },
+  recovery: {
+    icon: CheckCircle2,
+    colorClass: 'bg-green-500/20 text-green-400 border-green-500/30',
+    dotClass: 'bg-green-400'
   }
 };
 
@@ -91,8 +96,8 @@ export const SIMULATION_ALERTS: Record<number, SimulationAlert> = {
   7: {
     title: 'RECOVERY PHASE',
     description: 'Water levels receding. Cleanup crews dispatched.',
-    severity: 'advisory',
-    ...severityConfig.advisory
+    severity: 'recovery',
+    ...severityConfig.recovery
   },
   8: {
     title: 'ALL CLEAR',

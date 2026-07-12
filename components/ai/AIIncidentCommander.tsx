@@ -10,6 +10,7 @@ import { useDashboardData } from '@/hooks/useDashboardData';
 import { generateRecommendations, SystemState } from '@/lib/ai/ruleEngine';
 import type { ThreatLevel } from '@/data/simulationScenario';
 import { SituationReportModal } from '@/components/ai/SituationReportModal';
+import { AI_COMMANDER_CONFIG } from '@/data/aiCommanderConfig';
 
 const THREAT_STYLES: Record<ThreatLevel, { color: string; bg: string; border: string; glow: string }> = {
   LOW: { color: '#10B981', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.2)', glow: 'rgba(16,185,129,0.15)' },
@@ -38,7 +39,9 @@ export function AIIncidentCommander() {
   const { statuses, approve, reject, decisionHistory, customRecommendations } = useAIDecisionContext();
   const { metricsData, liveWeather, riskScore } = useDashboardData();
   
-  const threatLevel = (sim?.threatLevel as ThreatLevel) ?? 'LOW';
+  const phase = sim?.phase ?? 0;
+  const stageConfig = AI_COMMANDER_CONFIG[phase] || AI_COMMANDER_CONFIG[0];
+  const threatLevel = stageConfig.threatLevel;
   
   const activeIncidents = parseInt(metricsData?.incidents?.value || '0');
   const roadsClosed = parseInt(metricsData?.roads?.value || '0');
@@ -48,7 +51,7 @@ export function AIIncidentCommander() {
   const shelterAvailabilityPercent = Math.max(0, 100 - (sim?.phase ?? 0) * 18);
 
   const systemState: SystemState = useMemo(() => ({
-    riskScore: riskScore ?? ((sim?.phase ?? 0) * 15),
+    riskScore: stageConfig.riskScore,
     activeIncidents,
     roadsClosed,
     hospitalCapacityPercent,
@@ -58,16 +61,18 @@ export function AIIncidentCommander() {
     windSpeed: Number(liveWeather?.wind_speed) || 0,
     humidity: Number(liveWeather?.humidity) || 0,
     deployedUnits
-  }), [riskScore, activeIncidents, roadsClosed, hospitalCapacityPercent, shelterAvailabilityPercent, liveWeather, deployedUnits, sim?.phase]);
+  }), [stageConfig.riskScore, activeIncidents, roadsClosed, hospitalCapacityPercent, shelterAvailabilityPercent, liveWeather, deployedUnits]);
 
   const rawRecommendations = useMemo(() => {
-    return [...customRecommendations, ...generateRecommendations(systemState)];
-  }, [systemState, customRecommendations]);
+    const dynamicRecs = generateRecommendations(systemState);
+    const filteredDynamic = dynamicRecs.filter(r => r.id !== 'rec-default');
+    return [...customRecommendations, ...stageConfig.recommendations, ...filteredDynamic];
+  }, [systemState, stageConfig.recommendations, customRecommendations]);
   
   const recommendations = rawRecommendations.map(rec => ({
     ...rec,
     status: statuses[rec.id] || 'Pending'
-  }));
+  })) as AIRecommendation[];
 
   const [lastAnalysisTime, setLastAnalysisTime] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -99,7 +104,7 @@ export function AIIncidentCommander() {
       clearInterval(interval);
       clearTimeout(timer);
     };
-  }, [systemState.riskScore, systemState.activeIncidents, systemState.weatherLabel]);
+  }, [phase]); // Re-analyze when phase changes
 
   useEffect(() => {
     if (!lastAnalysisTime) {
@@ -149,7 +154,7 @@ export function AIIncidentCommander() {
                     >
                       {THINKING_STEPS[thinkingStepIndex]}
                     </motion.span>
-                  ) : `LAST UPDATE: ${lastAnalysisTime}`}
+                  ) : `LAST ANALYSIS: ${lastAnalysisTime}`}
                 </span>
               </div>
             </div>
@@ -227,18 +232,63 @@ export function AIIncidentCommander() {
                   </div>
                   
                   <motion.div
-                    key={systemState.riskScore + systemState.weatherLabel}
+                    key={phase + 'analysis'}
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="p-3 rounded-xl border border-white/[0.04] bg-white/[0.02] backdrop-blur-sm"
+                    className="p-3 rounded-xl border border-white/[0.04] bg-white/[0.02] backdrop-blur-sm flex flex-col gap-3"
                   >
                     <p className="text-xs text-white/80 leading-relaxed font-light">
-                      Risk score assessed at <strong className="text-white font-medium">{systemState.riskScore.toFixed(0)}</strong>. 
-                      Currently <strong className="text-white font-medium">{systemState.roadsClosed}</strong> roads closed and <strong className="text-white font-medium">{metricsData?.shelters?.value ?? 0}</strong> shelters available. 
-                      Weather conditions: <span className="italic text-white/70">{systemState.weatherLabel}</span>. 
-                      Active incidents tracking at {systemState.activeIncidents}.
+                      {stageConfig.situationSummary}
                     </p>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex flex-col p-2 bg-black/20 rounded-lg border border-white/5">
+                        <span className="text-[9px] text-white/40 uppercase font-bold tracking-widest mb-1">Risk Score</span>
+                        <span className="text-sm font-semibold text-white/90">{stageConfig.riskScore.toFixed(0)}/100</span>
+                      </div>
+                      
+                      <div className="flex flex-col p-2 bg-black/20 rounded-lg border border-white/5">
+                        <span className="text-[9px] text-white/40 uppercase font-bold tracking-widest mb-1">Confidence</span>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-sm font-semibold text-white/90 leading-none">{stageConfig.confidence}%</span>
+                          <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <motion.div 
+                              className="h-full bg-blue-500 rounded-full" 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${stageConfig.confidence}%` }}
+                              transition={{ duration: 0.8, ease: "easeOut" }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col p-2 bg-black/20 rounded-lg border border-white/5">
+                        <span className="text-[9px] text-white/40 uppercase font-bold tracking-widest mb-1">Priority</span>
+                        <div>
+                          <span className={`inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border ${PRIORITY_STYLES[stageConfig.priority].bg} ${PRIORITY_STYLES[stageConfig.priority].border} ${PRIORITY_STYLES[stageConfig.priority].text}`}>
+                            {stageConfig.priority}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col p-2 bg-black/20 rounded-lg border border-white/5">
+                        <span className="text-[9px] text-white/40 uppercase font-bold tracking-widest mb-1">Est. Response</span>
+                        <span className="text-sm font-semibold text-white/90">{stageConfig.estimatedResponseTime}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5 mt-1 border-t border-white/5 pt-3">
+                      <span className="text-[9px] text-white/40 uppercase font-bold tracking-widest">Resource Allocation</span>
+                      <div className="flex flex-wrap gap-2">
+                        {Object.entries(stageConfig.resources).map(([name, count]) => (
+                          <div key={name} className="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-md border border-white/10">
+                            <span className="text-[10px] text-white/60">{name}</span>
+                            <span className="text-xs font-semibold text-white">{count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </motion.div>
                 </div>
 
@@ -272,9 +322,6 @@ export function AIIncidentCommander() {
                                 <div className="flex items-center gap-2">
                                   <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border ${prioStyle.bg} ${prioStyle.border} ${prioStyle.text}`}>
                                     {rec.priority}
-                                  </span>
-                                  <span className="text-[10px] font-mono text-white/40">
-                                    {rec.confidence}% CONF
                                   </span>
                                 </div>
                               </div>
@@ -384,3 +431,4 @@ export function AIIncidentCommander() {
     </>
   );
 }
+

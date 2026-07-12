@@ -2,27 +2,11 @@ import { useState, useEffect } from 'react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
 
-export interface WeatherState {
-  id: string;
-  city_id: string;
-  temperature: number;
-  apparent_temperature: number;
-  rainfall: number;
-  precipitation_probability: number;
-  humidity: number;
-  wind_speed: number;
-  wind_direction: number;
-  weather_condition: string;
-  cloud_cover: number;
-  label: string;
-  emoji: string;
-  alertText: string;
-  alertLevel: string;
-  last_updated: string;
-}
+import { Weather } from '@/types/weather';
+
 
 export function useWeather(cityId: string, phase: number) {
-  const [weather, setWeather] = useState<WeatherState | null>(null);
+  const [weather, setWeather] = useState<Weather | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

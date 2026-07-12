@@ -7,6 +7,7 @@ import { useHospitals } from './useHospitals';
 import { useResources } from './useResources';
 import { useNotifications } from './useNotifications';
 import { useWeather } from './useWeather';
+import { Weather } from '@/types/weather';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
 
@@ -19,15 +20,7 @@ interface DashboardAPIResponse {
   deployedUnits: number;
   activeIncidents: number;
   averageResponseTime: string;
-  weather: {
-    label: string;
-    emoji: string;
-    rainfall: number;
-    wind_speed: number;
-    humidity: number;
-    alertText: string;
-    alertLevel: string;
-  };
+  weather: Weather;
   aiStatus: string;
   riskScore: number;
 }
@@ -127,7 +120,7 @@ export function useDashboardData() {
       time: n.time,
       text: n.text,
       dotColor: n.dotColor,
-      category: n.category as any,
+      category: n.category,
     }));
 
     return {
