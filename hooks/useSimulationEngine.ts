@@ -2,6 +2,21 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 export type SimStatus = 'idle' | 'running' | 'paused' | 'complete';
+export interface SimWeather {
+  label: string;
+  emoji: string;
+  rainfall: string;
+  forecast: string;
+  alertText: string;
+  alertLevel: string;
+}
+
+export interface SimResource {
+  deployed: number;
+  available: number;
+  personnel: number;
+}
+
 export interface SimulationState {
   status: SimStatus;
   phase: number;
@@ -9,10 +24,10 @@ export interface SimulationState {
   progress: number;
   threatLevel: string;
   confidence: number;
-  weather: any;
-  simIncidents: any[];
-  feedEntries: any[];
-  resources: any;
+  weather: SimWeather;
+  simIncidents: Record<string, unknown>[];
+  feedEntries: Record<string, unknown>[];
+  resources: SimResource;
   showFloodOverlay: boolean;
   showActionPlan: boolean;
   showPrediction: boolean;
@@ -31,13 +46,12 @@ export interface SimulationState {
 const API_BASE = 'http://127.0.0.1:8000/api/v1/simulation';
 
 export function useSimulationEngine(): SimulationState & { isBackendAvailable: boolean } {
-  const [backendState, setBackendState] = useState<any>(null);
+  const [backendState, setBackendState] = useState<Record<string, unknown> | null>(null);
   const [isBackendAvailable, setIsBackendAvailable] = useState<boolean>(true);
 
   // Poll backend
   useEffect(() => {
     let mounted = true;
-    let timer: any;
 
     const fetchStatus = async () => {
       try {
@@ -60,7 +74,7 @@ export function useSimulationEngine(): SimulationState & { isBackendAvailable: b
 
     fetchStatus();
     // Poll every 1 second
-    timer = setInterval(fetchStatus, 1000);
+    const timer = setInterval(fetchStatus, 1000);
 
     return () => {
       mounted = false;
@@ -91,7 +105,7 @@ export function useSimulationEngine(): SimulationState & { isBackendAvailable: b
 
   const setStage = useCallback(async (index: number) => {
     if (!backendState) return;
-    const current = backendState.currentStageIndex;
+    const current = backendState.currentStageIndex as number;
     if (index === current) return;
     
     // Safety check - if jumping, we must do it sequentially since no backend endpoint exists
@@ -126,18 +140,18 @@ export function useSimulationEngine(): SimulationState & { isBackendAvailable: b
 
     return {
       status: backendState.status as SimStatus,
-      phase: backendState.currentStageIndex,
-      elapsed: backendState.progress * 80, // rough approximation for UI timers if any
-      progress: backendState.progress,
-      threatLevel: backendState.threatLevel,
-      confidence: backendState.confidence,
-      weather: backendState.weather,
-      simIncidents: backendState.incidents,
-      feedEntries: backendState.feedEntries,
-      resources: backendState.resources,
-      showFloodOverlay: backendState.showFloodOverlay,
-      showActionPlan: backendState.showActionPlan,
-      showPrediction: backendState.showPrediction,
+      phase: backendState.currentStageIndex as number,
+      elapsed: (backendState.progress as number) * 80, // rough approximation for UI timers if any
+      progress: backendState.progress as number,
+      threatLevel: backendState.threatLevel as string,
+      confidence: backendState.confidence as number,
+      weather: backendState.weather as SimWeather,
+      simIncidents: backendState.incidents as Record<string, unknown>[],
+      feedEntries: backendState.feedEntries as Record<string, unknown>[],
+      resources: backendState.resources as SimResource,
+      showFloodOverlay: backendState.showFloodOverlay as boolean,
+      showActionPlan: backendState.showActionPlan as boolean,
+      showPrediction: backendState.showPrediction as boolean,
       start, pause, reset,
       startSimulation: start, pauseSimulation: pause, resumeSimulation: start, resetSimulation: reset,
       nextStage, previousStage, setStage

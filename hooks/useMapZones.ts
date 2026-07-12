@@ -6,13 +6,13 @@ export interface RiskZone {
   id: string;
   cityId: string;
   type: string;
-  geometry: any;
+  geometry: Record<string, unknown>;
 }
 
 export interface EvacuationRoute {
   id: string;
   cityId: string;
-  geometry: any;
+  geometry: Record<string, unknown>;
 }
 
 export function useMapZones(cityId: string) {

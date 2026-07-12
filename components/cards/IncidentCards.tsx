@@ -61,7 +61,16 @@ function IncidentCardItem({ incident, index, isSelected, onSelect }: IncidentCar
       exit={{ opacity: 0, y: -4, scale: 0.98 }}
       transition={{ duration: 0.3, delay: incident.isNew ? 0 : 0.06 * index }}
       onClick={() => onSelect(incident.id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect(incident.id);
+        }
+      }}
       whileTap={{ scale: 0.98 }}
+      role="button"
+      tabIndex={0}
+      aria-label={`Incident: ${incident.title}, Severity: ${incident.severity}`}
       className={cn(
         'rounded-xl border p-3.5 cursor-pointer transition-all duration-200 relative',
         'hover:brightness-110 hover:shadow-md hover:border-white/30',
@@ -151,8 +160,8 @@ export function IncidentCards() {
   const simIncidents = sim?.simIncidents ?? [];
 
   const allIncidents: Incident[] = [
-    ...(simIncidents as Incident[]),
-    ...(baseIncidents as Incident[]),
+    ...(simIncidents as unknown as Incident[]),
+    ...(baseIncidents as unknown as Incident[]),
   ];
 
   const criticalCount = allIncidents.filter((i) => i.severity === 'CRITICAL').length;

@@ -66,9 +66,14 @@ export function useDashboardData() {
     }
 
     fetchDashboard();
+    
+    // Polling every 10 seconds to keep live data fresh
+    const intervalId = setInterval(fetchDashboard, 10000);
+
     return () => {
       cancelled = true;
       controller.abort();
+      clearInterval(intervalId);
     };
   }, [currentCity.id]);
 
@@ -78,7 +83,7 @@ export function useDashboardData() {
     text: `Incident Update: ${inc.title}`,
     dotColor: inc.severity === 'critical' ? '#EF4444' : inc.severity === 'high' ? '#F97316' : inc.severity === 'medium' ? '#EAB308' : '#3B82F6',
     category: 'report' as const,
-    severity: (inc.severity.charAt(0).toUpperCase() + inc.severity.slice(1)) as any
+    severity: (inc.severity.charAt(0).toUpperCase() + inc.severity.slice(1)) as 'Critical' | 'High' | 'Medium' | 'Low' | 'Resolved'
   })), [incidents]);
 
   const mappedBaseIncidents = useMemo(() => incidents.map(inc => {
@@ -98,46 +103,45 @@ export function useDashboardData() {
   }), [incidents]);
 
   const data = useMemo(() => {
-    // Dynamic overlay computation using real API data limits where possible
     const totalShelters = apiData?.sheltersAvailable ?? shelters.length;
     const totalHospitals = apiData?.hospitalsNearby ?? hospitals.length;
     const totalResources = apiData?.deployedUnits ?? resources.length;
     
-    // Animate some values with phase if we want to keep the UX dynamic
-    const dynamicPop = apiData?.populationAffected ?? "12.4k";
-    const dynamicRoads = (apiData?.roadsClosed ?? 0) + phase;
-    const dynamicDeployed = totalResources + phase * 2 + extraDeployedUnits;
-    const dynamicIncidents = incidents.length + (sim?.simIncidents?.length ?? 0);
-    const dynamicResponse = Math.max(4, parseInt(apiData?.averageResponseTime || "24") - phase * 2);
+    // Use true backend values without frontend mock additions
+    const dynamicPop = apiData?.populationAffected ?? "Unknown";
+    const dynamicRoads = apiData?.roadsClosed ?? 0;
+    const dynamicDeployed = apiData?.deployedUnits ?? totalResources;
+    const dynamicIncidents = apiData?.activeIncidents ?? incidents.length;
+    const dynamicResponse = apiData?.averageResponseTime || "--m";
 
     const metricsData = {
       population: {
         value: dynamicPop,
-        subtext: phase > 0 ? 'Rising due to alerts' : 'Stable',
+        subtext: 'Current Affected Population',
       },
       hospitals: {
-        value: String(totalHospitals + Math.max(0, 3 - Math.floor(phase / 2))),
-        subtext: 'Surge protocols active',
+        value: String(totalHospitals),
+        subtext: 'Active Medical Centers',
       },
       roads: {
         value: String(dynamicRoads),
-        subtext: 'Major arterial blocked',
+        subtext: 'Current Road Closures',
       },
       shelters: {
-        value: String(totalShelters + phase),
-        subtext: `Total capacity: ${(totalShelters + phase) * 450}`,
+        value: String(totalShelters),
+        subtext: `Total Active Shelters`,
       },
       responseTime: {
-        value: `${dynamicResponse}m`,
-        subtext: phase > 0 ? 'Improving as units deploy' : 'Baseline',
+        value: String(dynamicResponse),
+        subtext: 'Estimated Unit Response',
       },
       deployed: {
         value: String(dynamicDeployed),
-        subtext: `${sim?.resources?.personnel ?? (18 + phase * 5)} personnel active`,
+        subtext: 'Active Field Units',
       },
       incidents: {
         value: String(dynamicIncidents),
-        subtext: `${incidents.length} active, ${sim?.simIncidents?.length ?? 0} new reports`,
+        subtext: 'Active Critical Events',
       },
     };
 
@@ -158,7 +162,7 @@ export function useDashboardData() {
       aiStatus: apiData?.aiStatus ?? null,
       riskScore: apiData?.riskScore ?? null,
     };
-  }, [apiData, shelters, hospitals, resources, notifications, weather, phase, sim, extraDeployedUnits, incidents, mappedBaseIncidents, incidentFeed]);
+  }, [apiData, shelters, hospitals, resources, notifications, weather, incidents, mappedBaseIncidents, incidentFeed]);
 
   return { ...data, isLoadingDashboard };
 }

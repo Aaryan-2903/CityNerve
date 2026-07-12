@@ -12,11 +12,15 @@ import logging
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from app.models.city import City
+from app.models.incident import Incident
+from app.models.emergency_resource import EmergencyResource
+from app.models.poi import Hospital, Shelter
 from app.schemas.dashboard import DashboardResponse, WeatherSummary
 from app.services.ai_commander import ai_commander_service
+from app.services.weather_service import fetch_weather_for_city
 
 logger = logging.getLogger(__name__)
 
@@ -76,32 +80,62 @@ def _city_key(name: str) -> str:
     """Normalise a city name to the lowercase key used in variance maps."""
     return name.lower().replace(" ", "")
 
-
-def _compute_metrics(city_doc: City) -> DashboardResponse:
+async def _compute_metrics(city_doc: City, db: AsyncSession) -> DashboardResponse:
     raw_name = city_doc.name
     city_key = _city_key(raw_name)
     city_id  = city_key  # matches frontend CityProfile.id convention
 
-    v       = _VARIANCE.get(city_key, 0)
     base_pop = _BASE_POPS.get(city_key, 12400)
-
     pop_formatted = f"{(base_pop / 1000):.1f}k"
 
-    # Incident / unit counts — deterministic formula matching the frontend (phase=0)
-    base_incidents = 3 + v            # mirrors scenario.mapLayers.incidents.length + v
-    hospitals      = 2 + 3 + v        # 2 base + 3 max capacity bonus (phase=0) + v
-    shelters       = 2 + (v % 3)      # 2 base shelters + v
-    roads_closed   = base_incidents + 1 + v
-    deployed_units = 2 + v            # phase=0 → sim?.resources?.deployed=2 + v
-    avg_response   = max(4, 24 - v)   # phase=0 baseline
+    # Query real counts from DB
+    incidents_count = await db.execute(select(func.count(Incident.id)).where(Incident.cityId == city_id, Incident.status != 'resolved'))
+    active_incidents = incidents_count.scalar_one()
 
-    weather_raw = _BASE_WEATHER.get(city_key, _DEFAULT_WEATHER)
-    weather = WeatherSummary(**weather_raw)
+    # Closed roads can be derived from incidents since we don't have a road model, 
+    # but we can just use active incidents * 1.5 as a rough real-time proxy if needed, 
+    # or just use active_incidents. Let's use a real-time proxy.
+    roads_closed = int(active_incidents * 1.5)
+
+    hospitals_count = await db.execute(select(func.count(Hospital.id)).where(Hospital.cityId == city_id))
+    hospitals = hospitals_count.scalar_one()
+
+    shelters_count = await db.execute(select(func.count(Shelter.id)).where(Shelter.cityId == city_id))
+    shelters = shelters_count.scalar_one()
+
+    # Fetch resources
+    resources_result = await db.execute(select(EmergencyResource).where(EmergencyResource.cityId == city_id))
+    resources = resources_result.scalars().all()
+    deployed_units = sum(r.enRoute + r.busy for r in resources)
+    
+    # Calculate average response time based on deployed units as a proxy for load
+    avg_response = max(4, 24 - (deployed_units // 5))
+
+    # Fetch real weather
+    weather_resp = await fetch_weather_for_city(city_doc, db)
+    weather = WeatherSummary(
+        label=weather_resp.label,
+        emoji=weather_resp.emoji,
+        rainfall=f"{weather_resp.rainfall} mm/hr",
+        forecast="Live Forecast",
+        alertText=weather_resp.alertText,
+        alertLevel=weather_resp.alertLevel,
+    )
+
+    # Pass live data to AI Commander
+    weather_raw = {
+        "label": weather.label,
+        "emoji": weather.emoji,
+        "rainfall": weather.rainfall,
+        "forecast": weather.forecast,
+        "alertText": weather.alertText,
+        "alertLevel": weather.alertLevel,
+    }
 
     risk_score, ai_status = ai_commander_service.evaluate_situation(
         live_weather=weather_raw,
         simulation_stage=0,
-        active_incidents=base_incidents
+        active_incidents=active_incidents
     )
 
     return DashboardResponse(
@@ -111,7 +145,7 @@ def _compute_metrics(city_doc: City) -> DashboardResponse:
         sheltersAvailable=shelters,
         roadsClosed=roads_closed,
         deployedUnits=deployed_units,
-        activeIncidents=base_incidents,
+        activeIncidents=active_incidents,
         averageResponseTime=f"{avg_response}m",
         weather=weather,
         aiStatus=ai_status,
@@ -138,4 +172,4 @@ async def get_dashboard_for_city(
             detail=f"City '{city_name}' not found or inactive.",
         )
 
-    return _compute_metrics(doc)
+    return await _compute_metrics(doc, db)

@@ -14,8 +14,8 @@ export function LiveAlertBanner() {
   
   let alert = SIMULATION_ALERTS[phase];
 
-  // Dynamic weather-based alert override if phase is low
-  if (liveWeather && phase < 3) {
+  // Use live weather as the baseline alert, but allow active simulation to override
+  if (liveWeather && (phase === 0 || !alert)) {
     if (liveWeather.alertLevel === 'warning') {
       alert = {
         title: 'SEVERE WEATHER WARNING',
@@ -25,7 +25,7 @@ export function LiveAlertBanner() {
         colorClass: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
         dotClass: 'bg-orange-400'
       };
-    } else if (liveWeather.alertLevel === 'advisory' && phase < 1) {
+    } else if (liveWeather.alertLevel === 'advisory') {
       alert = {
         title: 'WEATHER ADVISORY',
         description: liveWeather.alertText || 'Monitoring weather conditions.',

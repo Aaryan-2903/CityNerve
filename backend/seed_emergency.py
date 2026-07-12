@@ -13,10 +13,10 @@ async def seed():
     async with async_session_maker() as session:
         # seed data for mumbai
         resources = [
-            EmergencyResource(id=str(uuid.uuid4()), cityId="mumbai", resourceType="ambulance", available=42, busy=6, deployed=5),
-            EmergencyResource(id=str(uuid.uuid4()), cityId="mumbai", resourceType="police", available=81, busy=7, deployed=9),
-            EmergencyResource(id=str(uuid.uuid4()), cityId="mumbai", resourceType="fire", available=18, busy=2, deployed=4),
-            EmergencyResource(id=str(uuid.uuid4()), cityId="mumbai", resourceType="rescue", available=13, busy=1, deployed=2),
+            EmergencyResource(id=str(uuid.uuid4()), cityId="mumbai", resourceType="ambulance", available=42, busy=3, enRoute=5),
+            EmergencyResource(id=str(uuid.uuid4()), cityId="mumbai", resourceType="police", available=80, busy=4, enRoute=8),
+            EmergencyResource(id=str(uuid.uuid4()), cityId="mumbai", resourceType="fire", available=18, busy=1, enRoute=2),
+            EmergencyResource(id=str(uuid.uuid4()), cityId="mumbai", resourceType="rescue", available=12, busy=1, enRoute=3),
         ]
         session.add_all(resources)
         await session.commit()

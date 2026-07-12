@@ -22,25 +22,7 @@ export function useWeather(cityId: string, phase: number) {
         if (!cancelled) setWeather(data);
       } catch (err) {
         console.error("Failed to fetch weather", err);
-        // Fallback to mock data to prevent dashboard crash
-        if (!cancelled) setWeather({
-          id: "mock-fallback",
-          city_id: cityId,
-          temperature: 25.0,
-          apparent_temperature: 26.0,
-          rainfall: 0.0,
-          precipitation_probability: 0,
-          humidity: 50,
-          wind_speed: 10.0,
-          wind_direction: 180.0,
-          weather_condition: "Clear sky",
-          cloud_cover: 0,
-          label: "Clear sky",
-          emoji: "☀️",
-          alertText: "Conditions normal",
-          alertLevel: "info",
-          last_updated: new Date().toISOString()
-        });
+        if (!cancelled) setWeather(null);
       } finally {
         if (!cancelled) setIsLoading(false);
       }

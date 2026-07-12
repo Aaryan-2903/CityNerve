@@ -26,23 +26,32 @@ export interface AIDecisionHistoryEntry {
   status: 'Approved' | 'Rejected';
 }
 
+export interface TimelineEvent {
+  id: string;
+  time: string;
+  text: string;
+  dotColor: string;
+  category: string;
+  severity?: string;
+}
+
 export interface AIDecisionState {
   statuses: Record<string, 'Pending' | 'Approved' | 'Rejected'>;
-  approvedFeedEntries: any[];
+  approvedFeedEntries: TimelineEvent[];
   extraDeployedUnits: number;
   decisionHistory: AIDecisionHistoryEntry[];
   customRecommendations: AIRecommendation[];
   approve: (rec: AIRecommendation) => void;
   reject: (rec: AIRecommendation) => void;
   addCustomRecommendation: (rec: AIRecommendation) => void;
-  addTimelineEvent: (event: any) => void;
+  addTimelineEvent: (event: TimelineEvent) => void;
 }
 
 const AIDecisionContext = createContext<AIDecisionState | null>(null);
 
 export function AIDecisionProvider({ children }: { children: React.ReactNode }) {
   const [statuses, setStatuses] = useState<Record<string, 'Pending' | 'Approved' | 'Rejected'>>({});
-  const [approvedFeedEntries, setApprovedFeedEntries] = useState<any[]>([]);
+  const [approvedFeedEntries, setApprovedFeedEntries] = useState<TimelineEvent[]>([]);
   const [extraDeployedUnits, setExtraDeployedUnits] = useState<number>(0);
   const [decisionHistory, setDecisionHistory] = useState<AIDecisionHistoryEntry[]>([]);
   const [customRecommendations, setCustomRecommendations] = useState<AIRecommendation[]>([]);
@@ -120,7 +129,7 @@ export function AIDecisionProvider({ children }: { children: React.ReactNode }) 
     setCustomRecommendations((prev) => [rec, ...prev]);
   }, []);
 
-  const addTimelineEvent = useCallback((event: any) => {
+  const addTimelineEvent = useCallback((event: TimelineEvent) => {
     setApprovedFeedEntries((prev) => [event, ...prev]);
   }, []);
 

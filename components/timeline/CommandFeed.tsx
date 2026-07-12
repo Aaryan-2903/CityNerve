@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, ShieldAlert, Activity, Radio, Truck, AlertTriangle, ArrowDown } from 'lucide-react';
+import { Zap, ShieldAlert, Activity, Radio, Truck, ArrowDown } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useSimulationContext } from '@/context/SimulationContext';
@@ -104,16 +104,15 @@ export function CommandFeed() {
   const { baseFeed } = useDashboardData();
   const { approvedFeedEntries } = useAIDecisionContext();
   const feedEntries = sim?.feedEntries ?? [];
-  const phase = sim?.phase ?? -1;
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Combine and sort entries by time/creation order
   const allEntries: FeedEntry[] = [
     ...(approvedFeedEntries as FeedEntry[]),
-    ...(feedEntries as FeedEntry[]),
+    ...(feedEntries as unknown as FeedEntry[]),
     ...baseFeed,
-  ].map((e: any, i) => ({
+  ].map((e: any) => ({
     ...e,
     // Add fake severity for UI demo purposes if none exists
     severity: e.severity || (e.category === 'dispatch' ? 'High' : e.category === 'report' ? 'Critical' : 'Medium')

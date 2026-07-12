@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import type { Incident, Severity, IncidentType, IncidentStatus } from '@/types/incident';
+import type { Severity, IncidentType, IncidentStatus } from '@/types/incident';
 import { SEVERITY_ORDER } from '@/utils/severity';
 import { useIncidentsContext } from '@/context/IncidentContext';
 

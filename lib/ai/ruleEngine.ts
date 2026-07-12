@@ -1,4 +1,5 @@
 import { AIPriority, AIRecommendation } from '@/context/AIDecisionContext';
+import { EmergencyResourcesData } from '@/context/ResourceContext';
 import { AIStageConfig, AI_COMMANDER_CONFIG } from '@/data/aiCommanderConfig';
 import { ThreatLevel } from '@/data/simulationScenario';
 
@@ -14,6 +15,7 @@ export interface SystemState {
   humidity: number;
   temperature: number;
   deployedUnits: number;
+  resources: EmergencyResourcesData | null;
 }
 
 export interface Rule {
@@ -215,6 +217,42 @@ export const defaultRules: Rule[] = [
       }
       return null;
     }
+  },
+  {
+    id: 'rule-low-ambulances',
+    evaluate: (state) => {
+      const ambulances = state.resources?.ambulance;
+      if (ambulances && ambulances.available < 5) {
+        return {
+          id: 'rec-low-ambulances',
+          title: 'Critical Ambulance Shortage',
+          recommendation: 'Available ambulances critically low. Request private ambulance network support and increase ETA expectations.',
+          confidence: 90,
+          reasoning: [`Only ${ambulances.available} ambulances available`, 'Medical response capacity compromised'],
+          priority: 'Critical',
+          status: 'Pending'
+        };
+      }
+      return null;
+    }
+  },
+  {
+    id: 'rule-busy-rescue',
+    evaluate: (state) => {
+      const rescue = state.resources?.rescue;
+      if (rescue && (rescue.busy > 8 || rescue.available === 0)) {
+        return {
+          id: 'rec-busy-rescue',
+          title: 'Rescue Teams Exhausted',
+          recommendation: 'Rescue teams are currently overwhelmed. Recommend requesting nearby city assistance (Mutual Aid).',
+          confidence: 85,
+          reasoning: [`${rescue.busy} rescue teams busy; ${rescue.available} available`, 'Severe lack of specialized rescue personnel'],
+          priority: 'High',
+          status: 'Pending'
+        };
+      }
+      return null;
+    }
   }
 ];
 
@@ -326,6 +364,11 @@ export function generateDynamicStageConfig(state: SystemState, phase: number): A
   }
   if (state.temperature > 40) resources.Medical += 15;
 
+  let dynamicResponseTime = baseConfig.estimatedResponseTime;
+  if (state.resources?.ambulance && state.resources.ambulance.available < 5) {
+    dynamicResponseTime = '28m (Delayed)';
+  }
+
   return {
     threatLevel: dynamicThreatLevel,
     situationSummary: dynamicSummary,
@@ -334,6 +377,6 @@ export function generateDynamicStageConfig(state: SystemState, phase: number): A
     priority: dynamicPriority,
     recommendations: stageRecommendations,
     resources,
-    estimatedResponseTime: baseConfig.estimatedResponseTime,
+    estimatedResponseTime: dynamicResponseTime,
   };
 }

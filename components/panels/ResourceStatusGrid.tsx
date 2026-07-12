@@ -2,16 +2,9 @@
 
 import { motion } from 'framer-motion';
 import { Ambulance, Shield, Flame, LifeBuoy } from 'lucide-react';
-import { useCity } from '@/context/CityContext';
-import { useEmergencyResources } from '@/hooks/useEmergencyResources';
+import { useResourceContext } from '@/context/ResourceContext';
 
 type StatusType = 'Available' | 'En Route' | 'Busy';
-
-interface ResourceCount {
-  available: number;
-  enRoute: number;
-  busy: number;
-}
 
 const RESOURCE_TYPES = [
   { id: 'ambulance', label: 'Ambulances', icon: Ambulance, color: 'text-blue-400', bg: 'bg-blue-500/10' },
@@ -21,13 +14,12 @@ const RESOURCE_TYPES = [
 ];
 
 export function ResourceStatusGrid() {
-  const { currentCity } = useCity();
-  const { data: statusData } = useEmergencyResources(currentCity.id);
+  const { resources: statusData } = useResourceContext();
 
   return (
     <div className="grid grid-cols-2 gap-2 p-3 pb-1 border-b border-white/[0.06]">
       {RESOURCE_TYPES.map((res, i) => {
-        const data = statusData[res.id as keyof typeof statusData];
+        const data = statusData[res.id];
         return (
           <motion.div
             key={res.id}
@@ -49,21 +41,21 @@ export function ResourceStatusGrid() {
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
                   <span className="text-white/50">Available</span>
                 </div>
-                <span className="font-mono text-white/80">{data.available}</span>
+                <span className="font-mono text-white/80">{data?.available ?? '--'}</span>
               </div>
               <div className="flex items-center justify-between text-[10px]">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
                   <span className="text-white/50">En Route</span>
                 </div>
-                <span className="font-mono text-white/80">{data.enRoute}</span>
+                <span className="font-mono text-white/80">{data?.enRoute ?? '--'}</span>
               </div>
               <div className="flex items-center justify-between text-[10px]">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
                   <span className="text-white/50">Busy</span>
                 </div>
-                <span className="font-mono text-white/80">{data.busy}</span>
+                <span className="font-mono text-white/80">{data?.busy ?? '--'}</span>
               </div>
             </div>
           </motion.div>

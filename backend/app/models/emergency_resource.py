@@ -12,7 +12,7 @@ class EmergencyResource(Base):
     cityId = Column(String, ForeignKey("cities.id"), nullable=False, index=True)
     resourceType = Column(String, nullable=False) # 'ambulance', 'police', 'fire', 'rescue'
     available = Column(Integer, default=0)
-    deployed = Column(Integer, default=0)
+    enRoute = Column(Integer, default=0)
     busy = Column(Integer, default=0)
     maintenance = Column(Integer, default=0)
     updatedAt = Column(DateTime, default=datetime.utcnow)

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useAIDecisionContext, AIRecommendation, AIPriority } from '@/context/AIDecisionContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { useResourceContext } from '@/context/ResourceContext';
 import { generateDynamicStageConfig, SystemState } from '@/lib/ai/ruleEngine';
 import type { ThreatLevel } from '@/data/simulationScenario';
 import { SituationReportModal } from '@/components/ai/SituationReportModal';
@@ -48,6 +49,8 @@ export function AIIncidentCommander() {
   const hospitalCapacityPercent = Math.max(0, 100 - (sim?.phase ?? 0) * 15);
   const shelterAvailabilityPercent = Math.max(0, 100 - (sim?.phase ?? 0) * 18);
 
+  const { resources } = useResourceContext();
+
   const systemState: SystemState = useMemo(() => ({
     riskScore: 0,
     activeIncidents,
@@ -59,8 +62,9 @@ export function AIIncidentCommander() {
     windSpeed: Number(liveWeather?.wind_speed) || 0,
     humidity: Number(liveWeather?.humidity) || 0,
     temperature: Number(liveWeather?.temperature) || 0,
-    deployedUnits
-  }), [activeIncidents, roadsClosed, hospitalCapacityPercent, shelterAvailabilityPercent, liveWeather, deployedUnits]);
+    deployedUnits,
+    resources
+  }), [activeIncidents, roadsClosed, hospitalCapacityPercent, shelterAvailabilityPercent, liveWeather, deployedUnits, resources]);
 
   const stageConfig = useMemo(() => {
     return generateDynamicStageConfig(systemState, phase);

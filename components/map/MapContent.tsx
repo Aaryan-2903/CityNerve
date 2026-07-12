@@ -144,7 +144,8 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
       >
         {/* ── Risk Zones ── */}
         {showRiskZones && floodZoneData && (
-          <Source id="flood-zone-source" type="geojson" data={floodZoneData}>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          <Source id="flood-zone-source" type="geojson" data={floodZoneData as any}>
             <Layer {...floodFillLayer} />
             <Layer {...floodLineLayer} />
           </Source>
@@ -152,14 +153,16 @@ export function MapContent({ showMetricCards = false, onExpandClick }: MapConten
 
         {/* ── Evacuation Routes ── */}
         {showEvacRoutes && evacRouteData && (
-          <Source id="evac-route-source" type="geojson" data={evacRouteData}>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          <Source id="evac-route-source" type="geojson" data={evacRouteData as any}>
             <Layer {...evacLineLayer} />
           </Source>
         )}
 
         {/* ── Simulation: Flood Overlay (stage 4+) ── */}
         {showFloodOverlay && simFloodData && (
-          <Source id="sim-flood-source" type="geojson" data={simFloodData}>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          <Source id="sim-flood-source" type="geojson" data={simFloodData as any}>
             <Layer {...simFloodFill} />
             <Layer {...simFloodLine} />
           </Source>

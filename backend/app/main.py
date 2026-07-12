@@ -8,6 +8,7 @@ from app.database.database import engine, Base, async_session_maker
 from app.services.city_service import seed_cities
 from app.services.incident_service import seed_incidents
 from app.services.scenario_seed_service import seed_scenarios
+from app.services.emergency_resource_seed import seed_emergency_resources
 from app.models.weather import WeatherCache
 
 @asynccontextmanager
@@ -22,6 +23,7 @@ async def lifespan(app: FastAPI):
         await seed_cities(session)
         await seed_incidents(session)
         await seed_scenarios(session)
+        await seed_emergency_resources(session)
         
     yield
     

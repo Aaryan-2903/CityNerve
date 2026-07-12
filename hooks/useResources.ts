@@ -23,7 +23,7 @@ export function useResources(cityId: string) {
       setIsLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${API_BASE}/api/v1/resources?cityId=${cityId}`);
+        const res = await fetch(`${API_BASE}/api/v1/poi-resources?cityId=${cityId}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (!cancelled) setResources(data);

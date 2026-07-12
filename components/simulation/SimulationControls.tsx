@@ -9,7 +9,6 @@ import {
   RotateCcw 
 } from 'lucide-react';
 import { useSimulationContext } from '@/context/SimulationContext';
-import { cn } from '@/lib/utils';
 import { STAGE_LABELS } from '@/data/simulationScenario';
 
 export function SimulationControls() {

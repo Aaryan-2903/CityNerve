@@ -70,11 +70,11 @@ async def fetch_weather_for_city(city: City, session: AsyncSession) -> WeatherRe
             return build_weather_response(cached)
             
         except Exception as e:
-            # Fallback to cache if exists but old, otherwise return mock
+            # Fallback to cache if exists but old, otherwise raise
             if cached:
                 return build_weather_response(cached)
             print(f"Weather fetch failed: {e}")
-            return get_mock_weather(city.id)
+            raise Exception("Failed to fetch weather data and no cache available")
 
 def map_wmo_code(code: int) -> str:
     if code == 0: return "Clear sky"
@@ -137,22 +137,3 @@ def build_weather_response(cache: WeatherCache) -> WeatherResponse:
         last_updated=cache.last_updated
     )
 
-def get_mock_weather(city_id: str) -> WeatherResponse:
-    return WeatherResponse(
-        id="mock-123",
-        city_id=city_id,
-        temperature=25.0,
-        apparent_temperature=26.0,
-        rainfall=0.0,
-        precipitation_probability=0,
-        humidity=50,
-        wind_speed=10.0,
-        wind_direction=180.0,
-        weather_condition="Clear sky",
-        cloud_cover=0,
-        label="Clear sky",
-        emoji="☀️",
-        alertText="Conditions normal",
-        alertLevel="info",
-        last_updated=datetime.utcnow()
-    )
