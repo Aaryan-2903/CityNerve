@@ -28,7 +28,7 @@ function MetricCardItem({ metric, index }: MetricCardItemProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.2 + index * 0.07, ease: 'easeOut' }}
       className={cn(
-        'flex flex-col gap-1.5 rounded-2xl border border-white/[0.08] px-3 sm:px-5 py-3 sm:py-4',
+        'flex flex-col justify-between gap-2 sm:gap-2.5 rounded-2xl border border-white/[0.08] px-3 sm:px-5 py-3 sm:py-4 h-full',
         'bg-[#0C1220]/85 backdrop-blur-xl',
         // On desktop it's min-w constrained in flex row; on mobile it fills the grid cell
         'md:min-w-[150px] md:flex-1',
@@ -37,24 +37,26 @@ function MetricCardItem({ metric, index }: MetricCardItemProps) {
         boxShadow: `0 0 0 1px ${metric.dotColor}15, 0 4px 24px rgba(0,0,0,0.5)`,
       }}
     >
-      {/* Label row */}
-      <div className="flex items-center gap-1.5 sm:gap-2">
-        <metric.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" style={{ color: metric.dotColor }} />
-        <span className="text-[10px] sm:text-[11px] font-medium text-white/45 tracking-wide truncate">
-          {metric.label}
-        </span>
+      <div>
+        {/* Label row */}
+        <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-2.5">
+          <metric.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" style={{ color: metric.dotColor }} />
+          <span className="text-[9px] sm:text-[10px] font-bold uppercase text-white/50 tracking-widest truncate">
+            {metric.label}
+          </span>
+        </div>
+
+        {/* Value */}
+        <p
+          className="text-2xl sm:text-3xl font-black tracking-tighter tabular-nums leading-none"
+          style={{ color: metric.dotColor }}
+        >
+          {metric.value}
+        </p>
       </div>
 
-      {/* Value */}
-      <p
-        className="text-xl sm:text-2xl font-bold tracking-tight tabular-nums leading-none"
-        style={{ color: metric.dotColor }}
-      >
-        {metric.value}
-      </p>
-
       {/* Subtext */}
-      <p className="text-[10px] sm:text-[11px] text-white/30 leading-none truncate">{metric.subtext}</p>
+      <p className="text-[10px] sm:text-[11px] text-white/40 font-medium leading-snug line-clamp-2 mt-auto pt-1">{metric.subtext}</p>
     </motion.div>
   );
 }
@@ -130,7 +132,7 @@ export function MetricCards() {
 
   return (
     // Mobile: 2-column grid | Desktop: horizontal flex row (unchanged)
-    <div className="grid grid-cols-2 gap-2 px-3 pb-3 md:flex md:items-end md:gap-3 md:px-5 md:pb-5 md:overflow-x-auto md:w-full scrollbar-hide">
+    <div className="grid grid-cols-2 gap-2 px-3 pb-3 md:flex md:items-stretch md:gap-3 md:px-5 md:pb-5 md:overflow-x-auto md:w-full scrollbar-hide">
       {metricsArray.map((metric, i) => (
         <MetricCardItem key={metric.id} metric={metric} index={i} />
       ))}
