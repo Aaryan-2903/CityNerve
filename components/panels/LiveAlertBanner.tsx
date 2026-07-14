@@ -64,18 +64,18 @@ export function LiveAlertBanner() {
           transition={{ duration: 0.2 }}
           className="flex items-center justify-between w-full"
         >
-          <div className="flex items-center gap-3 sm:gap-4 flex-1">
-            <span className="relative flex h-2.5 w-2.5 shrink-0">
+          <div className="flex items-center gap-4 sm:gap-6 flex-1">
+            <span className="relative flex h-3 w-3 shrink-0">
               <span className={`absolute inline-flex h-full w-full rounded-full animate-ping opacity-75 ${alert.dotClass}`} />
-              <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${alert.dotClass}`} />
+              <span className={`relative inline-flex h-3 w-3 rounded-full ${alert.dotClass}`} />
             </span>
-            <Icon className="w-5 h-5 shrink-0" />
-            <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 overflow-hidden">
-              <span className="text-xs sm:text-sm font-bold tracking-widest uppercase shrink-0">
+            <Icon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0 opacity-90" />
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 overflow-hidden">
+              <span className="text-sm sm:text-base font-black tracking-widest uppercase shrink-0">
                 {alert.title}
               </span>
-              <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-current opacity-30 shrink-0" />
-              <span className="text-[11px] sm:text-xs font-medium opacity-90 truncate">
+              <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-current opacity-40 shrink-0" />
+              <span className="text-xs sm:text-sm font-medium opacity-90 truncate">
                 {alert.description}
               </span>
             </div>

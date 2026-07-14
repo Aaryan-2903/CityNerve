@@ -405,10 +405,10 @@ function FilterButton({ active, onClick, label }: { active: boolean; onClick: ()
     <button
       onClick={onClick}
       className={cn(
-        'rounded-md px-2.5 py-1 text-[11px] font-semibold transition-all backdrop-blur-md',
+        'rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-all backdrop-blur-md flex items-center',
         active
-          ? 'bg-white/10 text-white/90 shadow-sm border border-white/10'
-          : 'bg-white/5 text-white/40 border border-transparent hover:bg-white/10 hover:text-white/60',
+          ? 'bg-white/15 text-white shadow-md border border-white/20'
+          : 'bg-black/30 text-white/50 border border-white/[0.05] hover:bg-white/10 hover:text-white/80 hover:border-white/15',
       )}
     >
       {label}
@@ -418,9 +418,9 @@ function FilterButton({ active, onClick, label }: { active: boolean; onClick: ()
 
 function Legend({ emoji, label, color }: { emoji: string; label: string; color: string }) {
   return (
-    <div className="flex items-center gap-1 rounded-md border border-white/[0.06] bg-black/30 px-2 py-1 backdrop-blur-md">
-      <span className="text-[11px]">{emoji}</span>
-      <span className="text-[10px] font-medium" style={{ color }}>{label}</span>
+    <div className="flex items-center gap-1.5 rounded-lg border border-white/[0.06] bg-black/30 px-2.5 py-1.5 backdrop-blur-md">
+      <span className="text-[12px] leading-none">{emoji}</span>
+      <span className="text-[10px] font-bold tracking-wide uppercase" style={{ color }}>{label}</span>
     </div>
   );
 }

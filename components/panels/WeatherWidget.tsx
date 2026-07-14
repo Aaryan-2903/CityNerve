@@ -74,39 +74,39 @@ export function WeatherWidget() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 mt-1">
             {/* Temperature */}
-            <div className="flex items-center gap-2 rounded-lg border border-white/[0.05] bg-white/[0.02] px-2.5 py-2">
-              <div className="w-3.5 h-3.5 shrink-0 text-orange-400 flex items-center justify-center">🌡️</div>
-              <div>
-                <p className="text-[9px] text-white/25 uppercase tracking-wider">Temp / Feels</p>
-                <p className="text-[11px] font-semibold text-white/80">
-                  {currentWeather?.temperature ?? '--'}°C <span className="text-white/40 font-normal">/ {currentWeather?.apparent_temperature ?? '--'}°C</span>
+            <div className="flex items-center gap-2.5 rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5 h-full">
+              <div className="w-4 h-4 shrink-0 text-orange-400 flex items-center justify-center text-[14px]">🌡️</div>
+              <div className="flex flex-col justify-center">
+                <p className="text-[9px] text-white/30 uppercase tracking-widest font-bold mb-0.5">Temp / Feels</p>
+                <p className="text-[11px] font-bold text-white/90 leading-none">
+                  {currentWeather?.temperature ?? '--'}°C <span className="text-white/40 font-semibold">/ {currentWeather?.apparent_temperature ?? '--'}°C</span>
                 </p>
               </div>
             </div>
             {/* Rainfall */}
-            <div className="flex items-center gap-2 rounded-lg border border-white/[0.05] bg-white/[0.02] px-2.5 py-2">
-              <Droplets className="w-3.5 h-3.5 shrink-0 text-blue-400" />
-              <div>
-                <p className="text-[9px] text-white/25 uppercase tracking-wider">Rainfall</p>
-                <p className="text-[11px] font-semibold text-blue-400">{currentWeather?.rainfall ?? '--'}</p>
+            <div className="flex items-center gap-2.5 rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5 h-full">
+              <Droplets className="w-4 h-4 shrink-0 text-blue-400" />
+              <div className="flex flex-col justify-center">
+                <p className="text-[9px] text-white/30 uppercase tracking-widest font-bold mb-0.5">Rainfall</p>
+                <p className="text-[11px] font-bold text-blue-400 leading-none">{currentWeather?.rainfall ?? '--'}</p>
               </div>
             </div>
             {/* Humidity */}
-            <div className="flex items-center gap-2 rounded-lg border border-white/[0.05] bg-white/[0.02] px-2.5 py-2">
-              <div className="w-3.5 h-3.5 shrink-0 text-cyan-400 flex items-center justify-center">💧</div>
-              <div>
-                <p className="text-[9px] text-white/25 uppercase tracking-wider">Humidity</p>
-                <p className="text-[11px] font-semibold text-cyan-400">{currentWeather?.humidity ?? '--'}%</p>
+            <div className="flex items-center gap-2.5 rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5 h-full">
+              <div className="w-4 h-4 shrink-0 text-cyan-400 flex items-center justify-center text-[14px]">💧</div>
+              <div className="flex flex-col justify-center">
+                <p className="text-[9px] text-white/30 uppercase tracking-widest font-bold mb-0.5">Humidity</p>
+                <p className="text-[11px] font-bold text-cyan-400 leading-none">{currentWeather?.humidity ?? '--'}%</p>
               </div>
             </div>
             {/* Wind */}
-            <div className="flex items-center gap-2 rounded-lg border border-white/[0.05] bg-white/[0.02] px-2.5 py-2">
-              <div className="w-3.5 h-3.5 shrink-0 text-slate-400 flex items-center justify-center">💨</div>
-              <div>
-                <p className="text-[9px] text-white/25 uppercase tracking-wider">Wind</p>
-                <p className="text-[11px] font-semibold text-slate-300">{currentWeather?.wind_speed ?? '--'} km/h</p>
+            <div className="flex items-center gap-2.5 rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5 h-full">
+              <div className="w-4 h-4 shrink-0 text-slate-400 flex items-center justify-center text-[14px]">💨</div>
+              <div className="flex flex-col justify-center">
+                <p className="text-[9px] text-white/30 uppercase tracking-widest font-bold mb-0.5">Wind</p>
+                <p className="text-[11px] font-bold text-slate-300 leading-none">{currentWeather?.wind_speed ?? '--'} km/h</p>
               </div>
             </div>
           </div>
