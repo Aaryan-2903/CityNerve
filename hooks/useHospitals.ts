@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { CITY_DASHBOARD_DATA } from '@/data/cityDashboardData';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
 
@@ -25,10 +26,25 @@ export function useHospitals(cityId: string) {
       try {
         const res = await fetch(`${API_BASE}/api/v1/poi/hospitals?cityId=${cityId}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        let data = await res.json();
+        
+        if (!data || data.length === 0) {
+          const mockCity = CITY_DASHBOARD_DATA[cityId];
+          if (mockCity && mockCity.hospitals) {
+            data = mockCity.hospitals;
+          }
+        }
+        
         if (!cancelled) setHospitals(data);
       } catch (err) {
-        if (!cancelled) setError(err as Error);
+        if (!cancelled) {
+          setError(err as Error);
+          const mockCity = CITY_DASHBOARD_DATA[cityId];
+          if (mockCity && mockCity.hospitals) {
+            setHospitals(mockCity.hospitals);
+            setError(null);
+          }
+        }
       } finally {
         if (!cancelled) setIsLoading(false);
       }

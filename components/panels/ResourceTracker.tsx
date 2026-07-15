@@ -13,9 +13,10 @@ import {
   Clock,
   Users,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { GlassCard } from '@/components/shared/GlassCard';
 import { StatusIndicator } from '@/components/shared/StatusIndicator';
+import { ResourceSkeleton } from '@/components/shared/Skeletons';
+import { Loader2 } from 'lucide-react';
 import type { Resource, ResourceStatus, ResourceType } from '@/types/resource';
 import { formatRelativeTime, formatETA } from '@/utils/format';
 import { useState, useEffect } from 'react';
@@ -114,7 +115,7 @@ function ResourceCard({ resource }: { resource: Resource }) {
 export function ResourceTracker() {
   const sim = useSimulationContext();
   const { currentCity } = useCity();
-  const { resources } = useResources(currentCity.id);
+  const { resources, isLoading, isRefetching, lastUpdated } = useResources(currentCity.id);
 
   const deployed: Resource[] = resources.map((r: any, i: number) => ({
     id: r.id,
@@ -159,6 +160,11 @@ export function ResourceTracker() {
         <div className="flex items-center gap-2">
           <Truck className="w-4 h-4 text-blue-400" />
           <h2 className="text-sm font-semibold text-white/90">Field Resources</h2>
+          {isRefetching && !isLoading && (
+             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+               <Loader2 className="w-3 h-3 text-blue-400 animate-spin" />
+             </motion.div>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
@@ -202,10 +208,27 @@ export function ResourceTracker() {
 
       {/* Resource list */}
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
-        {deployed.map((resource) => (
-          <ResourceCard key={resource.id} resource={resource} />
-        ))}
+        {isLoading ? (
+          <>
+            <ResourceSkeleton />
+            <ResourceSkeleton />
+            <ResourceSkeleton />
+          </>
+        ) : (
+          deployed.map((resource) => (
+            <ResourceCard key={resource.id} resource={resource} />
+          ))
+        )}
       </div>
+      
+      {/* Footer */}
+      {(lastUpdated || !isLoading) && (
+        <div className="border-t border-white/[0.04] px-4 py-2 shrink-0">
+          <p className="text-[10px] text-white/20 font-mono">
+            {lastUpdated ? `UPDATED: ${lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : 'LIVE FEED'}
+          </p>
+        </div>
+      )}
     </GlassCard>
   );
 }

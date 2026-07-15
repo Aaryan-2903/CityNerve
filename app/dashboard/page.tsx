@@ -16,6 +16,9 @@ import { DashboardInteractionProvider } from '@/context/DashboardInteractionCont
 import { AIDecisionProvider } from '@/context/AIDecisionContext';
 import { IncidentProvider } from '@/context/IncidentContext';
 import { ResourceProvider } from '@/context/ResourceContext';
+import { ToastProvider } from '@/context/ToastContext';
+import { ToastContainer } from '@/components/ui/Toast';
+import { LiveStatusHeader } from '@/components/dashboard/LiveStatusHeader';
 
 export default function DashboardPage() {
   const [mapExpanded, setMapExpanded] = useState(false);
@@ -24,17 +27,21 @@ export default function DashboardPage() {
 
   return (
     <CityProvider>
-      <IncidentProvider>
-        <SimulationProvider>
-          <DashboardInteractionProvider>
-            <AIDecisionProvider>
-              <ResourceProvider>
+      <ToastProvider>
+        <IncidentProvider>
+          <SimulationProvider>
+            <DashboardInteractionProvider>
+              <AIDecisionProvider>
+                <ResourceProvider>
+            
+            <ToastContainer />
 
-          {/* ── Fullscreen map overlay ── */}
-          <ExpandedMapOverlay isOpen={mapExpanded} onClose={closeMap} />
+            {/* ── Fullscreen map overlay ── */}
+            <ExpandedMapOverlay isOpen={mapExpanded} onClose={closeMap} />
 
-          <DashboardLayout>
-            <LiveAlertBanner />
+            <DashboardLayout>
+              <LiveStatusHeader />
+              <LiveAlertBanner />
 
             {/* ════════════════════════════════════════════════════════════════
                 DESKTOP layout  (md and up)
@@ -108,11 +115,12 @@ export default function DashboardPage() {
             </div>
 
           </DashboardLayout>
-              </ResourceProvider>
-            </AIDecisionProvider>
-          </DashboardInteractionProvider>
-        </SimulationProvider>
-      </IncidentProvider>
+                </ResourceProvider>
+              </AIDecisionProvider>
+            </DashboardInteractionProvider>
+          </SimulationProvider>
+        </IncidentProvider>
+      </ToastProvider>
     </CityProvider>
   );
 }
