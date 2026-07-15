@@ -8,6 +8,8 @@ import { useSimulationContext } from '@/context/SimulationContext';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useDashboardInteraction } from '@/context/DashboardInteractionContext';
 import { ResourceStatusGrid } from '@/components/panels/ResourceStatusGrid';
+import { IncidentSkeleton } from '@/components/shared/Skeletons';
+import { Loader2 } from 'lucide-react';
 import type { SimIncident } from '@/data/simulationScenario';
 
 type Severity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
@@ -154,7 +156,7 @@ function IncidentCardItem({ incident, index, isSelected, onSelect }: IncidentCar
 
 export function IncidentCards() {
   const sim = useSimulationContext();
-  const { baseIncidents } = useDashboardData();
+  const { baseIncidents, isLoadingDashboard, isRefetchingDashboard } = useDashboardData();
   const { selectedIncidentId, setSelectedIncidentId } = useDashboardInteraction();
 
   const simIncidents = sim?.simIncidents ?? [];
@@ -184,6 +186,13 @@ export function IncidentCards() {
         <div className="flex items-center gap-2.5">
           <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
           <h2 className="text-[11px] font-bold tracking-[0.15em] text-white/70 uppercase">Incident Cards</h2>
+          <AnimatePresence>
+            {isRefetchingDashboard && !isLoadingDashboard && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <Loader2 className="w-3 h-3 text-blue-400 animate-spin" />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         <div className="flex items-center gap-2">
           <AnimatePresence mode="popLayout">
@@ -227,15 +236,29 @@ export function IncidentCards() {
       <ScrollArea className="flex-1 min-h-0">
         <div className="flex flex-col gap-2 p-3">
           <AnimatePresence mode="popLayout">
-            {allIncidents.map((incident, i) => (
-              <IncidentCardItem
-                key={incident.id}
-                incident={incident}
-                index={i}
-                isSelected={selectedIncidentId === incident.id}
-                onSelect={handleSelect}
-              />
-            ))}
+            {isLoadingDashboard ? (
+              <>
+                <motion.div key="skel1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <IncidentSkeleton />
+                </motion.div>
+                <motion.div key="skel2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <IncidentSkeleton />
+                </motion.div>
+                <motion.div key="skel3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <IncidentSkeleton />
+                </motion.div>
+              </>
+            ) : (
+              allIncidents.map((incident, i) => (
+                <IncidentCardItem
+                  key={incident.id}
+                  incident={incident}
+                  index={i}
+                  isSelected={selectedIncidentId === incident.id}
+                  onSelect={handleSelect}
+                />
+              ))
+            )}
           </AnimatePresence>
         </div>
       </ScrollArea>

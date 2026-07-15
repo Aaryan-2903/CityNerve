@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useCity } from '@/context/CityContext';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useAIDecisionContext } from '@/context/AIDecisionContext';
@@ -9,6 +9,7 @@ import { useNotifications } from './useNotifications';
 import { useWeather } from './useWeather';
 import { Weather } from '@/types/weather';
 import { useIncidentsContext } from '@/context/IncidentContext';
+import { CITY_DASHBOARD_DATA } from '@/data/cityDashboardData';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
 
@@ -34,41 +35,62 @@ export function useDashboardData() {
   const extraDeployedUnits = aiDecision?.extraDeployedUnits ?? 0;
 
   const [apiData, setApiData] = useState<DashboardAPIResponse | null>(null);
-  const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
+  const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
+  const [isRefetchingDashboard, setIsRefetchingDashboard] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
 
   // New hooks to fetch data that used to be in CITY_SCENARIOS
   const { shelters } = useShelters(currentCity.id);
   const { hospitals } = useHospitals(currentCity.id);
-  const { resources } = useResources(currentCity.id);
+  const { resources, refetch: refetchResources, isRefetching: isRefetchingResources, error: resourcesError } = useResources(currentCity.id);
   const { notifications } = useNotifications(currentCity.id, phase);
-  const { weather } = useWeather(currentCity.id, phase);
-  const { incidents } = useIncidentsContext();
+  const { weather, refetch: refetchWeather, isRefetching: isRefetchingWeather, error: weatherError } = useWeather(currentCity.id, phase);
+  const { incidents, refetch: refetchIncidents, error: incidentsError } = useIncidentsContext();
 
   useEffect(() => {
     let cancelled = false;
     const controller = new AbortController();
 
-    async function fetchDashboard() {
-      setIsLoadingDashboard(true);
-      try {
-        const res = await fetch(`${API_BASE}/api/v1/dashboard/${currentCity.id}`, { signal: controller.signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json: DashboardAPIResponse = await res.json();
-        if (!cancelled) setApiData(json);
-      } catch (err) {
-        if (!cancelled) {
-          console.warn('[CityNerve] Dashboard API error:', err);
-          setApiData(null);
+    async function fetchDashboard(isSilent = false) {
+      if (!isSilent) setIsLoadingDashboard(true);
+      else setIsRefetchingDashboard(true);
+        let json: DashboardAPIResponse | null = null;
+        try {
+          const res = await fetch(`${API_BASE}/api/v1/dashboard/${currentCity.id}`, { signal: controller.signal });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          json = await res.json();
+          if (json && json.activeIncidents === 0 && json.deployedUnits === 0) {
+            // Treat empty city metrics as "no data", fallback
+            throw new Error('City data empty');
+          }
+        } catch (err) {
+          const mockCity = CITY_DASHBOARD_DATA[currentCity.id];
+          if (mockCity && mockCity.apiData) {
+            json = mockCity.apiData;
+          } else {
+            if (!cancelled) {
+              console.warn('[CityNerve] Dashboard API error:', err);
+              setIsOffline(true);
+            }
+          }
         }
-      } finally {
-        if (!cancelled) setIsLoadingDashboard(false);
-      }
+
+        if (!cancelled && json) {
+          setApiData(json);
+          // If we successfully fetched OR gracefully fell back to mock data, we are not offline
+          setIsOffline(false);
+        }
+
+        if (!cancelled) {
+          setIsLoadingDashboard(false);
+          setIsRefetchingDashboard(false);
+        }
     }
 
     fetchDashboard();
     
-    // Polling every 10 seconds to keep live data fresh
-    const intervalId = setInterval(fetchDashboard, 10000);
+    // Polling every 60 seconds
+    const intervalId = setInterval(() => fetchDashboard(true), 60000);
 
     return () => {
       cancelled = true;
@@ -76,6 +98,41 @@ export function useDashboardData() {
       clearInterval(intervalId);
     };
   }, [currentCity.id]);
+
+  const refetchAll = useCallback(async () => {
+    setIsRefetchingDashboard(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/dashboard/${currentCity.id}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json: DashboardAPIResponse = await res.json();
+      if (json && json.activeIncidents === 0 && json.deployedUnits === 0) {
+        throw new Error('City data empty');
+      }
+      setApiData(json);
+      setIsOffline(false);
+    } catch (err) {
+      const mockCity = CITY_DASHBOARD_DATA[currentCity.id];
+      if (mockCity && mockCity.apiData) {
+        setApiData(mockCity.apiData);
+        setIsOffline(false);
+      } else {
+        setIsOffline(true);
+      }
+    } finally {
+      setIsRefetchingDashboard(false);
+    }
+    
+    if (refetchWeather) void refetchWeather();
+    if (refetchResources) void refetchResources(true);
+    if (refetchIncidents) void refetchIncidents(true);
+  }, [currentCity.id, refetchWeather, refetchResources, refetchIncidents]);
+
+  // Aggregate offline state
+  useEffect(() => {
+    if (weatherError || resourcesError || incidentsError) {
+      setIsOffline(true);
+    }
+  }, [weatherError, resourcesError, incidentsError]);
 
   const incidentFeed = useMemo(() => incidents.map(inc => ({
     id: `feed-${inc.id}`,
@@ -164,5 +221,12 @@ export function useDashboardData() {
     };
   }, [apiData, shelters, hospitals, resources, notifications, weather, incidents, mappedBaseIncidents, incidentFeed]);
 
-  return { ...data, isLoadingDashboard };
+  return { 
+    ...data, 
+    isLoadingDashboard, 
+    isRefetchingDashboard,
+    isRefetchingAny: isRefetchingDashboard || isRefetchingWeather || isRefetchingResources,
+    isOffline, 
+    refetchAll 
+  };
 }
