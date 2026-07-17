@@ -11,6 +11,7 @@ import { Weather } from '@/types/weather';
 import { useIncidentsContext } from '@/context/IncidentContext';
 import { CITY_DASHBOARD_DATA } from '@/data/cityDashboardData';
 import { API_BASE_URL as API_BASE } from '@/lib/api-config';
+import { formatHHMM } from '@/utils/format';
 
 
 interface DashboardAPIResponse {
@@ -143,7 +144,7 @@ export function useDashboardData() {
 
   const incidentFeed = useMemo(() => incidents.map(inc => ({
     id: `feed-${inc.id}`,
-    time: new Date(inc.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    time: formatHHMM(new Date(inc.timestamp)),
     text: `Incident Update: ${inc.title}`,
     dotColor: inc.severity === 'critical' ? '#EF4444' : inc.severity === 'high' ? '#F97316' : inc.severity === 'medium' ? '#EAB308' : '#3B82F6',
     category: 'report' as const,
@@ -157,7 +158,7 @@ export function useDashboardData() {
       id: inc.id,
       title: inc.title,
       severity: severityStr as 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW',
-      time: new Date(inc.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: formatHHMM(new Date(inc.timestamp)),
       team: inc.resourcesDeployed?.length ? `${inc.resourcesDeployed.length} Units` : 'Unassigned',
       status: inc.status.charAt(0).toUpperCase() + inc.status.slice(1),
       impact: `${inc.casualties || 0} Casualties`,

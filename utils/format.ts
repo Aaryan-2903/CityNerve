@@ -72,3 +72,38 @@ export function formatFullDate(isoString: string): string {
     timeZone: 'UTC',
   }) + ' UTC';
 }
+
+/**
+ * Shared time-formatting utilities to avoid SSR hydration mismatches
+ * by pinning to en-US and UTC timeZone.
+ */
+
+export function formatHHMM(date: Date): string {
+  return date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'UTC'
+  });
+}
+
+export function formatHHMMSS(date: Date): string {
+  return date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+    timeZone: 'UTC'
+  });
+}
+
+export function formatLocaleString(date: Date): string {
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'UTC'
+  }) + ' UTC';
+}

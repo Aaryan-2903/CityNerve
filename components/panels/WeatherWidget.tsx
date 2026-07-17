@@ -7,6 +7,7 @@ import { useWeather } from '@/hooks/useWeather';
 import { useCity } from '@/context/CityContext';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { WeatherSkeleton } from '@/components/shared/Skeletons';
+import { formatHHMMSS } from '@/utils/format';
 
 export function WeatherWidget() {
   const { currentCity } = useCity();
@@ -42,7 +43,7 @@ export function WeatherWidget() {
         </div>
         {(lastUpdated || currentWeather?.last_updated) && (
           <span className="text-[10px] text-white/40 font-mono">
-            UPDATED: {lastUpdated ? lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : new Date(currentWeather?.last_updated || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            UPDATED: {lastUpdated ? formatHHMMSS(lastUpdated) : currentWeather?.last_updated ? formatHHMMSS(new Date(currentWeather.last_updated)) : '--:--:--'}
           </span>
         )}
       </div>
