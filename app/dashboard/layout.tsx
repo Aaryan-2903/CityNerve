@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { DemoModeProvider } from '@/context/DemoModeContext';
 
 export const metadata: Metadata = {
   title: 'CityNerve — EOC Operations Dashboard',
@@ -6,5 +7,9 @@ export const metadata: Metadata = {
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <DemoModeProvider>
+      {children}
+    </DemoModeProvider>
+  );
 }

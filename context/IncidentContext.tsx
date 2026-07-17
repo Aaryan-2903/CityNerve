@@ -3,8 +3,11 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode, useRef } from 'react';
 import type { Incident } from '@/types/incident';
 import { useCity } from '@/context/CityContext';
+import { useToast } from '@/context/ToastContext';
+import { CITY_DASHBOARD_DATA } from '@/data/cityDashboardData';
+import { API_BASE_URL as API_BASE } from '@/lib/api-config';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
+
 
 interface IncidentContextState {
   incidents: Incident[];
@@ -28,6 +31,8 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [isReconnecting, setIsReconnecting] = useState(false);
+  const { toast } = useToast();
+  const prevIncidentIdsRef = useRef<Set<string>>(new Set());
   
   // Use a ref to prevent stale closures and track visibility
   const visibilityRef = useRef<DocumentVisibilityState>('visible');
@@ -41,7 +46,34 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       
-      const data = await res.json();
+      let data = await res.json();
+      
+      if (!data || data.length === 0) {
+        // Fallback to mock data if backend has no incidents for this city
+        const mockCity = CITY_DASHBOARD_DATA[currentCity.id];
+        if (mockCity && mockCity.incidents) {
+          data = mockCity.incidents;
+        }
+      }
+      
+      const newIds = new Set<string>(data.map((inc: Incident) => inc.id));
+      const prev = prevIncidentIdsRef.current;
+      
+      if (prev.size > 0) {
+        const addedIds = Array.from(newIds).filter(id => !prev.has(id));
+        if (addedIds.length > 0) {
+          const newIncidents = data.filter((inc: Incident) => addedIds.includes(inc.id));
+          newIncidents.forEach((inc: Incident) => {
+            toast({
+              title: 'New Incident Detected',
+              description: inc.title,
+              variant: inc.severity === 'critical' || inc.severity === 'high' ? 'error' : 'warning',
+            });
+          });
+        }
+      }
+      prevIncidentIdsRef.current = newIds;
+
       setIncidents(data);
       setError(null);
       setIsReconnecting(false); // Clear reconnecting on success
@@ -54,10 +86,16 @@ export function IncidentProvider({ children }: { children: ReactNode }) {
         setIsReconnecting(true);
       }
       // Note: We deliberately do NOT clear incidents on error.
+      
+      // Fallback on error
+      const mockCity = CITY_DASHBOARD_DATA[currentCity.id];
+      if (mockCity && mockCity.incidents) {
+        setIncidents(mockCity.incidents);
+      }
     } finally {
       if (!isSilent) setIsLoading(false);
     }
-  }, [currentCity.id]);
+  }, [currentCity.id, toast]);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;

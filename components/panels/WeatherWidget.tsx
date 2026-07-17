@@ -3,11 +3,16 @@
 import { Cloud, Droplets, AlertTriangle, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '@/components/shared/GlassCard';
-import { useDashboardData } from '@/hooks/useDashboardData';
+import { useWeather } from '@/hooks/useWeather';
+import { useCity } from '@/context/CityContext';
+import { useSimulationContext } from '@/context/SimulationContext';
+import { WeatherSkeleton } from '@/components/shared/Skeletons';
 
 export function WeatherWidget() {
-  const { liveWeather, isLoadingDashboard } = useDashboardData();
-  const currentWeather = liveWeather;
+  const { currentCity } = useCity();
+  const sim = useSimulationContext();
+  const phase = sim?.phase ?? 0;
+  const { weather: currentWeather, isLoading, isRefetching, lastUpdated } = useWeather(currentCity.id, phase);
 
   const ALERT_STYLE = {
     warning:  { color: '#EF4444', bg: 'rgba(239,68,68,0.1)',  border: 'rgba(239,68,68,0.2)'  },
@@ -24,27 +29,31 @@ export function WeatherWidget() {
           <Cloud className="w-4 h-4 text-blue-300" />
           <h2 className="text-sm font-semibold text-white/90">Weather Conditions</h2>
           <AnimatePresence>
-            {isLoadingDashboard && (
+            {(isLoading || isRefetching) && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.5 }}
               >
-                <Loader2 className="w-3 h-3 text-white/40 animate-spin" />
+                <Loader2 className="w-3 h-3 text-blue-400 animate-spin" />
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-        {currentWeather?.last_updated && (
+        {(lastUpdated || currentWeather?.last_updated) && (
           <span className="text-[10px] text-white/40 font-mono">
-            UPDATED: {new Date(currentWeather.last_updated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            UPDATED: {lastUpdated ? lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : new Date(currentWeather?.last_updated || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </span>
         )}
       </div>
 
       {/* Current conditions */}
       <AnimatePresence mode="wait">
-        {!currentWeather && !isLoadingDashboard ? (
+        {isLoading && !currentWeather ? (
+          <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <WeatherSkeleton />
+          </motion.div>
+        ) : !currentWeather ? (
           <motion.div 
             key="unavailable"
             initial={{ opacity: 0, y: 5 }}

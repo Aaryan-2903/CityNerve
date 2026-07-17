@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { DEFAULT_CITY, type CityProfile } from '@/data/cities';
+import { DEFAULT_CITY, SUPPORTED_CITIES, type CityProfile } from '@/data/cities';
+import { API_BASE_URL as API_BASE } from '@/lib/api-config';
 
-const API_BASE = 'http://127.0.0.1:8000';
+
 
 export interface UseCityReturn {
   currentCity: CityProfile;
@@ -74,18 +75,28 @@ function findNearestCity(lat: number, lng: number, cities: CityProfile[]): CityP
 // Hook
 // ---------------------------------------------------------------------------
 export function useCityInternal(): UseCityReturn {
-  const [availableCities, setAvailableCities] = useState<CityProfile[]>([]);
+  // Pre-populate with local data so city switching works immediately even before
+  // the backend responds (or if it never does in demo mode).
+  const [availableCities, setAvailableCities] = useState<CityProfile[]>(SUPPORTED_CITIES);
   const [isLoadingCities, setIsLoadingCities] = useState(true);
   const [currentCity, setCurrentCity] = useState<CityProfile>(DEFAULT_CITY);
   const [isDetecting, setIsDetecting] = useState(false);
 
-  // Fetch cities from the backend on mount; fall back to local mock on failure.
+  // Try to fetch cities from the backend; on any failure, keep the pre-populated
+  // SUPPORTED_CITIES list so city switching always works in demo mode.
   useEffect(() => {
     let cancelled = false;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     async function fetchCities() {
+      // No backend URL configured — stay on local data, skip fetch entirely.
+      if (!API_BASE) {
+        if (!cancelled) setIsLoadingCities(false);
+        clearTimeout(timeoutId);
+        return;
+      }
+
       try {
         const res = await fetch(`${API_BASE}/api/v1/cities`, {
           signal: controller.signal,
@@ -105,7 +116,8 @@ export function useCityInternal(): UseCityReturn {
         }
       } catch (err) {
         if (!cancelled) {
-          console.error('[CityNerve] Could not reach backend for cities.', err);
+          // Keep SUPPORTED_CITIES (already set as initial state) — city switching works.
+          console.warn('[CityNerve] Backend cities unavailable, using local city list.', err);
         }
       } finally {
         if (!cancelled) setIsLoadingCities(false);

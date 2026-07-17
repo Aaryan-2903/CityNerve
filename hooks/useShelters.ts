@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { CITY_DASHBOARD_DATA } from '@/data/cityDashboardData';
+import { API_BASE_URL as API_BASE } from '@/lib/api-config';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
+
 
 export interface Shelter {
   id: string;
@@ -25,10 +27,25 @@ export function useShelters(cityId: string) {
       try {
         const res = await fetch(`${API_BASE}/api/v1/poi/shelters?cityId=${cityId}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        let data = await res.json();
+        
+        if (!data || data.length === 0) {
+          const mockCity = CITY_DASHBOARD_DATA[cityId];
+          if (mockCity && mockCity.shelters) {
+            data = mockCity.shelters;
+          }
+        }
+        
         if (!cancelled) setShelters(data);
       } catch (err) {
-        if (!cancelled) setError(err as Error);
+        if (!cancelled) {
+          setError(err as Error);
+          const mockCity = CITY_DASHBOARD_DATA[cityId];
+          if (mockCity && mockCity.shelters) {
+            setShelters(mockCity.shelters);
+            setError(null); // Clear error since we recovered with mock
+          }
+        }
       } finally {
         if (!cancelled) setIsLoading(false);
       }
