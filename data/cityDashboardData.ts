@@ -87,7 +87,7 @@ const createMockCity = (
     cloud_cover: 90,
     label: weatherLabel,
     emoji: '🌥️',
-    alertText: 'Mock Advisory',
+    alertText: 'Simulation Scenario Active',
     alertLevel: 'advisory',
     last_updated: new Date().toISOString()
   };

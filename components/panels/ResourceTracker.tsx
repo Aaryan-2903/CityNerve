@@ -18,6 +18,7 @@ import { StatusIndicator } from '@/components/shared/StatusIndicator';
 import { ResourceSkeleton } from '@/components/shared/Skeletons';
 import { Loader2 } from 'lucide-react';
 import type { Resource, ResourceStatus, ResourceType } from '@/types/resource';
+import { formatHHMMSS } from '@/utils/format';
 import { formatRelativeTime, formatETA } from '@/utils/format';
 import { useState, useEffect } from 'react';
 import { useSimulationContext } from '@/context/SimulationContext';
@@ -225,7 +226,7 @@ export function ResourceTracker() {
       {(lastUpdated || !isLoading) && (
         <div className="border-t border-white/[0.04] px-4 py-2 shrink-0">
           <p className="text-[10px] text-white/20 font-mono">
-            {lastUpdated ? `UPDATED: ${lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : 'LIVE FEED'}
+            {lastUpdated ? `UPDATED: ${formatHHMMSS(lastUpdated)}` : 'LIVE FEED'}
           </p>
         </div>
       )}

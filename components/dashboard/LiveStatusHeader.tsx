@@ -1,22 +1,24 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { RefreshCw, WifiOff } from 'lucide-react';
+import { RefreshCw, Database } from 'lucide-react';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { useDemoMode } from '@/context/DemoModeContext';
 
 export function LiveStatusHeader() {
-  const { isOffline, isRefetchingAny, refetchAll } = useDashboardData();
+  const { isDemoMode } = useDemoMode();
+  const { isRefetchingAny, refetchAll } = useDashboardData();
 
   return (
     <div className="flex items-center justify-end px-4 py-2 gap-3 bg-[#070B14] border-b border-white/[0.05]">
-      {isOffline && (
+      {isDemoMode && (
         <motion.div 
           initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-500/10 border border-red-500/20"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-500/10 border border-purple-500/20"
         >
-          <WifiOff className="w-3.5 h-3.5 text-red-400" />
-          <span className="text-xs font-medium text-red-400">Offline - Retrying...</span>
+          <Database className="w-3.5 h-3.5 text-purple-400" />
+          <span className="text-xs font-medium text-purple-300">Demo Mode Active</span>
         </motion.div>
       )}
       
