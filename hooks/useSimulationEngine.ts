@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { API_BASE_URL as API_BASE } from '@/lib/api-config';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   PHASE_TIMESTAMPS,
   PHASE_THREAT,
@@ -131,77 +130,9 @@ function buildClientState(phase: number, status: SimStatus, elapsed: number): Si
 // ---------------------------------------------------------------------------
 
 export function useSimulationEngine(): SimulationState & { isBackendAvailable: boolean } {
-  const [backendState, setBackendState] = useState<Record<string, unknown> | null>(null);
-  const [isBackendAvailable, setIsBackendAvailable] = useState<boolean>(true);
-  const [backendChecked, setBackendChecked] = useState(false);
-
-  // Client-side simulation state (used when backend is unavailable)
   const [clientPhase, setClientPhase] = useState(0);
   const [clientStatus, setClientStatus] = useState<SimStatus>('idle');
   const [clientElapsed, setClientElapsed] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // ---------------------------------------------------------------------------
-  // Backend polling — check once, then poll only if backend is available
-  // ---------------------------------------------------------------------------
-  useEffect(() => {
-    let mounted = true;
-
-    // If no URL, skip backend entirely.
-    if (!API_BASE) {
-      setIsBackendAvailable(false);
-      setBackendChecked(true);
-      return;
-    }
-
-    const fetchStatus = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/status`, {
-          method: 'GET',
-          signal: AbortSignal.timeout(3000),
-        });
-        if (!res.ok) throw new Error('API Error');
-        const data = await res.json();
-        if (mounted) {
-          setBackendState(data);
-          setIsBackendAvailable(true);
-          setBackendChecked(true);
-        }
-      } catch {
-        if (mounted) {
-          setIsBackendAvailable(false);
-          setBackendChecked(true);
-        }
-      }
-    };
-
-    fetchStatus();
-
-    // Only start polling after we confirm backend is alive (avoid 60 errors/min)
-    const initialTimer = setTimeout(() => {
-      if (!mounted) return;
-      // After first check: poll every 5s (much gentler than original 1s)
-      const timer = setInterval(async () => {
-        if (!mounted || !isBackendAvailable) return;
-        try {
-          const res = await fetch(`${API_BASE}/status`, { signal: AbortSignal.timeout(3000) });
-          if (!res.ok) throw new Error('API Error');
-          const data = await res.json();
-          if (mounted) setBackendState(data);
-        } catch {
-          if (mounted) setIsBackendAvailable(false);
-        }
-      }, 5000);
-      timerRef.current = timer;
-    }, 1000);
-
-    return () => {
-      mounted = false;
-      clearTimeout(initialTimer);
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // ---------------------------------------------------------------------------
   // Client-side simulation controls
@@ -234,7 +165,6 @@ export function useSimulationEngine(): SimulationState & { isBackendAvailable: b
 
   // Advance elapsed time when running
   useEffect(() => {
-    if (isBackendAvailable) return; // backend handles its own clock
     if (clientStatus !== 'running') return;
 
     const id = setInterval(() => {
@@ -257,117 +187,28 @@ export function useSimulationEngine(): SimulationState & { isBackendAvailable: b
     }, 1000);
 
     return () => clearInterval(id);
-  }, [clientStatus, isBackendAvailable]);
+  }, [clientStatus]);
 
   // ---------------------------------------------------------------------------
-  // Backend action dispatcher (only used when backend IS available)
-  // ---------------------------------------------------------------------------
-  const action = useCallback(async (endpoint: string) => {
-    if (!API_BASE) return;
-    try {
-      const res = await fetch(`${API_BASE}/${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: AbortSignal.timeout(3000),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setBackendState(data);
-      }
-    } catch (e) {
-      console.error(`Failed to execute ${endpoint}`, e);
-    }
-  }, []);
-
-  const backendNext = useCallback(() => action('next'), [action]);
-  const backendPrevious = useCallback(() => action('previous'), [action]);
-  const backendStart = useCallback(() => action('start'), [action]);
-  const backendPause = useCallback(() => action('pause'), [action]);
-  const backendReset = useCallback(() => action('reset'), [action]);
-
-  const backendSetStage = useCallback(async (index: number) => {
-    if (!backendState) return;
-    const current = backendState.currentStageIndex as number;
-    if (index === current) return;
-    if (index > current) {
-      for (let i = current; i < index; i++) await action('next');
-    } else {
-      for (let i = current; i > index; i--) await action('previous');
-    }
-  }, [backendState, action]);
-
-  // ---------------------------------------------------------------------------
-  // Merge backend or client state into the unified SimulationState
+  // Unified SimulationState (Client-only)
   // ---------------------------------------------------------------------------
   const state = useMemo((): SimulationState & { isBackendAvailable: boolean } => {
-    // Not yet determined which mode to use — return idle state
-    if (!backendChecked) {
-      const clientSt = buildClientState(0, 'idle', 0);
-      clientSt.start = clientStart;
-      clientSt.pause = clientPause;
-      clientSt.reset = clientReset;
-      clientSt.startSimulation = clientStart;
-      clientSt.pauseSimulation = clientPause;
-      clientSt.resumeSimulation = clientStart;
-      clientSt.resetSimulation = clientReset;
-      clientSt.nextStage = clientNext;
-      clientSt.previousStage = clientPrevious;
-      clientSt.setStage = clientSetStage;
-      return clientSt;
-    }
-
-    // --- DEMO / OFFLINE MODE: full client-side simulation ---
-    if (!isBackendAvailable) {
-      const clientSt = buildClientState(clientPhase, clientStatus, clientElapsed);
-      clientSt.start = clientStart;
-      clientSt.pause = clientPause;
-      clientSt.reset = clientReset;
-      clientSt.startSimulation = clientStart;
-      clientSt.pauseSimulation = clientPause;
-      clientSt.resumeSimulation = clientStart;
-      clientSt.resetSimulation = clientReset;
-      clientSt.nextStage = clientNext;
-      clientSt.previousStage = clientPrevious;
-      clientSt.setStage = clientSetStage;
-      return clientSt;
-    }
-
-    // --- LIVE MODE: use backend state ---
-    if (!backendState) {
-      return buildClientState(0, 'idle', 0);
-    }
-
-    return {
-      status: backendState.status as SimStatus,
-      phase: backendState.currentStageIndex as number,
-      elapsed: (backendState.progress as number) * 80,
-      progress: backendState.progress as number,
-      threatLevel: backendState.threatLevel as string,
-      confidence: backendState.confidence as number,
-      weather: backendState.weather as SimWeather,
-      simIncidents: backendState.incidents as Record<string, unknown>[],
-      feedEntries: backendState.feedEntries as Record<string, unknown>[],
-      resources: backendState.resources as SimResource,
-      showFloodOverlay: backendState.showFloodOverlay as boolean,
-      showActionPlan: backendState.showActionPlan as boolean,
-      showPrediction: backendState.showPrediction as boolean,
-      isBackendAvailable: true,
-      start: backendStart,
-      pause: backendPause,
-      reset: backendReset,
-      startSimulation: backendStart,
-      pauseSimulation: backendPause,
-      resumeSimulation: backendStart,
-      resetSimulation: backendReset,
-      nextStage: backendNext,
-      previousStage: backendPrevious,
-      setStage: backendSetStage,
-    };
+    const clientSt = buildClientState(clientPhase, clientStatus, clientElapsed);
+    clientSt.start = clientStart;
+    clientSt.pause = clientPause;
+    clientSt.reset = clientReset;
+    clientSt.startSimulation = clientStart;
+    clientSt.pauseSimulation = clientPause;
+    clientSt.resumeSimulation = clientStart;
+    clientSt.resetSimulation = clientReset;
+    clientSt.nextStage = clientNext;
+    clientSt.previousStage = clientPrevious;
+    clientSt.setStage = clientSetStage;
+    clientSt.isBackendAvailable = false; // Never available since backend simulation is obsolete
+    return clientSt;
   }, [
-    backendChecked, isBackendAvailable, backendState,
     clientPhase, clientStatus, clientElapsed,
     clientStart, clientPause, clientReset, clientNext, clientPrevious, clientSetStage,
-    backendStart, backendPause, backendReset, backendNext, backendPrevious, backendSetStage,
   ]);
 
   return state;

@@ -1,4 +1,5 @@
 import { Hero } from '@/components/landing/Hero';
+import { Architecture } from '@/components/landing/Architecture';
 import { ProblemSolution } from '@/components/landing/ProblemSolution';
 import { Features } from '@/components/landing/Features';
 import { HowItWorks } from '@/components/landing/HowItWorks';
@@ -16,6 +17,7 @@ export default function LandingPage() {
   return (
     <main className="min-h-screen bg-[#070B14] text-slate-50 overflow-x-hidden selection:bg-blue-500/30">
       <Hero />
+      <Architecture />
       <ProblemSolution />
       <DashboardPreview />
       <Features />

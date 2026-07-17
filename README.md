@@ -50,6 +50,14 @@ CityNerve transforms raw municipal data into actionable intelligence, ensuring r
 
 ---
 
+## 📌 Project Status
+
+**Version:** v1.0.0
+
+CityNerve has reached its stable hackathon release. All core features are complete, tested, and deployed. Future updates will focus on enhancements and additional integrations rather than core functionality.
+
+---
+
 ## ✨ Features
 
 | Feature | Description |
@@ -61,6 +69,7 @@ CityNerve transforms raw municipal data into actionable intelligence, ensuring r
 | **Citizen Incident Reporting** | Ingest, categorize, and verify real-time incident reports from civilians. |
 | **Disaster Simulation Engine** | Run localized disaster escalation models to train and prepare units. |
 | **Situation Report Generator** | Instantly compile operational data into high-density Situation Reports (SITREP). |
+| **Offline Demo Mode** | Run the application seamlessly without a backend connection using built-in offline simulation datasets. |
 | **Multi-City Dashboard** | Dynamic geographic data loading, allowing operators to switch seamlessly between cities. |
 | **Infrastructure Monitoring** | Track critical urban infrastructure, including road closures and hospital capacities. |
 | **Emergency Operations Center** | A vertical, time-stamped scrolling feed for comprehensive incident tracking. |
@@ -238,7 +247,7 @@ cd ..
 ### 4. Environment Variables
 Create a `.env.local` file in the root directory:
 ```env
-NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
 ```
 *(No database configuration is needed! The backend automatically initializes a local SQLite `app.db` and seeds it on startup.)*
 
