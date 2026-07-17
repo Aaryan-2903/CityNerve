@@ -99,8 +99,8 @@ export function useDemoMode(): DemoModeState {
 function DemoModeBadge() {
   return (
     <div
-      aria-label="Demo Mode active"
-      title="The backend API is unavailable. Displaying simulated data."
+      aria-label="Demo Mode active — running on simulation dataset"
+      title="Running on simulation dataset. All data is illustrative."
       style={{
         position: 'fixed',
         bottom: '16px',
@@ -108,33 +108,47 @@ function DemoModeBadge() {
         zIndex: 9999,
         display: 'flex',
         alignItems: 'center',
-        gap: '6px',
-        padding: '5px 12px',
+        gap: '8px',
+        padding: '6px 14px',
         borderRadius: '9999px',
-        background: 'rgba(168, 85, 247, 0.15)',
-        border: '1px solid rgba(168, 85, 247, 0.4)',
-        backdropFilter: 'blur(8px)',
-        color: 'rgba(216, 180, 254, 0.9)',
-        fontSize: '11px',
-        fontWeight: 600,
-        letterSpacing: '0.06em',
-        textTransform: 'uppercase',
+        background: 'rgba(139, 92, 246, 0.12)',
+        border: '1px solid rgba(139, 92, 246, 0.35)',
+        backdropFilter: 'blur(12px)',
         pointerEvents: 'none',
         userSelect: 'none',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.3)',
+        boxShadow: '0 2px 16px rgba(139,92,246,0.15), 0 1px 4px rgba(0,0,0,0.4)',
       }}
     >
-      <span
-        style={{
-          width: '6px',
-          height: '6px',
-          borderRadius: '50%',
-          background: '#A855F7',
-          animation: 'pulse 2s infinite',
-          flexShrink: 0,
-        }}
-      />
-      Demo Mode
+      {/* Purple circle icon */}
+      <span style={{ fontSize: '10px', lineHeight: 1, flexShrink: 0 }}>🟣</span>
+
+      {/* Label + subtitle */}
+      <span style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+        <span
+          style={{
+            fontSize: '10px',
+            fontWeight: 700,
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            color: 'rgba(196, 168, 255, 0.95)',
+            lineHeight: 1,
+          }}
+        >
+          Demo Mode
+        </span>
+        <span
+          style={{
+            fontSize: '9px',
+            fontWeight: 500,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+            color: 'rgba(167, 139, 250, 0.6)',
+            lineHeight: 1,
+          }}
+        >
+          Simulation Dataset
+        </span>
+      </span>
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; }

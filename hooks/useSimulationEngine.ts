@@ -13,6 +13,7 @@ import {
   type SimFeedEntry,
 } from '@/data/simulationScenario';
 import { AI_COMMANDER_CONFIG } from '@/data/aiCommanderConfig';
+import { formatHHMM } from '@/utils/format';
 import { SIMULATION_ALERTS } from '@/data/simulationAlerts';
 
 export type SimStatus = 'idle' | 'running' | 'paused' | 'complete';
@@ -76,7 +77,7 @@ function buildClientState(phase: number, status: SimStatus, elapsed: number): Si
 
   const feedEntries: SimFeedEntry[] = cfg.recommendations.map((r, i) => ({
     id: `feed-${phase}-${i}`,
-    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    time: formatHHMM(new Date()),
     text: r.recommendation,
     dotColor: '#A855F7',
     category: 'dispatch' as const,
@@ -86,7 +87,7 @@ function buildClientState(phase: number, status: SimStatus, elapsed: number): Si
     id: `sim-inc-${phase}-${i}`,
     title: alert.title,
     severity: (cfg.threatLevel === 'CRITICAL' ? 'CRITICAL' : cfg.threatLevel === 'HIGH' ? 'HIGH' : cfg.threatLevel === 'MODERATE' ? 'MEDIUM' : 'LOW') as 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW',
-    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    time: formatHHMM(new Date()),
     team: `${resources.deployed} Units`,
     status: status === 'running' ? 'Active' : 'Standby',
     impact: `${cfg.riskScore}% risk`,

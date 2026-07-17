@@ -7,6 +7,8 @@ import { useCity } from '@/context/CityContext';
 import { SystemState } from '@/lib/ai/ruleEngine';
 import { AIRecommendation } from '@/context/AIDecisionContext';
 import { ThreatLevel } from '@/data/simulationScenario';
+import { useState, useEffect } from 'react';
+import { formatLocaleString } from '@/utils/format';
 
 interface SituationReportModalProps {
   isOpen: boolean;
@@ -18,6 +20,13 @@ interface SituationReportModalProps {
 
 export function SituationReportModal({ isOpen, onClose, systemState, threatLevel, recommendations }: SituationReportModalProps) {
   const { currentCity } = useCity();
+  const [timestamp, setTimestamp] = useState<string>('');
+
+  useEffect(() => {
+    if (isOpen) {
+      setTimestamp(formatLocaleString(new Date()));
+    }
+  }, [isOpen]);
 
   const handlePrint = () => {
     window.print();
@@ -116,7 +125,7 @@ export function SituationReportModal({ isOpen, onClose, systemState, threatLevel
                 <div>
                   <h2 className="text-sm font-bold text-white/90">EOC Situation Report</h2>
                   <div className="text-[11px] text-white/40 font-mono mt-0.5">
-                    Generated: {new Date().toLocaleString()}
+                    Generated: {timestamp}
                   </div>
                 </div>
               </div>
@@ -151,7 +160,7 @@ export function SituationReportModal({ isOpen, onClose, systemState, threatLevel
                   <MapPin className="w-4 h-4" />
                   <span className="text-sm font-medium">{currentCity.name} Sector</span>
                   <span className="text-sm font-medium mx-2 opacity-50">•</span>
-                  <span className="text-xs font-mono opacity-60">Generated: {new Date().toLocaleString()}</span>
+                  <span className="text-xs font-mono opacity-60">Generated: {timestamp}</span>
                 </div>
               </div>
               <div className="text-right">

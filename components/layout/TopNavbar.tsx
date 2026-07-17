@@ -1,10 +1,11 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ChevronDown, Bell, Cloud, Wind, Menu } from 'lucide-react';
+import { ChevronDown, Bell, Cloud, Wind, Menu, Database } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useIncidentsContext } from '@/context/IncidentContext';
+import { useDemoMode } from '@/context/DemoModeContext';
 
 function BrandMark() {
   return (
@@ -218,7 +219,7 @@ interface TopNavbarProps {
 }
 
 export function TopNavbar({ onMenuClick }: TopNavbarProps) {
-  const { isReconnecting } = useIncidentsContext();
+  const { isDemoMode } = useDemoMode();
 
   return (
     <motion.header
@@ -252,13 +253,13 @@ export function TopNavbar({ onMenuClick }: TopNavbarProps) {
 
       {/* Right: Actions */}
       <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-        {isReconnecting && (
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-500/10 border border-orange-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
-            <span className="text-[10px] font-bold text-orange-400 tracking-wider uppercase">Reconnecting...</span>
+        {isDemoMode && (
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/25 backdrop-blur-sm">
+            <Database className="w-3 h-3 text-purple-400" />
+            <span className="text-[10px] font-bold text-purple-300 tracking-wider uppercase">Demo Mode Active</span>
           </div>
         )}
-        <div className={cn("h-5 w-px bg-white/[0.08] hidden sm:block", !isReconnecting && "hidden sm:block")} />
+        <div className="h-5 w-px bg-white/[0.08] hidden sm:block" />
         <NotificationBell />
         <div className="h-5 w-px bg-white/[0.08] hidden sm:block" />
         <UserProfile />

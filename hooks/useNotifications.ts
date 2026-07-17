@@ -14,10 +14,9 @@ export interface NotificationEntry {
 // ---------------------------------------------------------------------------
 // Per-phase mock notifications — used when backend is unavailable
 // ---------------------------------------------------------------------------
-const now = () => {
-  const d = new Date();
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-};
+import { formatHHMM } from '@/utils/format';
+
+const now = () => ''; // Placeholder for SSR
 
 const PHASE_NOTIFICATIONS: Record<number, Omit<NotificationEntry, 'id' | 'cityId' | 'phase'>[]> = {
   0: [
@@ -66,8 +65,10 @@ const PHASE_NOTIFICATIONS: Record<number, Omit<NotificationEntry, 'id' | 'cityId
 
 function getMockNotifications(cityId: string, phase: number): NotificationEntry[] {
   const entries = PHASE_NOTIFICATIONS[phase] ?? PHASE_NOTIFICATIONS[0];
+  const currentTime = formatHHMM(new Date());
   return entries.map((n, i) => ({
     ...n,
+    time: currentTime,
     id: `mock-notif-${cityId}-${phase}-${i}`,
     cityId,
     phase,
@@ -77,9 +78,7 @@ function getMockNotifications(cityId: string, phase: number): NotificationEntry[
 // ---------------------------------------------------------------------------
 
 export function useNotifications(cityId: string, phase: number) {
-  const [notifications, setNotifications] = useState<NotificationEntry[]>(() =>
-    getMockNotifications(cityId, phase)
-  );
+  const [notifications, setNotifications] = useState<NotificationEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

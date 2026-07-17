@@ -27,8 +27,8 @@ export function LiveAlertBanner() {
       };
     } else if (liveWeather.alertLevel === 'advisory') {
       alert = {
-        title: 'WEATHER ADVISORY',
-        description: liveWeather.alertText || 'Monitoring weather conditions.',
+        title: 'SIMULATION ADVISORY',
+        description: 'Displaying a simulated emergency scenario for demonstration purposes.',
         severity: 'advisory',
         icon: Info,
         colorClass: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
