@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useCity } from '@/context/CityContext';
 import { useIncidents } from '@/hooks/useIncidents';
 import { useAIDecisionContext } from '@/context/AIDecisionContext';
+import { API_BASE_URL as API_BASE } from '@/lib/api-config';
 
 interface ReportIncidentModalProps {
   isOpen: boolean;
@@ -74,7 +75,7 @@ export function ReportIncidentModal({ isOpen, onClose }: ReportIncidentModalProp
         imagePath: image ? image.name : null, 
       };
 
-      const res = await fetch('http://127.0.0.1:8000/api/v1/incidents/citizen', {
+      const res = await fetch(`${API_BASE}/api/v1/incidents/citizen`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

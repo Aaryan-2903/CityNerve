@@ -5,8 +5,9 @@ import type { Incident } from '@/types/incident';
 import { useCity } from '@/context/CityContext';
 import { useToast } from '@/context/ToastContext';
 import { CITY_DASHBOARD_DATA } from '@/data/cityDashboardData';
+import { API_BASE_URL as API_BASE } from '@/lib/api-config';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
+
 
 interface IncidentContextState {
   incidents: Incident[];

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { API_BASE_URL as API_BASE } from '@/lib/api-config';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
+
 
 export interface RiskZone {
   id: string;
